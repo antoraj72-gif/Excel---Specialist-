@@ -1,4 +1,4 @@
-# Builds Caramel-Sheets-Standalone.html: index.html with every library inlined (no libs folder needed)
+# Builds Excel Specialist.html: index.html with every library inlined (no libs folder needed)
 import re
 import os
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))+'/'
@@ -18,5 +18,5 @@ for lib in ['xlsx.full.min.js','hyperformula.full.min.js','chart.umd.min.js']:
 extra=''.join(inline(p) for p in ['libs/pdf.min.js','libs/pdf.worker.min.js','libs/tesseract/tesseract.min.js','libs/tesseract/ocr-worker.js','libs/tesseract/ocr-core.js','libs/tesseract/ocr-eng.js'])
 html=html.replace('<style>', extra+'\n<style>',1)
 html=html.replace('Keep the "libs" folder next to it.','STANDALONE EDITION: every library is built into this one file – no libs folder or internet needed.',1)
-open(R+'Caramel-Sheets-Standalone.html','w',encoding='utf-8').write(html)
+open(R+'Excel Specialist.html','w',encoding='utf-8').write(html)
 print(len(html)//1024,'KB')
