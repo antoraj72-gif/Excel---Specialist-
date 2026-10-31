@@ -4,9 +4,12 @@ Upload your sales files, then **type what you want in plain English**. Caramel S
 It runs in your browser and nothing is sent anywhere.
 
 ## How to start
-1. Download this folder. Keep **`index.html`** and the **`libs`** folder together.
-2. Double-click **`index.html`**. It opens in Chrome or Edge.
-3. Click **🎁 Load Demo Data** to try it straight away, or go to **📂 My Files** and upload your own files.
+**Easiest: one file.** Download **`Caramel-Sheets-Standalone.html`** (about 12 MB) and double-click it. Every library is built in, so it works on its own, with no other files and no internet.
+
+**Or: the folder version.** Keep **`index.html`** and the **`libs`** folder together and double-click `index.html`. It opens in Chrome or Edge. Both versions work the same.
+
+Then:
+- Click **🎁 Load Demo Data** to try it straight away, or go to **📂 My Files** and upload your own files.
 
 No installation, no login and **no internet needed**: every library, including the photo reader and its English language data, is already in the `libs` folder.
 
@@ -67,3 +70,5 @@ SUM, SUMIF(S), AVERAGE, AVERAGEIF(S), COUNT, COUNTA, COUNTBLANK, COUNTIF(S), MIN
 The three `ocr-*.js` files hold the original files wrapped as JavaScript text. Browsers block background workers and data downloads on pages opened by double-click (`file://`), so this is what lets photo reading work offline.
 
 If the `libs` folder is missing, the app loads these libraries from the internet instead.
+
+`Caramel-Sheets-Standalone.html` is made from `index.html` and `libs/` by running `python3 tools/build_standalone.py`.

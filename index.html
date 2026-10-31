@@ -1198,7 +1198,7 @@ function cleanTable(aoa) {
 
 /* ---------- PDF ---------- */
 async function ensurePdf() {
-  if (window.pdfjsLib) return;
+  if (window.pdfjsLib) { App.libs.pdf = App.libs.pdf || 'built-in'; return; }
   App.libs.pdf = await loadScript('libs/pdf.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js');
   await loadScript('libs/pdf.worker.min.js', 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js'); // runs the worker on the page (works from file://)
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'libs/pdf.worker.min.js';
@@ -1255,18 +1255,20 @@ function linesToTable(lines) {
 async function ensureOcr(prog) {
   if (App.ocr) return App.ocr;
   prog.set(.03, 'Loading picture reader');
+  const builtIn = !!window.OCR_ENG_JS;
   try {
-    await loadScript('libs/tesseract/tesseract.min.js');
-    await loadScript('libs/tesseract/ocr-worker.js'); prog.set(.05);
-    await loadScript('libs/tesseract/ocr-core.js'); prog.set(.07);
-    await loadScript('libs/tesseract/ocr-eng.js'); prog.set(.09);
+    // already present in the standalone file; otherwise loaded from libs/
+    if (!window.Tesseract) await loadScript('libs/tesseract/tesseract.min.js');
+    if (!window.OCR_WORKER_JS) await loadScript('libs/tesseract/ocr-worker.js'); prog.set(.05);
+    if (!window.OCR_CORE_JS) await loadScript('libs/tesseract/ocr-core.js'); prog.set(.07);
+    if (!window.OCR_ENG_JS) await loadScript('libs/tesseract/ocr-eng.js'); prog.set(.09);
     // One blob holds the English data, a fetch() stand-in that serves it, the engine and the worker:
     // a worker on a file:// page may not load other files or blob URLs, and may not fetch().
     const shim = `self.__ENG=${JSON.stringify(window.OCR_ENG_JS)};
 self.fetch=(function(orig){return function(url,o){if(/eng\\.traineddata/.test(String(url))){var b=atob(self.__ENG),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return Promise.resolve(new Response(u));}return orig(url,o);};})(self.fetch);\n`;
     const src = URL.createObjectURL(new Blob([shim, window.OCR_CORE_JS, ';\n', window.OCR_WORKER_JS], {type: 'application/javascript'}));
     App.ocr = {offline: true, opts: {workerPath: src, workerBlobURL: false, langPath: 'offline', cacheMethod: 'none', gzip: true}};
-    App.libs.ocr = 'local';
+    App.libs.ocr = builtIn ? 'built-in' : 'local';
   } catch (e) {
     if (!window.Tesseract) {
       try { await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'); }
@@ -2669,9 +2671,9 @@ function applySettings() {
   saveSettings(); applySettings(); toast('Settings saved');
 });
 function libStatus() {
-  const local = n => { const s = $$('script').find(x => x.src && x.src.includes(n)); return s && !/^https?:\/\/cdn/.test(s.src) ? '📦 from libs folder (offline)' : '🌐 from internet'; };
+  const local = n => { const ss = $$('script').filter(x => x.src && x.src.includes(n)); if (!ss.length) return '📦 built into this file (offline)'; return ss.some(x => /^https?:/.test(x.src)) ? '🌐 from internet' : '📦 from libs folder (offline)'; };
   const rows = [['Excel & CSV reader', !!window.XLSX, local('xlsx.full')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
-    ['PDF reader', true, window.pdfjsLib ? (App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : '🌐 from internet') : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, App.libs.ocr === 'local' ? '📦 from libs folder (offline)' : App.libs.ocr === 'internet' ? '🌐 from internet' : 'loads when you upload a picture (offline from libs/tesseract)']];
+    ['PDF reader', true, App.libs.pdf === 'internet' ? '🌐 from internet' : App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : window.pdfjsLib ? '📦 built into this file (offline)' : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, App.libs.ocr === 'built-in' || (window.OCR_ENG_JS && !App.libs.ocr) ? '📦 built into this file (offline)' : App.libs.ocr === 'local' ? '📦 from libs folder (offline)' : App.libs.ocr === 'internet' ? '🌐 from internet' : 'loads when you upload a picture (offline from libs/tesseract)']];
   $('#libStatus').innerHTML = rows.map(([n, ok, how]) => `<div class="row" style="padding:3px 0">${ok ? '✅' : '❌'} <b>${n}</b> <span class="muted">${how}</span></div>`).join('');
 }
 
