@@ -307,6 +307,25 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 }
 .ribbon.min .rb-panel{display:none !important}
 .rb-min{margin-left:auto;font-size:14px}
+/* ---------- phones ---------- */
+@media (max-width:760px){
+  .topbar{flex-wrap:wrap;gap:6px 10px;padding:8px 12px 6px}
+  .brand{font-size:16px;gap:8px}.brand .logo{width:30px;height:30px;font-size:16px}
+  .top-right{margin-left:auto}
+  .tabs{order:3;width:100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;gap:4px;padding-bottom:2px}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:none;padding:6px 10px}.tab.active span.t{display:inline}
+  .ask-row{flex-wrap:wrap}.ask-input{flex:1 1 100%;font-size:15px}
+  .ask .btn.big{flex:1}
+  .rb-panel{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:thin;-webkit-overflow-scrolling:touch}
+  .rb-g{flex:none}.rb-gl{display:none}
+  .page h2{font-size:20px}
+  .page .row.noprint .btn{padding:7px 11px;font-size:13px}
+  .web-note{font-size:12.5px}
+}
+.web-note{display:none;background:#EAF2FB;border-left:4px solid #2a78d6;border-radius:8px;padding:8px 12px;color:#1c3d63;font-size:13.5px}
+:root[data-theme="dark"] .web-note{background:#1f3046;color:#d6e6f8}
+body.weblink .web-note{display:block}
 @media (max-width:760px){
   .topbar{padding:8px 12px}.tab span.t{display:none}.page{padding:12px}.side{left:12px;right:12px;width:auto}
   .tb span.t{display:none}.hero .big-emoji{display:none}
@@ -631,6 +650,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 <section class="page" id="page-export">
  <div class="wrap" style="display:flex;flex-direction:column;gap:16px;max-width:1000px">
   <h2 style="margin:0">⬇️ Export</h2>
+  <div class="web-note">ℹ️ You are using the <b>web link</b> version. When you download, you are asked to confirm the save (in the Claude phone app a share panel opens, so you can send the file to WhatsApp or mail). The <b>.xls</b> format and printing are not available here. Use <b>Excel (.xlsx)</b>, <b>PDF file</b>, <b>CSV</b> or <b>PowerPoint</b>.</div>
   <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">1️⃣ What do you want to export?</h3>
     <div class="row"><button class="btn sm light" id="exAll">Select all</button><button class="btn sm ghost" id="exNone">Clear</button></div></div>
     <div id="exItems"></div></div>
@@ -759,6 +779,8 @@ function installExtraFormulas(H){
    1. SMALL HELPERS
    ===================================================================== */
 const $ = (s, el = document) => el.querySelector(s);
+/* opened from a web link inside another page (not the downloaded file): downloads, printing and pop-ups are blocked there */
+const WEB_LINK = location.protocol !== 'file:' && (() => { try { return window.self !== window.top; } catch (e) { return true; } })();
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colName = i => { let s = ''; i++; while (i > 0) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; };
@@ -772,6 +794,7 @@ const qs = name => "'" + String(name).replace(/'/g, "''") + "'";            // q
 const fstr = s => '"' + String(s).replace(/"/g, '""') + '"';               // string literal for formulas
 
 function toast(msg, type = 'ok', ms = 3800) {
+  if (WEB_LINK && type === 'ok' && / downloaded\b/.test(msg)) msg = msg.replace(/ downloaded\b/, ' ready – please confirm the save');
   const t = document.createElement('div'); t.className = 'toast ' + type; t.innerHTML = msg;
   $('#toasts').appendChild(t); setTimeout(() => t.remove(), ms);
 }
@@ -1257,13 +1280,16 @@ function updateFormulaBar() {
 (function wireGrid() {
   const body = $('#gBody');
   let raf = 0; body.addEventListener('scroll', () => { if (raf) return; raf = requestAnimationFrame(() => { raf = 0; Grid.renderCells(); }); });
-  let dragging = false;
+  let dragging = false, lastDown = null;
   const cellFromEvent = e => { const el = e.target.closest('.c'); return el ? {r: +el.dataset.r, c: +el.dataset.c} : null; };
   const down = e => {
     const fb = e.target.closest('.fbtn'); if (fb) { e.preventDefault(); e.stopPropagation(); openFilterPopup(+fb.dataset.fcol, fb); return; }
     if (e.button !== 0) return; const p = cellFromEvent(e); if (!p) return;
     if (Grid.editing) Grid.endEdit(true);
+    const now = Date.now(), again = lastDown && lastDown.r === p.r && lastDown.c === p.c && now - lastDown.t < 400;   // double-tap on phones
+    lastDown = {r: p.r, c: p.c, t: now};
     Grid.select(p.r, p.c, e.shiftKey); dragging = true; body.focus({preventScroll: true}); e.preventDefault();
+    if (again && !e.shiftKey) { lastDown = null; Grid.startEdit(); }
   };
   body.addEventListener('mousedown', down); $('#gColHead').addEventListener('mousedown', e => {
     const h = e.target.closest('.g-hcell');
@@ -3490,7 +3516,23 @@ const Export = {
     zip.file('[Content_Types].xml', ct);
     return zip.generateAsync({type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', compression: 'DEFLATE'});
   },
-  saveBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); },
+  saveBlob(blob, name) {
+    if (WEB_LINK) return this.webSave(blob, name);
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); },
+  /* web link version: the page may not download by itself, so it asks the viewer (Claude app shows a save / share panel) */
+  async webSave(blob, name) {
+    let dl = null;
+    try { dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; } catch (e) { dl = null; }
+    if (!dl) return toast(`⚠️ <b>${esc(name)}</b> can't be saved here. Open the downloaded <b>Excel Specialist.html</b> file on a laptop to save it.`, 'warn', 9000);
+    try { await dl.save({filename: name, data: blob}); toast(`✅ <b>${esc(name)}</b> saved.`, 'ok', 5000); return true; }
+    catch (e) {
+      const c = e && e.code;
+      if (c === 'declined') return toast('Save cancelled.', 'warn', 3000);
+      if (c === 'rejected_extension' || c === 'extension_not_enabled') return toast(`⚠️ <b>.${esc(name.split('.').pop())}</b> files can't be saved from the web link. Choose <b>Excel (.xlsx)</b>, <b>PDF</b>, <b>CSV</b> or <b>PowerPoint</b> instead.`, 'warn', 8000);
+      if (c === 'rate_limited') return toast('A save is already waiting for your answer. Please try again in a moment.', 'warn', 5000);
+      return toast(`⚠️ <b>${esc(name)}</b> couldn't be saved here (${esc(c || 'unavailable')}). Open the downloaded <b>Excel Specialist.html</b> file on a laptop to save it.`, 'warn', 9000);
+    }
+  },
   /* values as display text (CSV / print) */
   displayRows(id) {
     if (id.startsWith('s:')) {
@@ -3602,7 +3644,7 @@ const Export = {
       const rows = this.displayRows(id).slice(0, 3000), isRep = !id.startsWith('s:'), hdr = isRep ? 2 : 0;
       h += `<h2 class="${k || charts.length ? 'pb' : ''}">${esc(isRep ? rows[0][0] : id.slice(2))}</h2><table>` + rows.slice(isRep ? 2 : 0).map((r, i) => `<tr class="${i === 0 ? 'h' : ''}">${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('') + '</table>';
     });
-    const w = window.open('', '_blank'); if (!w) return toast('Please allow pop-ups to print or save as PDF.', 'warn');
+    const w = window.open('', '_blank'); if (!w) return toast(WEB_LINK ? 'Printing isn\'t available in the web link version. Choose <b>PDF file</b> on a laptop, or open the downloaded file.' : 'Please allow pop-ups to print or save as PDF.', 'warn', 7000);
     w.document.write(h); w.document.close(); w.focus(); setTimeout(() => w.print(), 300);
   }
 };
@@ -4105,6 +4147,7 @@ const Share = {
         ${btn('print', '🖨️', 'Print', 'Print or Save as PDF')}
         ${btn('download', '⬇️', 'Download only', 'Save to this computer')}
       </div>
+      ${WEB_LINK ? '<div class="web-note" style="margin-top:10px">ℹ️ Web link version: use <b>📤 Share to apps</b> or <b>⬇️ Download only</b>. You are asked to confirm, then (in the Claude phone app) the share panel opens, so you can pick WhatsApp, Gmail or Outlook. Printing works best in the downloaded file on a laptop.</div>' : ''}
       <div class="sh-help" id="shHelp">${pdfOK || xlsOK ? `✅ This computer can attach ${pdfOK && xlsOK ? 'PDF and Excel files' : pdfOK ? '<b>PDF files</b>' : '<b>Excel files</b>'} directly with <b>📤 Share to apps</b> (pick WhatsApp, Outlook or Mail in the panel that opens).` : 'ℹ️ This browser cannot attach files to other apps directly.'}
         For WhatsApp, Gmail and Outlook the file is <b>saved to your Downloads folder</b> first and the app opens with your message. Then click <b>📎 Attach</b> and pick the file (or drag it in from the download bar). These need internet.</div>`,
       [{label: 'Close', value: null, cls: 'light'}], {width: '760px', onOpen: b => {
@@ -4127,6 +4170,7 @@ const Share = {
       if (ch === 'print') { closeModal(); return Export.print(this.ids, base, charts); }
       const f = await Export.buildFile(this.ids, this.format, base, {filter: true, charts});
       const file = new File([f.blob], f.name, {type: f.type});
+      if (WEB_LINK && (ch === 'apps' || ch === 'download')) { if (win) win.close(); const ok = await Export.saveBlob(f.blob, f.name); if (ok) closeModal(); return; }
       if (ch === 'apps') {
         if (navigator.canShare && navigator.canShare({files: [file]})) {
           try { await navigator.share({files: [file], title: subject, text: msg}); toast('📤 Shared.'); closeModal(); return; }
@@ -4710,21 +4754,25 @@ function chartSelection() {
 function exportXlsx() { // all sheets, formulas kept (same builder as the Export tab)
   const wb = XLSX.utils.book_new();
   sheetNames().forEach(n => XLSX.utils.book_append_sheet(wb, Export.sheetWs(n, true, false), n.slice(0, 31)));
-  XLSX.writeFile(wb, `Excel_Specialist_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  const name = `Excel_Specialist_${new Date().toISOString().slice(0, 10)}.xlsx`;
+  if (WEB_LINK) return Export.saveBlob(new Blob([XLSX.write(wb, {bookType: 'xlsx', type: 'array'})]), name);
+  XLSX.writeFile(wb, name);
   toast('⬇️ Excel file downloaded (all sheets, formulas kept). For a values-only file or other formats, use the ⬇️ Export tab.');
 }
 function exportCsv() {
   const id = sheetId(), d = App.hf.getSheetDimensions(id), m = getMeta(), aoa = [];
   for (let r = 0; r < d.height; r++) { const row = []; for (let c = 0; c < d.width; c++) { const v = App.hf.getCellValue({sheet: id, row: r, col: c}); row.push(v && typeof v === 'object' ? v.value : (typeof v === 'number' && isDateCell(id, r, c)) ? fmtDate(v) : v ?? ''); } aoa.push(row); }
   const ws = XLSX.utils.aoa_to_sheet(aoa), csv = XLSX.utils.sheet_to_csv(ws);
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8'})); a.download = App.active + '.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  const blob = new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8'});
+  if (WEB_LINK) return Export.saveBlob(blob, App.active + '.csv');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = App.active + '.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   toast('⬇️ CSV downloaded');
 }
 function printSheet() {
   const id = sheetId(), d = App.hf.getSheetDimensions(id), m = getMeta(), rows = Math.min(d.height, 3000);
   let h = `<h2 style="font-family:sans-serif;color:#8B5A2B">${esc(App.active)}</h2><table style="border-collapse:collapse;font:12px sans-serif">`;
   for (let r = 0; r < rows; r++) { h += '<tr>'; for (let c = 0; c < d.width; c++) { const v = displayValue(id, r, c, m); h += `<td style="border:1px solid #ddd;padding:3px 6px;${r === 0 ? 'background:#C68642;color:#fff;font-weight:bold;' : ''}${v.num ? 'text-align:right' : ''}">${esc(v.text)}</td>`; } h += '</tr>'; }
-  const w = window.open('', '_blank'); if (!w) return toast('Please allow pop-ups to print.', 'warn');
+  const w = window.open('', '_blank'); if (!w) return toast(WEB_LINK ? 'Printing isn\'t available in the web link version. Open the downloaded file on a laptop to print.' : 'Please allow pop-ups to print.', 'warn', 7000);
   w.document.write(`<title>${esc(App.active)}</title>${h}</table>`); w.document.close(); w.focus(); w.print();
 }
 
@@ -4924,6 +4972,7 @@ function applySettings() {
   $('#setTheme').value = App.settings.theme; $('#setCur').value = App.settings.currency; $('#setDec').value = String(App.settings.decimals); $('#setDate').value = App.settings.dateFmt;
   $('#curBtn').textContent = App.settings.currency.trim() || '#';
   $('#grid').classList.toggle('nogrid', App.settings.gridlines === false);
+  if (App.settings.ribbonMin === undefined && innerWidth <= 760) App.settings.ribbonMin = true;   // phones start with the ribbon folded
   $('#toolbar').classList.toggle('min', !!App.settings.ribbonMin); $('#rbMin').textContent = App.settings.ribbonMin ? '⌄' : '⌃';
 }
 ['#setTheme', '#setCur', '#setDec', '#setDate'].forEach(s => $(s).onchange = () => {
@@ -4943,6 +4992,7 @@ async function start() {
     return;
   }
   installExtraFormulas(HyperFormula);
+  if (WEB_LINK) document.body.classList.add('weblink');
   loadSettings(); applySettings();
   await loadSaved();
   ensureSheet();

@@ -46,6 +46,14 @@ Sharing needs internet; making the files doesn't. In PDF files the rupee symbol 
 ## 💻 Laptops
 Made for laptop screens from 1280×720 upwards: on smaller screens the tabs show icons only (hover for the name), the example requests sit on one scrolling line and the ribbon gets slimmer. Click **⌃** on the ribbon (or double-click a tab) to hide the ribbon for more rows, as in Excel. Works in Chrome, Edge and Firefox.
 
+## 📱 Phones
+- **Phone layout:** on phones the tabs and ribbon scroll sideways, the ribbon starts folded so you see more rows, and the request box uses the full width. Double-tap a cell to edit it.
+- **Web link version (best for phones):** open the private claude.ai link in the Claude app or a phone browser. Nothing to download.
+  - When you save a file you are asked to confirm. In the Claude phone app a share panel opens, so you can send the file straight to WhatsApp, Gmail or Outlook.
+  - Excel (.xlsx), PDF, CSV and PowerPoint work. The old **.xls** format and printing don't; use the file on a laptop for those.
+  - Your sheets are kept in that browser only.
+- **The single file on a phone:** Android phones can open `Excel Specialist.html` in Chrome from the Files app. iPhones can't open local HTML files well, so use the web link there.
+
 ## Things you can type (sales team examples)
 All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
 
