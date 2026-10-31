@@ -1508,7 +1508,7 @@ const ALIASES = [
   [/achievement/, ['achievement', 'achieved']],
   [/city|town|location/, ['city', 'town', 'location']]
 ];
-function canon(w) { w = w.toLowerCase(); if (CANON[w]) return CANON[w]; if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) { const x = w.slice(0, -1); return CANON[x] || x; } return w; }
+function canon(w) { w = w.toLowerCase(); if (CANON[w]) return CANON[w]; if (w.length > 4 && w.endsWith('ies')) return w.slice(0, -3) + 'y'; if (w.length > 3 && w.endsWith('s') && !w.endsWith('ss')) { const x = w.slice(0, -1); return CANON[x] || x; } return w; }
 function tokenize(s) { const out = [], re = /[a-z0-9]+|%/gi; let m; while ((m = re.exec(s))) out.push({raw: m[0], t: canon(m[0]), s: m.index, e: m.index + m[0].length}); return out; }
 function lev(a, b) { if (Math.abs(a.length - b.length) > 2) return 9; const d = []; for (let i = 0; i <= a.length; i++) { d[i] = [i]; } for (let j = 1; j <= b.length; j++) d[0][j] = j; for (let i = 1; i <= a.length; i++) for (let j = 1; j <= b.length; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); return d[a.length][b.length]; }
 function tokEq(a, b) { if (a === b) return 1; if (/^\d+$/.test(a) || /^\d+$/.test(b)) return 0; if (a.length >= 5 && b.length >= 5 && lev(a, b) <= 1) return .9; if (a.length >= 8 && lev(a, b) <= 2) return .85; return 0; }
@@ -1613,6 +1613,8 @@ function analyze(text, force = {}) {
   // multi-word column mentions block table names inside them ("sales value" is not the table "Sales")
   const spans = []; sheetNames().forEach(n => ctx.cols(n).forEach(m => { if (m.L > 1) spans.push(m); }));
   ctx.tables = findTableMentions(text, spans);
+  const raw = ctx._cols; ctx._cols = {};
+  ctx.cols = name => ctx._cols[name] || (ctx._cols[name] = (raw[name] || (ctx.table(name) ? findColumnMentions(toks, ctx.table(name)) : [])).filter(m => !ctx.tables.some(t => m.s < t.e && m.e > t.s)));
   ctx.vals = name => {
     if (ctx._vals[name]) return ctx._vals[name];
     const t = ctx.table(name); if (!t) return [];
@@ -1646,7 +1648,7 @@ function chooseTable(ctx, exclude = []) {
   sheetNames().filter(n => !exclude.includes(n)).forEach(n => {
     const t = ctx.table(n); if (!t || !t.rows.length) return;
     let sc = ctx.cols(n).reduce((a, m) => a + m.score * (m.L > 1 ? 2.2 : 2), 0) + ctx.vals(n).length * 1.2;
-    if (n === App.active) sc += .6; if (getMeta(n).master) sc += .1; if (getMeta(n).kind === 'result') sc -= .5;
+    if (n === App.active) sc += .6; if (getMeta(n).master) sc += .1; if (getMeta(n).kind === 'result') sc = n === App.active ? sc - .5 : sc * .3 - 1;
     if (sc > bestScore) { bestScore = sc; best = n; }
   });
   if (best) return best;
@@ -1707,8 +1709,8 @@ function passes(row, filters) {
     return f.op === 'gt' ? v > f.v : f.op === 'lt' ? v < f.v : f.op === 'ge' ? v >= f.v : f.op === 'le' ? v <= f.v : v !== f.v;
   });
 }
-const showVal = v => typeof v === 'number' ? (Number.isInteger(v) && v >= 1900 && v <= 2100 ? String(v) : fmtNum(v)) : v;
-function filterText(t, filters) { return filters.map(f => f.op === 'range' ? `<b>${esc(t.headers[f.c])}</b> in ${esc(f.label)}` : `<b>${esc(t.headers[f.c])}</b> ${OPW[f.op]} <b>${esc(showVal(f.v))}</b>`).join(', '); }
+const showVal = (v, h) => typeof v === 'number' ? (h && /%|percent/i.test(h) && Math.abs(v) <= 1 ? fmtNum(Math.round(v * 10000) / 100) + '%' : Number.isInteger(v) && v >= 1900 && v <= 2100 ? String(v) : fmtNum(v)) : v;
+function filterText(t, filters) { return filters.map(f => f.op === 'range' ? `<b>${esc(t.headers[f.c])}</b> in ${esc(f.label)}` : `<b>${esc(t.headers[f.c])}</b> ${OPW[f.op]} <b>${esc(showVal(f.v, t.headers[f.c]))}</b>`).join(', '); }
 function aggFormula(agg, val, pairs) {
   const p = pairs.join(',');
   switch (agg) {
@@ -1866,8 +1868,8 @@ function buildLookup(ctx) {
     if (k) key = k.c;
   }
   if (key === undefined) return askCols(`Which column is the <b>common ID</b> to match rows (the lookup key) in <b>${esc(src)}</b>?`, S, null, 'key');
-  let rets = ctx.force.rets || sm.filter(m => m.c !== key).map(m => ({c: m.c, sum: /\b(total|sum of|sum)\s+(of\s+)?$/.test(low.slice(Math.max(0, m.s - 9), m.s))}));
-  rets = rets.filter((r, i) => rets.findIndex(x => x.c === r.c) === i);
+  let rets = ctx.force.rets || sm.filter(m => m.c !== key).map(m => ({c: m.c, sum: /\b(total|sum of|sum)\s+(of\s+)?$/.test(low.slice(Math.max(0, m.s - 9), m.s)) || /^(total|sum)\b/.test(low.slice(m.s, m.e))}));
+  rets = rets.filter((r, i) => rets.findIndex(x => x.c === r.c) === i).map(r => ({c: r.c, sum: rets.some(x => x.c === r.c && x.sum)}));
   if (!rets.length) return {ask: `Which details should I bring from <b>${esc(src)}</b>?`, options: S.headers.map((h, c) => ({label: h, force: {key, src, tgt, rets: [{c, sum: false}]}})).filter((o, c) => c !== key).concat([{label: '✅ All other columns', force: {key, src, tgt, rets: S.headers.map((h, c) => ({c, sum: false})).filter(r => r.c !== key)}}])};
   // key column in target
   let keyT = ctx.force.keyT;
@@ -1980,7 +1982,7 @@ function buildAggregate(ctx) {
   if (groups.length) {
     const spec = {table: tn, rows: groups.slice(0, 2), cols: groups.slice(2, 3), values: ms.map(c => ({c, agg})), filters, pct: /\b(percent|percentage|share)\b/.test(ctx.low)};
     return {
-      title: '📊 Summary', describe: `I will make a summary of <b>${ms.map(c => AGG_LABEL[agg] + ' ' + esc(t.headers[c])).join(', ')}</b> for each <b>${groups.map(c => esc(t.headers[c])).join(' & ')}</b> from <b>${esc(tn)}</b>${filters.length ? `, only where ${filterText(t, filters)}` : ''}.`,
+      title: '📊 Summary', describe: `I will make a summary of <b>${ms.map(c => AGG_LABEL[agg] + ' ' + esc(t.headers[c])).join(', ')}</b> for each <b>${groups.map(c => esc(t.headers[c])).join(' & ')}</b> from <b>${esc(tn)}</b>${filters.length ? `, only where ${filterText(t, filters)}` : ''}${spec.pct ? ', with a <b>% of total</b> column' : ''}.`,
       apply: () => { const r = buildPivot(Object.assign(spec, {name: 'Summary'})); switchSheet(r.name); return {msg: `Summary ready on sheet <b>${esc(r.name)}</b> (${r.rows} rows).`, formula: r.sample, how: `${AGG_EXPLAIN[agg]} each name in the first column${filters.length ? ' plus your filters' : ''}.`, chart: true}; }
     };
   }
@@ -2037,7 +2039,7 @@ function buildFilter(ctx) {
   const tn = chooseTable(ctx); if (!tn) return needData();
   const t = ctx.table(tn), filters = getFilters(ctx, t);
   if (!filters.length) return {info: `Tell me what to keep, for example <i>"show only Chennai rows"</i> or <i>"rows where sales value is above 50000"</i>. I couldn't find a value from <b>${esc(tn)}</b> in your sentence.`};
-  const s = /\b(sort|order|high to low|low to high|descending|ascending)\b/.test(ctx.low) ? sortSpec(ctx, t) : null;
+  const s = /\b(sort(ed)?|order(ed)?|arrange(d)?|high to low|low to high|descending|ascending)\b/.test(ctx.low) ? sortSpec(ctx, t) : null;
   return {title: '🔽 Filter', describe: `I will copy the rows of <b>${esc(tn)}</b> where ${filterText(t, filters)} to a new sheet${s ? `, sorted by <b>${esc(t.headers[s.c])}</b> ${s.desc ? 'high → low' : 'low → high'}` : ''}.`,
     apply: () => {
       let rows = t.rows.filter(r => passes(r, filters));
@@ -2123,7 +2125,10 @@ function buildTrim(ctx) {
   const tn = chooseTable(ctx) || App.active; const t = ctx.table(tn);
   return {title: '✨ Clean up', describe: `I will remove extra spaces from every text cell in <b>${esc(tn)}</b>.`,
     apply: () => { const id = sheetId(tn), d = App.hf.getSheetDimensions(id); let n = 0;
-      App.hf.batch(() => { for (let r = 0; r < d.height; r++) for (let c = 0; c < d.width; c++) { const v = App.hf.getCellSerialized({sheet: id, row: r, col: c}); if (typeof v === 'string' && !v.startsWith('=')) { const x = v.replace(/\s+/g, ' ').trim(); if (x !== v) { App.hf.setCellContents({sheet: id, row: r, col: c}, [[x]]); n++; } } } });
+      const changes = [];
+      for (let r = 0; r < d.height; r++) for (let c = 0; c < d.width; c++) { const v = App.hf.getCellSerialized({sheet: id, row: r, col: c}); if (typeof v === 'string' && !v.startsWith('=')) { const x = v.replace(/\s+/g, ' ').trim(); if (x !== v) changes.push([r, c, x]); } }
+      if (changes.length) App.hf.batch(() => changes.forEach(([r, c, x]) => App.hf.setCellContents({sheet: id, row: r, col: c}, [[x]])));
+      n = changes.length;
       switchSheet(tn); return {msg: `Cleaned ${n} cell(s).`, how: 'Same as Excel TRIM: spaces at the start and end are removed, and double spaces become single.'}; }};
 }
 function buildSplit(ctx) {
@@ -2165,7 +2170,7 @@ function buildIfCol(ctx) {
   if (!yes) { const m = text.match(/\b(?:show|then|return|put|write|mark|display)\s+([A-Za-z][\w ]*?)(?=\s+(?:else|otherwise|or)\b|,|$)/i); if (m) yes = m[1].trim(); }
   if (!no) { const m = text.match(/\b(?:else|otherwise)\s+(?:show\s+|return\s+|put\s+|write\s+)?["']?([A-Za-z][\w ]*?)["']?\s*$/i); if (m) no = m[1].trim(); }
   yes = yes || 'Yes'; no = no || 'No';
-  return {title: '🔀 IF column', describe: `I will add a column <b>${esc(name)}</b> to <b>${esc(tn)}</b>: if <b>${esc(t.headers[cc])}</b> ${OPW[cond.op]} <b>${esc(showVal(cond.v))}</b> it shows <b>"${esc(yes)}"</b>, otherwise <b>"${esc(no)}"</b>.`,
+  return {title: '🔀 IF column', describe: `I will add a column <b>${esc(name)}</b> to <b>${esc(tn)}</b>: if <b>${esc(t.headers[cc])}</b> ${OPW[cond.op]} <b>${esc(showVal(cond.v, t.headers[cc]))}</b> it shows <b>"${esc(yes)}"</b>, otherwise <b>"${esc(no)}"</b>.`,
     apply: () => {
       const T = readTable(tn), start = App.hf.getSheetDimensions(T.id).width, L = colName(cc), out = [[name]];
       const rhs = typeof cond.v === 'number' ? cond.v : fstr(cond.v);
@@ -2192,7 +2197,9 @@ function buildFormulaCol(ctx) {
     apply: () => {
       const T = readTable(tn), start = App.hf.getSheetDimensions(T.id).width, out = [[name]];
       for (let r = 1; r <= T.lastRow; r++) { const R = r + 1; out.push(['=IFERROR(' + expr.replace(/\u0001(\d+)\u0002/g, (a, c) => colName(+c) + R).replace(/\s+/g, '') + ',"")']); }
-      App.hf.setCellContents({sheet: T.id, row: 0, col: start}, out); switchSheet(tn); Grid.select(1, start);
+      App.hf.setCellContents({sheet: T.id, row: 0, col: start}, out);
+      if (/%|percent|achiev|ratio|share|margin|growth/i.test(name)) getMeta(tn).colFmt[start] = 'pct';
+      switchSheet(tn); Grid.select(1, start);
       return {msg: `Column <b>${esc(name)}</b> added.`, formula: out[1][0], how: 'The same calculation is done on every row, using that row\'s values.'};
     }};
 }
@@ -2342,6 +2349,69 @@ function renderHistory() {
   el.innerHTML = App.history.slice().reverse().map((h, i) => `<div class="hist-item" data-t="${esc(h.text)}"><span>${h.ok ? '✅' : '⚠️'} ${esc(h.text)}</span><button class="btn sm light" title="Run again">▶</button></div>`).join('');
   $$('.hist-item', el).forEach(d => d.onclick = () => { $('#askInput').value = d.dataset.t; runCommand(d.dataset.t); $('#histPanel').classList.remove('show'); });
 }
+/* Example requests for sales teams, grouped by task (all work on the demo data) */
+const EXAMPLE_GROUPS = [
+  ['🔎 Lookups (VLOOKUP)', [
+    'From Master, bring Designation and Monthly Target by Employee ID',
+    'From Master, bring Designation by Employee Name',
+    'From Sales, bring total Sales Value and total Qty into Master by Employee ID',
+    'In Master, add a column Achievement = Total Sales Value / Monthly Target']],
+  ['💰 Totals & counts', [
+    'Total sales value by salesperson',
+    'Total sales value by region',
+    'Total sales value by month',
+    'Total qty by product category',
+    'Total qty for North region in March',
+    'Total sales value for Electronics in South region',
+    'Total sales value in 2025 for Electronics',
+    'Average sales value by salesperson',
+    'Count invoices per city',
+    'How many orders above 50,000',
+    'Number of invoices for Arun Kumar']],
+  ['🧮 Pivots & summaries', [
+    'Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025',
+    'Pivot with Product Category in rows, Month in columns, sum of Sales Value',
+    'Pivot with Salesperson in rows, Region in columns, count of Invoice No',
+    'Pivot with Region in rows, Year in columns, sum of Sales Value',
+    'Pivot with City in rows, sum of Qty and sum of Sales Value',
+    'Share of sales value by region in percent',
+    'Pivot with Product Category in rows and Region in columns, average of Sales Value',
+    'Unique list of customers']],
+  ['🏆 Rankings', [
+    'Top 5 customers by sales value',
+    'Top 10 products by qty',
+    'Bottom 5 salespersons by sales value',
+    'Top 3 cities by sales value in 2025',
+    'Top 5 customers for Electronics']],
+  ['🔽 Filter & sort', [
+    'Show only Chennai rows sorted by sales value high to low',
+    'Show only invoices above 1 lakh',
+    'Show only Furniture rows for West region',
+    'Show only Arun Kumar rows sorted by date',
+    'Sort by sales value high to low']],
+  ['🔀 New columns & IF', [
+    "Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'",
+    "Add a column Order Size: if Qty is above 20 show 'Bulk' else 'Retail'",
+    "Add a column Discount Flag: if Discount % is above 5% show 'Discounted' else 'Full Price'",
+    'Add a column GST = Sales Value * 0.18',
+    'Add a column Gross Value = Qty * Unit Price']],
+  ['📈 Growth & charts', [
+    'Month on month growth of sales value',
+    'Month on month growth of qty for South region',
+    'Doughnut chart of sales value by region',
+    'Bar chart of sales value by month',
+    'Doughnut chart of qty by product category',
+    'Bar chart of sales value by salesperson']],
+  ['🧹 Check & clean', [
+    'Compare Master and Sales by Employee ID',
+    'Remove duplicates by Invoice No',
+    'Add subtotals of qty and sales value for each product category',
+    'Highlight sales value below 10000 in red',
+    'Highlight qty above 30 in green',
+    'Split Employee Name into first and last',
+    'Combine all files',
+    'Trim extra spaces']]
+];
 const EXAMPLES = [
   'From Master, bring Designation and Monthly Target by Employee ID',
   'Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025',
@@ -2350,12 +2420,9 @@ const EXAMPLES = [
   'Total qty for North region in March',
   "Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'",
   'Doughnut chart of sales value by region',
-  'Month on month growth of sales value',
-  'Show only Chennai rows sorted by sales value high to low',
-  'Compare Master and Sales by Employee ID',
-  'Add subtotals of sales value for each region',
-  'How many orders above 50,000'
+  'Month on month growth of sales value'
 ];
+const ALL_EXAMPLES = EXAMPLE_GROUPS.flatMap(g => g[1]);
 /* =====================================================================
    9. NAVIGATION, TOOLBAR & PANELS
    ===================================================================== */
@@ -2389,10 +2456,9 @@ $('#askInput').addEventListener('keydown', e => { if (e.key === 'Enter') runComm
 $('#histBtn').onclick = () => $('#histPanel').classList.toggle('show');
 $('#exampleChips').innerHTML = EXAMPLES.slice(0, 8).map(x => `<button class="chip">${esc(x)}</button>`).join('') + `<button class="chip" id="moreEx">More ideas…</button>`;
 $$('#exampleChips .chip').forEach(b => { if (b.id === 'moreEx') return; b.onclick = () => { $('#askInput').value = b.textContent; runCommand(b.textContent); }; });
-$('#moreEx').onclick = () => modal('💡 Things you can ask', `<p class="muted">Click one to use it. Change the column and file names to match your data.</p>` + EXAMPLES.concat([
-  'From Sales, total Qty and total Sales Value by Employee Name', 'Average discount for each region', 'Count invoices per city', 'Remove duplicates by Invoice No', 'Combine all files',
-  'Split Employee Name into first and last', 'Highlight sales value below 10000 in red', 'Unique list of customers', 'Add a column Net = Sales Value * 0.82', 'Sort by date', 'Bar chart of qty by product name',
-  'Pivot with Product Category in rows and Region in columns, average of Sales Value', 'Total sales value in 2025 for Electronics']).map(x => `<button class="chip" style="margin:3px" onclick="closeModal();$('#askInput').value=this.textContent;runCommand(this.textContent)">${esc(x)}</button>`).join(''), [{label: 'Close', value: null, cls: 'light'}]);
+$('#moreEx').onclick = () => modal('💡 Things you can ask', `<p class="muted">Click any request to run it. Change the column and file names to match your own data. These all work on the 🎁 demo data.</p>` +
+  EXAMPLE_GROUPS.map(([title, list]) => `<h4 style="margin:14px 0 6px;color:var(--caramel-dark)">${title}</h4>` + list.map(x => `<button class="chip ex-pick" style="margin:3px">${esc(x)}</button>`).join('')).join(''),
+  [{label: 'Close', value: null, cls: 'light'}], {width: '980px', onOpen: b => $$('.ex-pick', b).forEach(x => x.onclick = () => { closeModal(); go('sheet'); $('#askInput').value = x.textContent; runCommand(x.textContent); })});
 (function speech() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return;
   const b = $('#micBtn'); b.style.display = '';
