@@ -32,6 +32,7 @@ Click **📽️ PowerPoint** on the Targets, Growth, Sample Report or Charts tab
 1. **Title slide** with the report names and date, and a **Contents** slide when there are several reports
 2. For each report: a **section** slide, **key numbers** cards, **real PowerPoint charts** (target vs achieved bars, share doughnut, month trend, previous-vs-current and green/red growth % bars), **tables** with coloured headers and status colours, and **"What the numbers say"** insights
 3. A **summary** slide with the main points
+- `Make a PowerPoint of customer wise target vs achievement` · `PPT of product wise target vs achievement`
 
 The charts are real PowerPoint charts, so you can still change colours or numbers in PowerPoint.
 
@@ -55,11 +56,12 @@ Made for laptop screens from 1280×720 upwards: on smaller screens the tabs show
 - **The single file on a phone:** Android phones can open `Excel Specialist.html` in Chrome from the Files app. iPhones can't open local HTML files well, so use the web link there.
 
 ## Things you can type (sales team examples)
-All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
+All 120+ of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
 
 **📈 Growth & degrowth**
 - `Sales growth vs last year by region` · `Product wise degrowth vs last year` · `This month vs last month by salesperson`
 - `Quarter vs previous quarter growth by category` · `Financial year growth vs previous FY` · `YTD growth vs last year sheet`
+- `Sales growth vs last year by product` · `Customer wise growth vs last year` · `This month vs last month by region` · `Quarter vs previous quarter growth by salesperson`
 
 **📽️ PowerPoint**
 - `Make a PowerPoint of target vs achievement` · `Presentation of region wise target vs achievement` · `PPT of sales growth vs last year`
@@ -70,17 +72,22 @@ All of these work on the demo data. Click **More ideas…** in the app to run an
 - `Target vs achievement sheet for each salesperson` (creates a sheet with formulas)
 - `Region wise target vs achievement` · `Region wise target vs achievement sheet for 2025`
 - Targets can come from a **Target** column in the sales file, or from a separate file (for example *Employee ID, Monthly Target*), matched by name or ID.
+- `Target vs achievement for 2024`
 
 **🔎 Lookups (VLOOKUP)**
 - `From Master, bring Designation and Monthly Target by Employee ID`
 - `From Master, bring Designation by Employee Name`
 - `From Sales, bring total Sales Value and total Qty into Master by Employee ID`
 - `In Master, add a column Achievement = Total Sales Value / Monthly Target` (target vs achievement, shown in %)
+- `In Master, add a column Annual Target = Monthly Target * 12` · `In Master, add a column Quarterly Target = Monthly Target * 3`
 
 **💰 Totals & counts**
 - `Total sales value by salesperson` · `Total sales value by region` · `Total sales value by month` · `Total qty by product category`
 - `Total qty for North region in March` · `Total sales value for Electronics in South region` · `Total sales value in 2025 for Electronics`
 - `Average sales value by salesperson` · `Count invoices per city` · `How many orders above 50,000` · `Number of invoices for Arun Kumar`
+- `Total sales value by salesperson for March 2025` · `Total sales value by region in 2024` · `Total sales value by year` · `Total qty by product name`
+- `Total sales value by customer for Arun Kumar` · `Total sales value by product name for South region`
+- `Average discount % by salesperson` · `Average unit price by product name` · `Highest sales value by salesperson` · `Count invoices per salesperson in 2025`
 
 **🧮 Pivots & summaries**
 - `Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025`
@@ -89,31 +96,45 @@ All of these work on the demo data. Click **More ideas…** in the app to run an
 - `Pivot with Region in rows, Year in columns, sum of Sales Value`
 - `Pivot with City in rows, sum of Qty and sum of Sales Value`
 - `Share of sales value by region in percent` · `Unique list of customers`
+- `Pivot with Customer Name in rows, Product Category in columns, sum of Sales Value`
+- `Pivot with Salesperson in rows, Month in columns, sum of Sales Value, filter Year = 2025`
+- `Pivot with Product Name in rows, Region in columns, sum of Qty` · `Pivot with Customer Name in rows, Year in columns, sum of Sales Value`
+- `Pivot with Month in rows, count of Invoice No` · `Unique list of products` · `Unique list of cities`
 
 **🏆 Rankings**
 - `Top 5 customers by sales value` · `Top 10 products by qty` · `Bottom 5 salespersons by sales value`
 - `Top 3 cities by sales value in 2025` · `Top 5 customers for Electronics`
+- `Top 10 customers by sales value in 2025` · `Bottom 5 products by sales value` · `Top 5 products in Chennai`
+- `Top 3 salespersons by qty in North region` · `Bottom 5 customers by qty`
 
 **🔽 Filter & sort**
 - `Show only Chennai rows sorted by sales value high to low` · `Show only invoices above 1 lakh`
 - `Show only Furniture rows for West region` · `Show only Arun Kumar rows sorted by date` · `Sort by sales value high to low`
+- `Show only rows with discount % above 5%` · `Show only invoices below 10000` · `Show only Metro Retail rows sorted by date`
+- `Show only Electronics rows in 2025` · `Show only South region rows for March` · `Sort by qty high to low`
 
 **🔀 New columns & IF**
 - `Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'`
 - `Add a column Order Size: if Qty is above 20 show 'Bulk' else 'Retail'`
 - `Add a column Discount Flag: if Discount % is above 5% show 'Discounted' else 'Full Price'`
 - `Add a column GST = Sales Value * 0.18` · `Add a column Gross Value = Qty * Unit Price`
+- `Add a column Commission = Sales Value * 0.02` · `Add a column Value in Lakhs = Sales Value / 100000` · `Add a column Net Price = Unit Price * (1 - Discount %)`
+- `Add a column Incentive: if Sales Value is above 100000 show 'Eligible' else 'Not Eligible'`
+- `Add a column Deal Type: if Qty is above 40 show 'Key Account' else 'Regular'`
 
 **📈 Growth & charts**
 - `Month on month growth of sales value` · `Month on month growth of qty for South region`
 - `Doughnut chart of sales value by region` · `Bar chart of sales value by month`
 - `Doughnut chart of qty by product category` · `Bar chart of sales value by salesperson`
+- `Month on month growth of sales value for Arun Kumar` · `Bar chart of qty by city` · `Doughnut chart of sales value by customer`
+- `Bar chart of sales value by product name` · `Bar chart of sales value by year`
 
 **🧹 Check & clean**
 - `Compare Master and Sales by Employee ID` · `Remove duplicates by Invoice No`
 - `Add subtotals of qty and sales value for each product category`
 - `Highlight sales value below 10000 in red` · `Highlight qty above 30 in green`
 - `Split Employee Name into first and last` · `Combine all files` · `Trim extra spaces`
+- `Highlight discount % above 8% in red` · `Highlight sales value above 100000 in green` · `Compare Master and Sales by Employee Name`
 
 **Tips**
 - Use the names of your columns and files as they appear (small spelling mistakes are fine). "emp name", "employee" and "salesperson" all find *Employee Name*.

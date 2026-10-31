@@ -1834,7 +1834,7 @@ function findTableMentions(text, blockSpans) {
       while ((mm = re.exec(low))) {
         const s = mm.index + mm[1].length, e = s + mm[0].length - mm[1].length;
         const before = low.slice(Math.max(0, s - 22), s), after = low.slice(e, e + 12);
-        const ctxOk = /(from|in|into|of|on|to|using|compare|and|with|between|vs|versus|against|combine|merge|sheet|file|table|use)\s+(the\s+|my\s+|our\s+)?$/.test(before) || /^\s*(file|sheet|table|data|list|report|excel)\b/.test(after) || p.split(' ').length > 1 || /\d/.test(p) || (p === 'master' && masterT === n);
+        const ctxOk = /(from|in|into|of|on|to|using|compare|and|with|between|vs|versus|against|combine|merge|sheet|file|table|use)\s+(the\s+|my\s+|our\s+)?$/.test(before) || (m.kind === 'result' ? /^\s*(file|sheet|table)\b/ : /^\s*(file|sheet|table|data|list|report|excel)\b/).test(after) || p.split(' ').length > 1 || /\d/.test(p) || (p === 'master' && masterT === n);
         if (!ctxOk) continue;
         if (blockSpans.some(b => b.s <= s && b.e >= e && (b.e - b.s) > (e - s))) continue;
         out.push({name: n, s, e});
@@ -2599,11 +2599,17 @@ const EXAMPLE_GROUPS = [
     'This month vs last month by salesperson',
     'Quarter vs previous quarter growth by category',
     'Financial year growth vs previous FY',
-    'YTD growth vs last year sheet']],
+    'YTD growth vs last year sheet',
+    'Sales growth vs last year by product',
+    'Customer wise growth vs last year',
+    'This month vs last month by region',
+    'Quarter vs previous quarter growth by salesperson']],
   ['📽️ PowerPoint', [
     'Make a PowerPoint of target vs achievement',
     'Presentation of region wise target vs achievement',
-    'PPT of sales growth vs last year']],
+    'PPT of sales growth vs last year',
+    'Make a PowerPoint of customer wise target vs achievement',
+    'PPT of product wise target vs achievement']],
   ['🎯 Target vs achievement', [
     'Target vs achievement dashboard',
     'Target vs achievement for 2025',
@@ -2614,12 +2620,15 @@ const EXAMPLE_GROUPS = [
     'Customer wise target vs achievement',
     'Customer wise target vs achievement sheet for 2025',
     'Region wise target vs achievement',
-    'Region wise target vs achievement sheet for 2025']],
+    'Region wise target vs achievement sheet for 2025',
+    'Target vs achievement for 2024']],
   ['🔎 Lookups (VLOOKUP)', [
     'From Master, bring Designation and Monthly Target by Employee ID',
     'From Master, bring Designation by Employee Name',
     'From Sales, bring total Sales Value and total Qty into Master by Employee ID',
-    'In Master, add a column Achievement = Total Sales Value / Monthly Target']],
+    'In Master, add a column Achievement = Total Sales Value / Monthly Target',
+    'In Master, add a column Annual Target = Monthly Target * 12',
+    'In Master, add a column Quarterly Target = Monthly Target * 3']],
   ['💰 Totals & counts', [
     'Total sales value by salesperson',
     'Total sales value by region',
@@ -2631,7 +2640,17 @@ const EXAMPLE_GROUPS = [
     'Average sales value by salesperson',
     'Count invoices per city',
     'How many orders above 50,000',
-    'Number of invoices for Arun Kumar']],
+    'Number of invoices for Arun Kumar',
+    'Total sales value by salesperson for March 2025',
+    'Total sales value by region in 2024',
+    'Total sales value by year',
+    'Total qty by product name',
+    'Total sales value by customer for Arun Kumar',
+    'Total sales value by product name for South region',
+    'Average discount % by salesperson',
+    'Average unit price by product name',
+    'Highest sales value by salesperson',
+    'Count invoices per salesperson in 2025']],
   ['🧮 Pivots & summaries', [
     'Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025',
     'Pivot with Product Category in rows, Month in columns, sum of Sales Value',
@@ -2640,32 +2659,60 @@ const EXAMPLE_GROUPS = [
     'Pivot with City in rows, sum of Qty and sum of Sales Value',
     'Share of sales value by region in percent',
     'Pivot with Product Category in rows and Region in columns, average of Sales Value',
-    'Unique list of customers']],
+    'Unique list of customers',
+    'Pivot with Customer Name in rows, Product Category in columns, sum of Sales Value',
+    'Pivot with Salesperson in rows, Month in columns, sum of Sales Value, filter Year = 2025',
+    'Pivot with Product Name in rows, Region in columns, sum of Qty',
+    'Pivot with Customer Name in rows, Year in columns, sum of Sales Value',
+    'Pivot with Month in rows, count of Invoice No',
+    'Unique list of products',
+    'Unique list of cities']],
   ['🏆 Rankings', [
     'Top 5 customers by sales value',
     'Top 10 products by qty',
     'Bottom 5 salespersons by sales value',
     'Top 3 cities by sales value in 2025',
-    'Top 5 customers for Electronics']],
+    'Top 5 customers for Electronics',
+    'Top 10 customers by sales value in 2025',
+    'Bottom 5 products by sales value',
+    'Top 5 products in Chennai',
+    'Top 3 salespersons by qty in North region',
+    'Bottom 5 customers by qty']],
   ['🔽 Filter & sort', [
     'Show only Chennai rows sorted by sales value high to low',
     'Show only invoices above 1 lakh',
     'Show only Furniture rows for West region',
     'Show only Arun Kumar rows sorted by date',
-    'Sort by sales value high to low']],
+    'Sort by sales value high to low',
+    'Show only rows with discount % above 5%',
+    'Show only invoices below 10000',
+    'Show only Metro Retail rows sorted by date',
+    'Show only Electronics rows in 2025',
+    'Show only South region rows for March',
+    'Sort by qty high to low']],
   ['🔀 New columns & IF', [
     "Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'",
     "Add a column Order Size: if Qty is above 20 show 'Bulk' else 'Retail'",
     "Add a column Discount Flag: if Discount % is above 5% show 'Discounted' else 'Full Price'",
     'Add a column GST = Sales Value * 0.18',
-    'Add a column Gross Value = Qty * Unit Price']],
+    'Add a column Gross Value = Qty * Unit Price',
+    'Add a column Commission = Sales Value * 0.02',
+    'Add a column Value in Lakhs = Sales Value / 100000',
+    'Add a column Net Price = Unit Price * (1 - Discount %)',
+    "Add a column Incentive: if Sales Value is above 100000 show 'Eligible' else 'Not Eligible'",
+    "Add a column Deal Type: if Qty is above 40 show 'Key Account' else 'Regular'"]],
   ['📈 Growth & charts', [
     'Month on month growth of sales value',
     'Month on month growth of qty for South region',
     'Doughnut chart of sales value by region',
     'Bar chart of sales value by month',
     'Doughnut chart of qty by product category',
-    'Bar chart of sales value by salesperson']],
+    'Bar chart of sales value by salesperson',
+    'Month on month growth of sales value for Arun Kumar',
+    'Bar chart of qty by city',
+    'Doughnut chart of sales value by customer',
+    'Bar chart of sales value by product name',
+    'Bar chart of sales value by year']],
   ['🧹 Check & clean', [
     'Compare Master and Sales by Employee ID',
     'Remove duplicates by Invoice No',
@@ -2674,7 +2721,10 @@ const EXAMPLE_GROUPS = [
     'Highlight qty above 30 in green',
     'Split Employee Name into first and last',
     'Combine all files',
-    'Trim extra spaces']]
+    'Trim extra spaces',
+    'Highlight discount % above 8% in red',
+    'Highlight sales value above 100000 in green',
+    'Compare Master and Sales by Employee Name']]
 ];
 const EXAMPLES = [
   'From Master, bring Designation and Monthly Target by Employee ID',
