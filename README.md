@@ -19,18 +19,29 @@ No installation, no login and **no internet needed**: every library, including t
 | 🏠 Home | Quick start, stats and recent files |
 | 📂 My Files | Upload Excel (.xlsx/.xls), CSV, PDF, JPG, PNG. Preview, rename, set a ⭐ Master file, delete |
 | 📊 Work Sheet | Excel-style sheet with the ✨ request box, formula bar, sheet tabs and an **Excel-style ribbon**: **File** (Normal Excel, Excel with formulas, CSV, more export, print), **Home** (cut/copy/paste, font style, font size, **B** *I* <u>U</u>, font colour, fill colour, borders/box, alignment, number formats, colour rules, insert/delete rows and columns), **Insert** (sheet, sales template, pivot, chart, targets, report from sample, function), **Data** (sort, **filter buttons on the header row** like Excel, clear filters, custom filter, remove duplicates, find) and **View** (freeze top row, gridlines, focus mode, dark mode). Shortcuts: Ctrl+B / I / U / Z / Y / C / X / V / F |
-| 🎯 Targets | **Target vs achievement by salesperson or by region** (switch with **View by**). The region view adds up each region's targets and sales, shows the best salesperson per region, and lists every salesperson inside each region card. For each view: team gauge, target-vs-achieved chart, a **month-wise target vs achievement trend** (whole team, one region or one salesperson, with % per month), report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
+| 🎯 Targets | **Target vs achievement by salesperson, region or product** (switch with **View by**). The product view uses a product target file (*Product, Monthly Target*); if you don't have one, **📝 Make a product target sheet** lists every product for you to type targets. The region view adds up each region's targets and sales, shows the best salesperson per region, and lists every salesperson inside each region card. For each view: team gauge, target-vs-achieved chart, a **month-wise target vs achievement trend** (whole team, one region or one salesperson, with % per month), report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
 | 🧩 Sample Report | Upload a **sample report** as Excel/CSV or a **photo/screenshot** (or type its headings). The app reads the column headings (e.g. *Employee Name, Category, Month/Year, Target, Achievement, Achievement %*), shows what each one means (you can change any of them), and builds the same report from your master data, with a dashboard of charts. Every salesperson × month gets a row, even with no sales. When a column like Category can't carry a target, it becomes separate Achieved columns (one per category). Download as Normal Excel + charts, Excel with formulas, a sheet in the app, or PDF |
-| ⬇️ Export | Tick any sheets and reports (target vs achievement by salesperson, region or month, sample report, latest chart data), then choose **Normal Excel (.xlsx, values only)**, **Excel with formulas**, **Excel 97-2003 (.xls)**, **CSV** or **PDF / Print**. Excel files keep **fonts, sizes, bold/italic/underline, colours, fills, borders, alignment**, colour rules, money (₹ with Indian grouping), % and dates, add filter buttons to header rows, and include a **Dashboard sheet with the charts as pictures**. PDF includes the charts too |
+| ⬇️ Export | Tick any sheets and reports (target vs achievement by salesperson, region, product or month, sample report, latest chart data), then choose **Normal Excel (.xlsx, values only)**, **Excel with formulas**, **Excel 97-2003 (.xls)**, **CSV**, **PDF file (.pdf)** or **Print / Save as PDF**. Click **📤 Share…** to send it. Excel files keep **fonts, sizes, bold/italic/underline, colours, fills, borders, alignment**, colour rules, money (₹ with Indian grouping), % and dates, add filter buttons to header rows, and include a **Dashboard sheet with the charts as pictures**. PDF includes the charts too |
 | 📈 Charts | Doughnut and bar charts of your latest result, plus summary cards. Download as PNG or print |
 | 📘 Formula Help | Every formula explained simply, with a **Try it** button |
 | ⚙️ Settings | Light/dark caramel theme, money symbol, decimals, date format |
+
+## 📤 Sharing (WhatsApp, Gmail, Outlook, email, print)
+**📤 Share** buttons are on the Export tab, the Targets tab, Sample Report, Charts and the ribbon's **File** tab. Choose **PDF file**, **Excel file** or **Excel with formulas**, then:
+- **📤 Share to apps:** on Windows 10/11 and Mac (Chrome or Edge), the system share panel opens and the file is **attached directly** to WhatsApp Desktop, Outlook, Mail and similar apps. Browsers allow this for PDF files; Excel files depend on the browser.
+- **WhatsApp / Gmail / Outlook / Outlook.com / Email app:** the file is saved to your **Downloads** folder and the app opens with your message already typed. Click **📎 Attach** and pick the file. A web page can't put a file inside these apps by itself.
+- **🖨️ Print:** prints the charts and tables, or choose "Save as PDF".
+
+Sharing needs internet; making the files doesn't. In PDF files the rupee symbol is written as **Rs.**.
+
+## 💻 Laptops
+Made for laptop screens from 1280×720 upwards: on smaller screens the tabs show icons only (hover for the name), the example requests sit on one scrolling line and the ribbon gets slimmer. Click **⌃** on the ribbon (or double-click a tab) to hide the ribbon for more rows, as in Excel. Works in Chrome, Edge and Firefox.
 
 ## Things you can type (sales team examples)
 All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
 
 **🎯 Target vs achievement**
-- `Month wise target vs achievement trend`
+- `Month wise target vs achievement trend` · `Product wise target vs achievement`
 - `Target vs achievement dashboard` · `Target vs achievement for 2025` · `Target vs achievement for March`
 - `Target vs achievement sheet for each salesperson` (creates a sheet with formulas)
 - `Region wise target vs achievement` · `Region wise target vs achievement sheet for 2025`
@@ -105,6 +116,8 @@ SUM, SUMIF(S), AVERAGE, AVERAGEIF(S), COUNT, COUNTA, COUNTBLANK, COUNTIF(S), MIN
 | `xlsx-js-style.min.js` | xlsx-js-style 1.2.0 (SheetJS 0.18.5 with cell styles) | Apache-2.0 |
 | `cpexcel.js` | SheetJS code pages (old .xls / CSV encodings) | Apache-2.0 |
 | `jszip.min.js` | JSZip 3.10.1 (chart pictures inside Excel files) | MIT |
+| `jspdf.umd.min.js` | jsPDF 2.5.1 (PDF files) | MIT |
+| `jspdf.plugin.autotable.min.js` | jsPDF-AutoTable 3.8.2 (tables in PDF files) | MIT |
 | `hyperformula.full.min.js` | HyperFormula 2.7.1 | GPL-3.0 (used with the `gpl-v3` key) |
 | `chart.umd.min.js` | Chart.js 4.4.1 | MIT |
 | `pdf.min.js`, `pdf.worker.min.js` | PDF.js 3.11.174 | Apache-2.0 |
