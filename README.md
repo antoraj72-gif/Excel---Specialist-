@@ -23,19 +23,52 @@ No installation, no login and **no internet needed**: every library, including t
 | 📘 Formula Help | Every formula explained simply, with a **Try it** button |
 | ⚙️ Settings | Light/dark caramel theme, money symbol, decimals, date format |
 
-## 10 things you can type
-1. `From Master, bring Designation and Monthly Target by Employee ID`
-2. `Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025`
-3. `Total sales value by salesperson`
-4. `Top 5 customers by sales value`
-5. `Total qty for North region in March`
-6. `Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'`
-7. `Doughnut chart of sales value by region`
-8. `Month on month growth of sales value`
-9. `Compare Master and Sales by Employee ID`
-10. `Add subtotals of sales value for each region`
+## Things you can type (sales team examples)
+All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
 
-More: `How many orders above 50,000` · `Remove duplicates by Invoice No` · `Combine all files` · `Show only Chennai rows sorted by sales value high to low` · `Split Employee Name into first and last` · `Highlight sales value below 10000 in red` · `Add a column Net = Sales Value * 0.82` · `Unique list of customers`
+**🔎 Lookups (VLOOKUP)**
+- `From Master, bring Designation and Monthly Target by Employee ID`
+- `From Master, bring Designation by Employee Name`
+- `From Sales, bring total Sales Value and total Qty into Master by Employee ID`
+- `In Master, add a column Achievement = Total Sales Value / Monthly Target` (target vs achievement, shown in %)
+
+**💰 Totals & counts**
+- `Total sales value by salesperson` · `Total sales value by region` · `Total sales value by month` · `Total qty by product category`
+- `Total qty for North region in March` · `Total sales value for Electronics in South region` · `Total sales value in 2025 for Electronics`
+- `Average sales value by salesperson` · `Count invoices per city` · `How many orders above 50,000` · `Number of invoices for Arun Kumar`
+
+**🧮 Pivots & summaries**
+- `Pivot with Region in rows, Month in columns, sum of Qty, filter Year = 2025`
+- `Pivot with Product Category in rows, Month in columns, sum of Sales Value`
+- `Pivot with Salesperson in rows, Region in columns, count of Invoice No`
+- `Pivot with Region in rows, Year in columns, sum of Sales Value`
+- `Pivot with City in rows, sum of Qty and sum of Sales Value`
+- `Share of sales value by region in percent` · `Unique list of customers`
+
+**🏆 Rankings**
+- `Top 5 customers by sales value` · `Top 10 products by qty` · `Bottom 5 salespersons by sales value`
+- `Top 3 cities by sales value in 2025` · `Top 5 customers for Electronics`
+
+**🔽 Filter & sort**
+- `Show only Chennai rows sorted by sales value high to low` · `Show only invoices above 1 lakh`
+- `Show only Furniture rows for West region` · `Show only Arun Kumar rows sorted by date` · `Sort by sales value high to low`
+
+**🔀 New columns & IF**
+- `Add a column Status: if Sales Value is above 50000 show 'High' else 'Normal'`
+- `Add a column Order Size: if Qty is above 20 show 'Bulk' else 'Retail'`
+- `Add a column Discount Flag: if Discount % is above 5% show 'Discounted' else 'Full Price'`
+- `Add a column GST = Sales Value * 0.18` · `Add a column Gross Value = Qty * Unit Price`
+
+**📈 Growth & charts**
+- `Month on month growth of sales value` · `Month on month growth of qty for South region`
+- `Doughnut chart of sales value by region` · `Bar chart of sales value by month`
+- `Doughnut chart of qty by product category` · `Bar chart of sales value by salesperson`
+
+**🧹 Check & clean**
+- `Compare Master and Sales by Employee ID` · `Remove duplicates by Invoice No`
+- `Add subtotals of qty and sales value for each product category`
+- `Highlight sales value below 10000 in red` · `Highlight qty above 30 in green`
+- `Split Employee Name into first and last` · `Combine all files` · `Trim extra spaces`
 
 **Tips**
 - Use the names of your columns and files as they appear (small spelling mistakes are fine). "emp name", "employee" and "salesperson" all find *Employee Name*.
