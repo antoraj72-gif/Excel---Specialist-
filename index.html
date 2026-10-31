@@ -9,7 +9,9 @@
   ------------------------------------------------------
   Open this file by double-clicking it (Chrome or Edge). Keep the "libs" folder next to it.
   Library files used (all open source). Each one is loaded from ./libs first, and from the internet only if missing:
-    libs/xlsx.full.min.js         SheetJS 0.18.5       – read/write Excel & CSV
+    libs/xlsx-js-style.min.js     xlsx-js-style 1.2.0  – read/write Excel & CSV, with fonts, colours and borders (SheetJS 0.18.5 based)
+    libs/cpexcel.js               SheetJS codepages    – old .xls / CSV text encodings
+    libs/jszip.min.js             JSZip 3.10.1         – puts chart pictures inside exported Excel files
     libs/hyperformula.full.min.js HyperFormula 2.7.1   – Excel formula engine (GPLv3 licence key "gpl-v3")
     libs/chart.umd.min.js         Chart.js 4.4.1       – doughnut & bar charts
     libs/pdf.min.js               PDF.js 3.11.174      – read PDF files (loaded only when a PDF is uploaded)
@@ -20,8 +22,12 @@
     libs/tesseract/ocr-eng.js        English language data      } browsers block normal worker/data downloads
   Everything works with no internet once the libs folder is in place.
 -->
-<script src="libs/xlsx.full.min.js"></script>
-<script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>')</script>
+<script src="libs/cpexcel.js"></script>
+<script>window.cptable||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/cpexcel.js"><\/script>')</script>
+<script src="libs/xlsx-js-style.min.js"></script>
+<script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"><\/script>')</script>
+<script src="libs/jszip.min.js"></script>
+<script>window.JSZip||document.write('<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"><\/script>')</script>
 <script src="libs/hyperformula.full.min.js"></script>
 <script>window.HyperFormula||document.write('<script src="https://cdn.jsdelivr.net/npm/hyperformula@2.7.1/dist/hyperformula.full.min.js"><\/script>')</script>
 <script src="libs/chart.umd.min.js"></script>
@@ -126,6 +132,32 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 .res code,.fhelp code{background:var(--latte);padding:2px 6px;border-radius:6px;font-family:Consolas,"Courier New",monospace;font-size:12.5px;word-break:break-all}
 .answer{font-size:28px;font-weight:700;color:var(--caramel-dark);margin:4px 0}
 :root[data-theme="dark"] .answer{color:var(--caramel)}
+.ribbon{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-sm);overflow:hidden;flex:none}
+.rb-tabs{display:flex;gap:2px;padding:4px 8px 0;background:var(--latte-2);border-bottom:1px solid var(--line)}
+.rb-tab{border:0;background:transparent;padding:6px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-weight:500;color:var(--text-soft);font-size:13px}
+.rb-tab:hover{background:var(--latte)}
+.rb-tab.on{background:var(--card);color:var(--caramel-dark);font-weight:700;box-shadow:0 -2px 0 var(--caramel) inset}
+:root[data-theme="dark"] .rb-tab.on{color:var(--caramel)}
+.rb-panel{display:none;gap:0;padding:6px 6px 2px;flex-wrap:wrap;align-items:stretch}
+.rb-panel.on{display:flex}
+.rb-g{display:flex;flex-direction:column;justify-content:space-between;padding:0 8px;border-right:1px solid var(--line);gap:3px;min-height:64px}
+.rb-g:last-child{border-right:0}
+.rb-row{display:flex;gap:2px;align-items:center}
+.rb-gl{font-size:10.5px;color:var(--text-soft);text-align:center;padding:1px 0 3px}
+.rb-btn{background:transparent;border:1px solid transparent;border-radius:6px;padding:3px 7px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text);min-height:26px;position:relative}
+.rb-btn:hover{background:var(--latte);border-color:var(--line)}
+.rb-btn.on{background:var(--caramel);color:#fff;border-color:var(--caramel)}
+.rb-btn.big{flex-direction:column;gap:1px;font-size:20px;padding:3px 8px;min-width:58px}
+.rb-btn.big span{font-size:11px;line-height:1.15;white-space:nowrap}
+.rb-sel{padding:3px 6px !important;border-radius:6px !important;font-size:12.5px;height:26px}
+.rb-color input{width:0;height:0;opacity:0;position:absolute;left:50%;bottom:0}
+.fpop{position:fixed;z-index:60;width:250px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:10px;font-size:13px}
+.fpop .fl{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:4px 6px;margin:6px 0}
+.fpop .fl label{display:flex;gap:6px;align-items:center;padding:2px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fbtn{position:absolute;right:2px;top:4px;width:17px;height:17px;border-radius:4px;background:rgba(255,255,255,.85);color:#5D4037;font-size:10px;line-height:17px;text-align:center;cursor:pointer;z-index:2}
+.fbtn.act{background:#2a78d6;color:#fff}
+.grid.nogrid .c{border-color:transparent}
+#page-sheet.focus .ask,#page-sheet.focus #resultArea{display:none !important}
 .toolbar{display:flex;gap:4px;flex-wrap:wrap;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:5px 8px;box-shadow:var(--shadow-sm)}
 .tb{background:transparent;border:0;border-radius:8px;padding:6px 8px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text);position:relative}
 .tb:hover{background:var(--latte)}
@@ -186,11 +218,17 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 .pbar>i{display:block;height:100%;border-radius:99px}
 .tg-badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:600;background:var(--latte);color:var(--text-soft);white-space:nowrap}
 .st-ok{background:#E3EFD3;color:#4B6B17}.st-mid{background:#FCEBC8;color:#8A5A00}.st-low{background:#F8DCDC;color:#B23A3A}
-.tg-table td{vertical-align:middle}.tg-total td{font-weight:700;background:var(--latte) !important}
+.tg-table td{vertical-align:middle}
+.tg-month th,.tg-month td{min-width:86px;font-size:12px}.tg-month td:first-child{white-space:nowrap}.tg-total td{font-weight:700;background:var(--latte) !important}
 .pcards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .pcard{display:flex;gap:14px;align-items:center;padding:14px 16px}
 .pcard .pname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ring{flex:none;width:86px;height:86px;border-radius:50%;display:grid;place-items:center}
+.sm-note{background:#EAF2FB;border-left:4px solid #2a78d6;border-radius:8px;padding:8px 12px;margin-bottom:6px;font-size:13px;color:#1c3d63}
+:root[data-theme="dark"] .sm-note{background:#1f3046;color:#d6e6f8}
+.sm-charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
+.sm-charts img{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff}
+.sm-map td{vertical-align:middle}
 .ex-h{margin:14px 0 8px;color:var(--text-soft)}
 .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
 .ex-item,.ex-fmt{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card);transition:.15s}
@@ -230,6 +268,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 @keyframes sp{to{transform:rotate(360deg)}}
 [data-tip]{position:relative}
 [data-tip]:hover:after{content:attr(data-tip);position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#3E2723;color:#FFF8EE;padding:5px 9px;border-radius:7px;font-size:11.5px;white-space:nowrap;z-index:50;pointer-events:none;font-weight:400}
+@media (max-width:1560px){.tab{padding:7px 10px;font-size:13px}.brand small{display:none}.topbar{gap:12px}}
 @media (max-width:760px){
   .topbar{padding:8px 12px}.tab span.t{display:none}.page{padding:12px}.side{left:12px;right:12px;width:auto}
   .tb span.t{display:none}.hero .big-emoji{display:none}
@@ -249,6 +288,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <button class="tab" data-page="sheet" data-tip="Your Excel sheet and smart helper">📊 <span class="t">Work Sheet</span></button>
     <button class="tab" data-page="charts" data-tip="See your results as charts">📈 <span class="t">Charts</span></button>
     <button class="tab" data-page="targets" data-tip="Target vs achievement for each salesperson">🎯 <span class="t">Targets</span></button>
+    <button class="tab" data-page="sample" data-tip="Make a report shaped like your sample file or picture">🧩 <span class="t">Sample Report</span></button>
     <button class="tab" data-page="export" data-tip="Download your sheets and reports">⬇️ <span class="t">Export</span></button>
     <button class="tab" data-page="help" data-tip="Every formula explained simply">📘 <span class="t">Formula Help</span></button>
     <button class="tab" data-page="settings" data-tip="Colours, money symbol, dates">⚙️ <span class="t">Settings</span></button>
@@ -315,44 +355,123 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
   </div>
   <div id="resultArea" class="noprint"></div>
 
-  <div class="toolbar noprint" id="toolbar">
-    <button class="tb" data-act="newSheet" data-tip="Open a new blank sheet">➕ <span class="t">New Sheet</span></button>
-    <button class="tb" data-act="template" data-tip="Ready-made sales sheet with formulas">🧾 <span class="t">Sales Template</span></button>
-    <span class="sep"></span>
-    <button class="tb" data-act="undo" data-tip="Undo (Ctrl+Z)">↶</button>
-    <button class="tb" data-act="redo" data-tip="Redo (Ctrl+Y)">↷</button>
-    <span class="sep"></span>
-    <button class="tb" data-act="bold" data-tip="Bold (Ctrl+B)"><b>B</b></button>
-    <label class="tb" data-tip="Fill colour">🎨<input type="color" id="fillColor" value="#F3E3CF" style="width:22px;height:18px;border:0;padding:0;background:none"></label>
-    <button class="tb" data-act="clearFmt" data-tip="Remove colour and bold">🧽</button>
-    <span class="sep"></span>
-    <button class="tb" data-act="fmtCur" data-tip="Money format" id="curBtn">₹</button>
-    <button class="tb" data-act="fmtPct" data-tip="Percent format">%</button>
-    <button class="tb" data-act="decUp" data-tip="More decimals">.0+</button>
-    <button class="tb" data-act="decDown" data-tip="Fewer decimals">.0−</button>
-    <span class="sep"></span>
-    <button class="tb" data-act="sortAsc" data-tip="Sort A→Z by the selected column">A→Z</button>
-    <button class="tb" data-act="sortDesc" data-tip="Sort Z→A by the selected column">Z→A</button>
-    <button class="tb" data-act="filter" data-tip="Show only some rows">🔽 <span class="t">Filter</span></button>
-    <button class="tb" data-act="freeze" id="freezeBtn" data-tip="Keep the top row visible">❄️ <span class="t">Freeze</span></button>
-    <button class="tb" data-act="find" data-tip="Find (Ctrl+F)">🔍</button>
-    <button class="tb" data-act="dupes" data-tip="Remove repeated rows">🧹 <span class="t">Duplicates</span></button>
-    <span class="sep"></span>
-    <button class="tb" data-act="addRow" data-tip="Insert a row above">+ Row</button>
-    <button class="tb" data-act="delRow" data-tip="Delete selected rows">− Row</button>
-    <button class="tb" data-act="addCol" data-tip="Insert a column to the left">+ Col</button>
-    <button class="tb" data-act="delCol" data-tip="Delete selected columns">− Col</button>
-    <span class="sep"></span>
-    <button class="tb" data-act="rule" data-tip="Colour cells automatically, e.g. red if below target">🌈 <span class="t">Colour Rule</span></button>
-    <button class="tb" data-act="pivot" data-tip="Build a pivot by clicking">🧮 <span class="t">Pivot Builder</span></button>
-    <button class="tb" data-act="chart" data-tip="Chart the selected cells">📈</button>
-    <span class="sep"></span>
-    <button class="tb" data-act="xlsx" data-tip="Download as Excel (keeps formulas)">⬇️ <span class="t">Excel</span></button>
-    <button class="tb" data-act="csv" data-tip="Download this sheet as CSV">⬇️ CSV</button>
-    <button class="tb" data-act="exportTab" data-tip="More download options: normal Excel, old Excel, PDF…">⬇️ <span class="t">Export…</span></button>
-    <button class="tb" data-act="copy" data-tip="Copy selected cells">📋</button>
-    <button class="tb" data-act="print" data-tip="Print">🖨️</button>
+  <div class="ribbon noprint" id="toolbar">
+    <div class="rb-tabs">
+      <button class="rb-tab" data-rb="file">File</button>
+      <button class="rb-tab on" data-rb="home">Home</button>
+      <button class="rb-tab" data-rb="insert">Insert</button>
+      <button class="rb-tab" data-rb="data">Data</button>
+      <button class="rb-tab" data-rb="view">View</button>
+    </div>
+    <div class="rb-panel" data-rb="file">
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="xlsxNormal" data-tip="Values only, keeps fonts, colours, borders">📗<span>Normal Excel</span></button>
+        <button class="rb-btn big" data-act="xlsx" data-tip="All sheets, formulas kept">🧮<span>Excel with formulas</span></button>
+        <button class="rb-btn big" data-act="csv" data-tip="This sheet as CSV">📄<span>CSV</span></button>
+        <button class="rb-btn big" data-act="exportTab" data-tip="Choose sheets, reports and format">⬇️<span>More export…</span></button>
+        <button class="rb-btn big" data-act="print" data-tip="Print or save as PDF">🖨️<span>Print / PDF</span></button>
+      </div><div class="rb-gl">Save &amp; share</div></div>
+    </div>
+    <div class="rb-panel on" data-rb="home">
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn" data-act="undo" data-tip="Undo (Ctrl+Z)">↶</button>
+        <button class="rb-btn" data-act="redo" data-tip="Redo (Ctrl+Y)">↷</button>
+        <button class="rb-btn" data-act="cut" data-tip="Cut (Ctrl+X)">✂️</button>
+        <button class="rb-btn" data-act="copy" data-tip="Copy (Ctrl+C)">📋</button>
+        <button class="rb-btn" data-act="paste" data-tip="Paste (Ctrl+V)">📥</button>
+      </div><div class="rb-gl">Clipboard</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <select id="rbFont" class="rb-sel" style="width:132px" data-tip="Font style">
+          <option>Calibri</option><option>Arial</option><option>Aptos</option><option>Segoe UI</option><option>Verdana</option><option>Tahoma</option><option>Times New Roman</option><option>Georgia</option><option>Cambria</option><option>Garamond</option><option>Courier New</option><option>Trebuchet MS</option><option>Poppins</option>
+        </select>
+        <select id="rbSize" class="rb-sel" style="width:58px" data-tip="Font size">
+          <option>8</option><option>9</option><option>10</option><option selected>11</option><option>12</option><option>13</option><option>14</option><option>16</option>
+        </select>
+      </div><div class="rb-row">
+        <button class="rb-btn" data-act="bold" id="rbB" data-tip="Bold (Ctrl+B)"><b>B</b></button>
+        <button class="rb-btn" data-act="italic" id="rbI" data-tip="Italic (Ctrl+I)"><i style="font-family:Georgia">I</i></button>
+        <button class="rb-btn" data-act="underline" id="rbU" data-tip="Underline (Ctrl+U)"><u>U</u></button>
+        <select id="rbBorder" class="rb-sel" style="width:96px" data-tip="Borders / box">
+          <option value="">⊞ Borders</option><option value="all">All borders</option><option value="box">Outside box</option><option value="thick">Thick box</option><option value="bottom">Bottom border</option><option value="top">Top border</option><option value="left">Left border</option><option value="right">Right border</option><option value="none">No border</option>
+        </select>
+        <label class="rb-btn rb-color" data-tip="Fill colour">🎨<input type="color" id="fillColor" value="#FFF2CC"></label>
+        <label class="rb-btn rb-color" data-tip="Font colour"><b style="border-bottom:3px solid #C00000;line-height:1">A</b><input type="color" id="fontColor" value="#C00000"></label>
+      </div><div class="rb-gl">Font</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn" data-act="alignL" id="rbAL" data-tip="Align left">⫷</button>
+        <button class="rb-btn" data-act="alignC" id="rbAC" data-tip="Centre">☰</button>
+        <button class="rb-btn" data-act="alignR" id="rbAR" data-tip="Align right">⫸</button>
+      </div><div class="rb-row"><button class="rb-btn" data-act="clearFmt" data-tip="Clear formatting">🧽 <span class="t">Clear</span></button></div><div class="rb-gl">Alignment</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <select id="rbNum" class="rb-sel" style="width:110px" data-tip="Number format">
+          <option value="gen">General</option><option value="num">Number</option><option value="cur">Currency</option><option value="pct">Percent</option><option value="date">Date</option>
+        </select>
+      </div><div class="rb-row">
+        <button class="rb-btn" data-act="fmtCur" id="curBtn" data-tip="Money format">₹</button>
+        <button class="rb-btn" data-act="fmtPct" data-tip="Percent format">%</button>
+        <button class="rb-btn" data-act="decUp" data-tip="More decimals">.0+</button>
+        <button class="rb-btn" data-act="decDown" data-tip="Fewer decimals">.0−</button>
+      </div><div class="rb-gl">Number</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="rule" data-tip="Colour cells automatically, e.g. red if below target">🌈<span>Colour rule</span></button>
+      </div><div class="rb-gl">Styles</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn" data-act="addRow" data-tip="Insert a row above">+ Row</button>
+        <button class="rb-btn" data-act="addCol" data-tip="Insert a column to the left">+ Col</button>
+      </div><div class="rb-row">
+        <button class="rb-btn" data-act="delRow" data-tip="Delete selected rows">− Row</button>
+        <button class="rb-btn" data-act="delCol" data-tip="Delete selected columns">− Col</button>
+      </div><div class="rb-gl">Cells</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn" data-act="sortAsc" data-tip="Sort A→Z">A→Z</button>
+        <button class="rb-btn" data-act="sortDesc" data-tip="Sort Z→A">Z→A</button>
+      </div><div class="rb-row">
+        <button class="rb-btn" data-act="filterBtns" id="rbFilter2" data-tip="Filter buttons on the header row">🔽 <span class="t">Filter</span></button>
+        <button class="rb-btn" data-act="find" data-tip="Find (Ctrl+F)">🔍</button>
+      </div><div class="rb-gl">Editing</div></div>
+    </div>
+    <div class="rb-panel" data-rb="insert">
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="newSheet" data-tip="Open a new blank sheet">➕<span>New sheet</span></button>
+        <button class="rb-btn big" data-act="template" data-tip="Ready-made sales sheet with formulas">🧾<span>Sales template</span></button>
+      </div><div class="rb-gl">Sheets</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="pivot" data-tip="Build a pivot by clicking">🧮<span>Pivot table</span></button>
+        <button class="rb-btn big" data-act="chart" data-tip="Chart the selected cells">📈<span>Chart</span></button>
+        <button class="rb-btn big" data-act="targets" data-tip="Target vs achievement dashboard">🎯<span>Targets</span></button>
+        <button class="rb-btn big" data-act="sampleTab" data-tip="Make a report shaped like your sample file or picture">🧩<span>Report from sample</span></button>
+      </div><div class="rb-gl">Tables &amp; charts</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="fx" data-tip="Pick a formula from Formula Help">ƒx<span>Function</span></button>
+        <button class="rb-btn big" data-act="addRow">⬇️<span>Row</span></button>
+        <button class="rb-btn big" data-act="addCol">➡️<span>Column</span></button>
+      </div><div class="rb-gl">Cells</div></div>
+    </div>
+    <div class="rb-panel" data-rb="data">
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="sortAsc" data-tip="Sort A→Z by the selected column">⬆️<span>Sort A→Z</span></button>
+        <button class="rb-btn big" data-act="sortDesc" data-tip="Sort Z→A by the selected column">⬇️<span>Sort Z→A</span></button>
+      </div><div class="rb-gl">Sort</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="filterBtns" id="rbFilter" data-tip="Show filter buttons on the header row">🔽<span>Filter buttons</span></button>
+        <button class="rb-btn big" data-act="clearFilters" data-tip="Show all rows again">✖️<span>Clear filters</span></button>
+        <button class="rb-btn big" data-act="filter" data-tip="Filter with a condition, e.g. more than 50000">🔎<span>Custom filter</span></button>
+      </div><div class="rb-gl">Filter</div></div>
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="dupes" data-tip="Remove repeated rows">🧹<span>Remove duplicates</span></button>
+        <button class="rb-btn big" data-act="find" data-tip="Find (Ctrl+F)">🔍<span>Find</span></button>
+      </div><div class="rb-gl">Tools</div></div>
+    </div>
+    <div class="rb-panel" data-rb="view">
+      <div class="rb-g"><div class="rb-row">
+        <button class="rb-btn big" data-act="freeze" id="freezeBtn" data-tip="Keep the top row visible">❄️<span>Freeze top row</span></button>
+        <button class="rb-btn big on" data-act="gridlines" id="gridBtn" data-tip="Show or hide cell lines">▦<span>Gridlines</span></button>
+        <button class="rb-btn big" data-act="focus" id="focusBtn" data-tip="Hide the request box to see more rows">⛶<span>Focus mode</span></button>
+        <button class="rb-btn big" data-act="theme" data-tip="Switch light / dark caramel">🌙<span>Dark mode</span></button>
+      </div><div class="rb-gl">Show</div></div>
+    </div>
   </div>
+  <div id="fpop" class="fpop" style="display:none"></div>
   <div class="filterbar noprint" id="filterBar">
     <b>🔽 Show only rows where</b>
     <select id="fCol"></select>
@@ -404,7 +523,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
       <label class="field">Labels (names)<select id="chLabel"></select></label>
       <label class="field">Numbers<select id="chValue"></select></label>
       <label class="field">How to add up<select id="chAgg"><option value="sum">Total</option><option value="count">Count</option><option value="average">Average</option><option value="max">Highest</option><option value="min">Lowest</option></select></label>
-      <label class="field">Show top<select id="chTop"><option value="0">All</option><option value="5">Top 5</option><option value="10" selected>Top 10</option><option value="15">Top 15</option></select></label>
+      <label class="field">Bars to show<select id="chTop"><option value="0">All</option><option value="5">Top 5</option><option value="10" selected>Top 10</option><option value="15">Top 15</option></select></label>
       <label class="field">Order<select id="chSort"><option value="desc">High → Low</option><option value="asc">Low → High</option><option value="none">As is</option></select></label>
       <label class="field">Chart title<input type="text" id="chTitle" placeholder="Auto"></label>
       <button class="btn light" id="chHoriz">↔️ Flip bars</button>
@@ -428,6 +547,33 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
  </div>
 </section>
 
+<!-- ================= REPORT FROM SAMPLE ================= -->
+<section class="page" id="page-sample">
+ <div class="wrap" style="display:flex;flex-direction:column;gap:16px;max-width:1150px">
+  <h2 style="margin:0">🧩 Report from Sample</h2>
+  <div class="card" style="background:var(--latte-2)">Have a report format your manager likes? Upload it as an <b>Excel file</b> or a <b>photo / screenshot</b>. I read its column headings (for example <i>Employee Name, Category, Month, Target, Achievement</i>) and build the same report from your master data, with charts. You can then download it as a normal Excel file, an Excel file with formulas, or a PDF.</div>
+  <div class="card"><h3>1️⃣ Your master data</h3><div class="row"><label class="field">Use data from<select id="smMaster"></select></label></div><p class="muted" id="smMasterInfo" style="margin:8px 0 0;font-size:12.5px"></p></div>
+  <div class="card"><h3>2️⃣ Your sample report</h3>
+    <div class="drop" id="smDrop" style="padding:22px">
+      <div style="font-size:36px">🧾</div><b>Drop a sample Excel / CSV / JPG / PNG here</b>
+      <div class="muted" style="margin:4px 0 10px">Only its column headings are used. Example data inside it is ignored.</div>
+      <button class="btn" type="button" id="smChoose">📁 Choose sample</button><input type="file" id="smFile" accept=".xlsx,.xls,.xlsm,.csv,.txt,.jpg,.jpeg,.png" hidden>
+    </div>
+    <div class="row" style="margin-top:12px"><input type="text" id="smTyped" placeholder="…or type the headings, e.g. Employee Name, Product Category, Month, Target, Achieved, Achievement %" style="flex:1;min-width:260px"><button class="btn light" id="smUseTyped">Use these headings</button></div>
+    <div class="chips" style="margin-top:8px"><span class="muted" style="font-size:12.5px">Try:</span>
+      <button class="chip sm-ex" data-t="Salesperson Target vs Achievement" data-h="Employee Name, Region, Target, Achieved, Achievement %, Status">Salesperson target report</button>
+      <button class="chip sm-ex" data-t="Monthly Target vs Achievement" data-h="Employee Name, Month, Year, Target, Achievement, Achievement %">Month-wise by salesperson</button>
+      <button class="chip sm-ex" data-t="Category-wise Achievement" data-h="Employee Name, Product Category, Month, Target, Achieved, Achievement %">With category</button>
+      <button class="chip sm-ex" data-t="Region Sales Summary" data-h="Region, City, Total Qty, Sales Value, No of Invoices">Region summary</button>
+    </div>
+    <div id="smHeads" style="margin-top:10px"></div></div>
+  <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">3️⃣ Check what each column means</h3><button class="btn big" id="smBuild" disabled>✨ Build report</button></div><div id="smMap" style="margin-top:10px"></div></div>
+  <div class="card" id="smOutCard" style="display:none"><div class="row" style="justify-content:space-between"><h3 style="margin:0">4️⃣ Your report</h3>
+    <div class="row noprint"><button class="btn light" id="smSheet">📊 Create sheet (formulas)</button><button class="btn" id="smXlsx">📗 Normal Excel + charts</button><button class="btn light" id="smXlsxF">🧮 Excel with formulas</button><button class="btn light" id="smPdf">🖨️ PDF</button><button class="btn ghost" id="smMore">⬇️ More…</button></div></div>
+    <div id="smOut" style="margin-top:10px"></div></div>
+ </div>
+</section>
+
 <!-- ================= EXPORT ================= -->
 <section class="page" id="page-export">
  <div class="wrap" style="display:flex;flex-direction:column;gap:16px;max-width:1000px">
@@ -440,6 +586,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <div class="row" style="align-items:flex-end">
       <label class="field" style="flex:1;min-width:240px">File name<input type="text" id="exName"></label>
       <label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:9px"><input type="checkbox" id="exFilter" checked> Add filter buttons to header rows</label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:9px" id="exChartsLbl"><input type="checkbox" id="exCharts" checked> Add dashboard charts</label>
       <button class="btn big" id="exGo">⬇️ Download</button>
     </div>
     <p class="muted" id="exSummary" style="margin:10px 0 0"></p></div>
@@ -791,7 +938,7 @@ function openNewSheet() {
 }
 function switchSheet(name) {
   if (sheetId(name) === undefined) return;
-  Grid.endEdit(true); App.active = name; Grid.filter = null; Grid.sel = {r: 1, c: 0, r2: 1, c2: 0};
+  Grid.endEdit(true); App.active = name; Grid.filter = null; Grid.colFilters = {}; closeFilterPopup(); Grid.sel = {r: 1, c: 0, r2: 1, c2: 0};
   if (!getMeta(name).frozen) Grid.sel = {r: 0, c: 0, r2: 0, c2: 0};
   Grid.rebuildRows(); renderSheetTabs(); Grid.render(); updateFormulaBar();
   $('#freezeBtn').classList.toggle('on', !!getMeta().frozen);
@@ -859,6 +1006,25 @@ function plainNumberCol(id, c) { // years, IDs, codes: no thousands separators
   let h; try { h = App.hf.getCellValue({sheet: id, row: 0, col: c}); } catch (e) { return false; }
   return typeof h === 'string' && /year|\byr\b|\bid\b|code|\bno\b|number|pin|zip|phone|mobile/i.test(h) && !/qty|amount|value|price|sales/i.test(h);
 }
+/* inline CSS for a cell's own formatting: font, size, B/I/U, colours, alignment, borders */
+const BORDER_INK = '#3E2723';
+function cellCss(st, header) {
+  if (!st) return '';
+  let css = '';
+  if (st.bg) css += `;background:${st.bg}`;
+  if (st.color) css += `;color:${st.color}`;
+  if (st.font) css += `;font-family:'${st.font}',sans-serif`;
+  if (st.size) css += `;font-size:${Math.round(st.size * 1.2)}px`;
+  if (st.b) css += ';font-weight:700';
+  if (st.i) css += ';font-style:italic';
+  if (st.u) css += ';text-decoration:underline';
+  if (st.al) css += `;text-align:${{l: 'left', c: 'center', r: 'right'}[st.al]}`;
+  if (st.bd) { const w = k => st.bd[k] === 2 ? 2 : 1, sh = [];
+    if (st.bd.t) sh.push(`inset 0 ${w('t')}px 0 ${BORDER_INK}`); if (st.bd.b) sh.push(`inset 0 -${w('b')}px 0 ${BORDER_INK}`);
+    if (st.bd.l) sh.push(`inset ${w('l')}px 0 0 ${BORDER_INK}`); if (st.bd.r) sh.push(`inset -${w('r')}px 0 0 ${BORDER_INK}`);
+    if (sh.length) css += `;box-shadow:${sh.join(',')}`; }
+  return css;
+}
 function ruleMatch(rule, v) {
   const n = typeof v === 'number' ? v : toNumber(String(v)), rv = rule.val, rn = toNumber(String(rv));
   switch (rule.op) {
@@ -885,13 +1051,16 @@ const Grid = {
   // rows shown in the scrolling body (sheet row numbers)
   rebuildRows() {
     const m = getMeta(), {h} = this.dims(), total = Math.max(h + 60, 100), start = m.frozen ? 1 : 0;
-    if (this.filter) {
+    const cf = Object.entries(this.colFilters || {});
+    if (this.filter || cf.length) {
       const f = this.filter, arr = [];
       for (let r = start; r < total; r++) {
         if (r >= h) break;
-        let v; try { v = App.hf.getCellValue({sheet: this.id, row: r, col: f.col}); } catch (e) { v = null; }
-        if (v && typeof v === 'object') v = v.value;
-        if (ruleMatch(f, v ?? '')) arr.push(r);
+        if (f) { let v; try { v = App.hf.getCellValue({sheet: this.id, row: r, col: f.col}); } catch (e) { v = null; }
+          if (v && typeof v === 'object') v = v.value;
+          if (!ruleMatch(f, v ?? '')) continue; }
+        if (cf.length && !cf.every(([c, set]) => set.has(displayValue(this.id, r, +c, m).text))) continue;
+        arr.push(r);
       }
       this.rows = arr; this.rowPos = new Map(arr.map((r, i) => [r, i]));
     } else { this.rows = null; this.rowPos = null; this.start = start; this.total = total; }
@@ -912,7 +1081,8 @@ const Grid = {
     for (let c = 0; c < n; c++) ch.push(`<div class="g-hcell ${c >= sc && c <= ec ? 'sel' : ''}" data-col="${c}" style="left:${X[c]}px;width:${this.colW(c)}px;top:0">${colName(c)}</div>`);
     if (m.frozen) {
       ch.push(`<div class="frow" style="position:absolute;top:26px;left:0">`);
-      for (let c = 0; c < n; c++) { const d = displayValue(this.id, 0, c, m); ch.push(`<div class="c ${m.styles['0,' + c]?.b ? 'b' : ''}" data-r="0" data-c="${c}" style="left:${X[c]}px;width:${this.colW(c)}px;top:0" title="${esc(d.text)}">${esc(d.text)}</div>`); }
+      for (let c = 0; c < n; c++) { const d = displayValue(this.id, 0, c, m), st = m.styles['0,' + c];
+        ch.push(`<div class="c ${st?.b ? 'b' : ''}" data-r="0" data-c="${c}" style="left:${X[c]}px;width:${this.colW(c)}px;top:0${cellCss(st, true)}" title="${esc(d.text)}">${esc(d.text)}${this.fbOn && d.text ? `<span class="fbtn ${this.colFilters && this.colFilters[c] ? 'act' : ''}" data-fcol="${c}">▾</span>` : ''}</div>`); }
       ch.push(`</div>`);
     }
     $('#gColHeadIn').innerHTML = ch.join('');
@@ -938,13 +1108,12 @@ const Grid = {
         let cls = 'c' + (d.num ? ' num' : '') + (d.bad ? ' bad' : '') + (r % 2 === 0 ? ' z' : '') + (st && st.b ? ' b' : '');
         if (r === 0 && !m.frozen && d.text) cls += ' hdr';
         let style = `left:${X[c]}px;top:${y}px;width:${X[c + 1] - X[c]}px`;
-        if (st && st.bg) style += `;background:${st.bg}`;
-        if (st && st.color) style += `;color:${st.color}`;
+        style += cellCss(st);
         if (r > 0 && rules.length && d.text !== '') {
           for (const ru of rules) if (ru.col === c) { let v; try { v = App.hf.getCellValue({sheet: id, row: r, col: c}); } catch (e) {} if (ruleMatch(ru, v ?? '')) { style += `;background:${ru.color};color:#3E2723`; break; } }
         }
         if (hitSet && hitSet.has(r + ',' + c)) cls += ' g-find';
-        html.push(`<div class="${cls}" data-r="${r}" data-c="${c}" style="${style}"${d.title ? ` title="${esc(d.title)}"` : ''}>${esc(d.text)}</div>`);
+        html.push(`<div class="${cls}" data-r="${r}" data-c="${c}" style="${style}"${d.title ? ` title="${esc(d.title)}"` : ''}>${esc(d.text)}${r === 0 && !m.frozen && this.fbOn && d.text ? `<span class="fbtn ${this.colFilters && this.colFilters[c] ? 'act' : ''}" data-fcol="${c}">▾</span>` : ''}</div>`);
       }
     }
     $('#gCells').innerHTML = html.join('');
@@ -1027,6 +1196,7 @@ function updateFormulaBar() {
   if (!App.active) return;
   const s = Grid.sel; $('#nameBox').value = addr(s.r, s.c) + (s.r !== s.r2 || s.c !== s.c2 ? '…' : '');
   if (document.activeElement !== $('#formulaInput')) $('#formulaInput').value = rawContent(s.r, s.c);
+  syncRibbon();
 }
 
 /* Grid events */
@@ -1036,6 +1206,7 @@ function updateFormulaBar() {
   let dragging = false;
   const cellFromEvent = e => { const el = e.target.closest('.c'); return el ? {r: +el.dataset.r, c: +el.dataset.c} : null; };
   const down = e => {
+    const fb = e.target.closest('.fbtn'); if (fb) { e.preventDefault(); e.stopPropagation(); openFilterPopup(+fb.dataset.fcol, fb); return; }
     if (e.button !== 0) return; const p = cellFromEvent(e); if (!p) return;
     if (Grid.editing) Grid.endEdit(true);
     Grid.select(p.r, p.c, e.shiftKey); dragging = true; body.focus({preventScroll: true}); e.preventDefault();
@@ -1059,6 +1230,8 @@ function updateFormulaBar() {
     if (ctrl && k.toLowerCase() === 'z') { e.preventDefault(); return doUndo(); }
     if (ctrl && k.toLowerCase() === 'y') { e.preventDefault(); return doRedo(); }
     if (ctrl && k.toLowerCase() === 'b') { e.preventDefault(); return toolbarAction('bold'); }
+    if (ctrl && k.toLowerCase() === 'i') { e.preventDefault(); return toolbarAction('italic'); }
+    if (ctrl && k.toLowerCase() === 'u') { e.preventDefault(); return toolbarAction('underline'); }
     if (ctrl && k.toLowerCase() === 'f') { e.preventDefault(); return toolbarAction('find'); }
     if (ctrl && k.toLowerCase() === 'a') { e.preventDefault(); const d = Grid.dims(); Grid.sel = {r: 0, c: 0, r2: Math.max(d.h - 1, 0), c2: Math.max(d.w - 1, 0)}; Grid.render(); return; }
     if (ctrl && (k.toLowerCase() === 'c' || k.toLowerCase() === 'x' || k.toLowerCase() === 'v')) return; // handled by copy/paste events
@@ -1799,6 +1972,7 @@ function setLastResult(r) { App.lastResult = r; }
 /* ---------- Intent handlers ---------- */
 const INTENTS = [
  {name: 'help', test: c => /^\s*(help|what can you do|\?|examples?)\s*$/.test(c.low), build: () => ({info: `I can do lookups, pivots, totals, top 10 lists, IF columns, comparisons, combining files, cleaning, growth %, subtotals and charts. Click any example below to try one.`})},
+ {name: 'sample', test: c => /\bsample\b/.test(c.low) && /\b(report|format|layout|like)\b/.test(c.low), build: () => ({title: '🧩 Report from sample', describe: 'I will open <b>Report from Sample</b>, where you upload a sample report (Excel or picture) and I build the same report from your data.', apply: () => { go('sample'); return {msg: 'Opened the 🧩 Sample Report tab.'}; }})},
  {name: 'chart', test: c => /\b(chart|graph|doughnut|donut|pie|bar|visual|plot)\b/.test(c.low), build: buildChart},
  {name: 'compare', test: c => /\b(compare|reconcile|mismatch|missing|not in|difference between)\b/.test(c.low), build: buildCompare},
  {name: 'combine', test: c => /\b(combine|merge|append|consolidate|stack|join all|put together)\b/.test(c.low), build: buildCombine},
@@ -2332,6 +2506,7 @@ const EXAMPLE_GROUPS = [
     'Target vs achievement for 2025',
     'Target vs achievement for March',
     'Target vs achievement sheet for each salesperson',
+    'Month wise target vs achievement trend',
     'Region wise target vs achievement',
     'Region wise target vs achievement sheet for 2025']],
   ['🔎 Lookups (VLOOKUP)', [
@@ -2615,6 +2790,7 @@ const Targets = {
           <div class="muted" style="text-align:center;font-size:12.5px">${wmoney(tot.achieved)} of ${wmoney(tot.target)}</div></div>
         <div class="card"><h3 style="margin-bottom:2px">📊 Target vs achieved by salesperson</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Achieved bar: 🟢 100% or more · 🟡 80–99% · 🔴 below 80%</div><div class="chart-box" style="height:${Math.max(300, Math.min(640, sorted.length * 34 + 80))}px"><canvas id="tgBar"></canvas></div></div>
       </div>
+      <div class="card" id="tgTrendCard"></div>
       <div class="card"><h3>📋 Salesperson report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>Salesperson</th>${R.rc >= 0 || list.some(p => p.region) ? '<th>Region</th>' : ''}<th style="text-align:right">Target</th><th style="text-align:right">Achieved</th><th style="text-align:right">Balance</th><th>Achievement</th><th>Status</th></tr></thead><tbody>
         ${sorted.map((p, i) => `<tr><td>${i + 1}</td><td><b>${esc(p.name)}</b></td>${R.rc >= 0 || list.some(x => x.region) ? `<td>${esc(p.region || '')}</td>` : ''}<td style="text-align:right">${wmoney(p.target)}</td><td style="text-align:right">${wmoney(p.achieved)}</td><td style="text-align:right">${wmoney(p.balance)}</td>
           <td><div class="row" style="gap:8px;flex-wrap:nowrap"><div class="pbar"><i style="width:${Math.min(100, (p.pct || 0) * 100)}%;background:${color(p.status)}"></i></div><b style="min-width:52px">${pctTxt(p.pct)}</b></div></td><td>${badge(p.status)}</td></tr>`).join('')}
@@ -2626,6 +2802,7 @@ const Targets = {
           <div style="font-size:12.5px;margin-top:4px">🎯 ${wmoney(p.target)}<br>💰 ${wmoney(p.achieved)}${p.balance > 0 ? `<br><span class="muted">Needs ${wmoney(p.balance)} more</span>` : p.target ? `<br><span style="color:var(--ok)">+${wmoney(p.achieved - p.target)} above</span>` : ''}</div>
           <div style="margin-top:6px">${badge(p.status)}</div></div></div>`; }).join('')}</div></div>`;
     this.drawCharts(sorted, tot, color);
+    this.drawTrend(R);
   },
   drawCharts(sorted, tot, color) {
     if (!window.Chart) return;
@@ -2701,6 +2878,7 @@ const Targets = {
           <div class="muted" style="text-align:center;font-size:12.5px">${wmoney(tot.achieved)} of ${wmoney(tot.target)}</div></div>
         <div class="card"><h3 style="margin-bottom:2px">🗺️ Target vs achieved by region</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Achieved bar: 🟢 100% or more · 🟡 80–99% · 🔴 below 80%</div><div class="chart-box" style="height:${Math.max(280, Math.min(640, regs.length * 60 + 80))}px"><canvas id="tgBar"></canvas></div></div>
       </div>
+      <div class="card" id="tgTrendCard"></div>
       <div class="card"><h3>📋 Region report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>Region</th><th style="text-align:right">Salespeople</th><th style="text-align:right">Target</th><th style="text-align:right">Achieved</th><th style="text-align:right">Balance</th><th>Achievement</th><th>Status</th><th>Best salesperson</th></tr></thead><tbody>
         ${regs.map((g, i) => { const b = best(g); return `<tr><td>${i + 1}</td><td><b>${esc(g.name)}</b></td><td style="text-align:right">${g.count}</td><td style="text-align:right">${wmoney(g.target)}</td><td style="text-align:right">${wmoney(g.achieved)}</td><td style="text-align:right">${wmoney(g.balance)}</td>
           <td><div class="row" style="gap:8px;flex-wrap:nowrap">${bar(g.pct, g.status)}<b style="min-width:52px">${tgPct(g.pct)}</b></div></td><td>${tgBadge(g.status)}</td><td>${b ? esc(b.name) + ' <span class="muted">(' + tgPct(b.pct) + ')</span>' : '–'}</td></tr>`; }).join('')}
@@ -2713,6 +2891,7 @@ const Targets = {
           <div style="margin-top:6px">${tgBadge(g.status)}</div></div></div>
           <div class="rpeople">${g.people.map(p => `<div class="rp"><span class="rpn">${esc(p.name)}</span>${bar(p.pct, p.status)}<b>${tgPct(p.pct)}</b></div>`).join('')}</div></div>`; }).join('')}</div></div>`;
     this.drawCharts(regs, tot, tgColor);
+    this.drawTrend(R);
   },
   createRegionSheet(R) {
     const c = this.cfg, s = R.s, t = c.tt ? readTable(c.tt) : null, regs = this.sortList(R.regions), per = critPairs(s, R.filters), L = colName;
@@ -2735,6 +2914,59 @@ const Targets = {
     toast(`📊 Sheet <b>${esc(n)}</b> created with live formulas (SUMIFS by region). Use ⬇️ Export to download it.`, 'ok', 6000);
     return n;
   },
+  /* month-wise numbers; who = 'all' | 'p:<salesperson key>' | 'r:<region>' */
+  trend(R, who = 'all') {
+    const c = this.cfg, s = R.s, P = R.P, keyOf = v => String(v).trim().toLowerCase();
+    const rowYm = r => { if (P.dc >= 0 && typeof r[P.dc] === 'number') { const d = serialToDate(r[P.dc]); return d.getUTCFullYear() * 100 + d.getUTCMonth(); }
+      if (P.mc >= 0) { const m = monthIndex(String(r[P.mc])); return m < 0 ? null : (P.yc >= 0 ? (+r[P.yc] || 0) : 0) * 100 + m; } return null; };
+    let keys = P.keys;
+    if (c.period.startsWith('y:')) keys = keys.filter(k => Math.floor(k / 100) === +c.period.slice(2));
+    else if (c.period.startsWith('m:')) { const y = Math.floor(+c.period.slice(2) / 100); keys = keys.filter(k => Math.floor(k / 100) === y); }
+    const people = R.list.filter(p => who === 'all' || (who.startsWith('p:') ? keyOf(p.key) === who.slice(2) : String(p.tRegion || p.region || '(no region)') === who.slice(2)));
+    const pk = new Set(people.map(p => keyOf(p.key))), ach = new Map(keys.map(k => [k, 0])), tgt = new Map(keys.map(k => [k, 0]));
+    s.rows.forEach(r => {
+      const k = rowYm(r); if (!ach.has(k)) return;
+      const inScope = who === 'all' || (who.startsWith('r:') && R.rc >= 0 ? String(r[R.rc]) === who.slice(2) : pk.has(keyOf(r[c.keyS ?? c.pc])));
+      if (!inScope) return;
+      if (typeof r[c.vc] === 'number') ach.set(k, ach.get(k) + r[c.vc]);
+      if (c.tt === c.sales && typeof r[c.tc] === 'number') tgt.set(k, tgt.get(k) + r[c.tc]);
+    });
+    if (c.tt && c.tt !== c.sales) { const perMonth = people.reduce((a, p) => a + p.target / (R.months || 1), 0); keys.forEach(k => tgt.set(k, perMonth)); }
+    return keys.map(k => { const y = Math.floor(k / 100), t = tgt.get(k), a = ach.get(k);
+      return {k, label: monthName(k % 100) + (y ? ' ' + y : ''), short: monthName(k % 100) + (y ? " '" + String(y).slice(2) : ''), target: t, achieved: a, pct: t ? a / t : null, status: tgStatus(t ? a / t : null)}; });
+  },
+  drawTrend(R) {
+    const card = $('#tgTrendCard'); if (!card) return;
+    if (!R.P.keys.length) { card.innerHTML = '<h3>📅 Month-wise target vs achievement</h3><p class="muted">Add a Date or Month column to the sales data to see the monthly trend.</p>'; return; }
+    const keyOf = v => String(v).trim().toLowerCase(), who = this.trendWho || 'all';
+    const regs = R.regions ? R.regions.map(g => g.name).sort() : [], ppl = R.list.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
+    if (who !== 'all' && !(who.startsWith('r:') ? regs.includes(who.slice(2)) : ppl.some(p => 'p:' + keyOf(p.key) === who))) this.trendWho = 'all';
+    const M = this.trend(R, this.trendWho || 'all'), hit = M.filter(m => m.status === 'ok').length, best = M.filter(m => m.pct !== null).sort((a, b) => b.pct - a.pct)[0];
+    const tot = M.reduce((a, m) => ({t: a.t + m.target, a: a.a + m.achieved}), {t: 0, a: 0});
+    card.innerHTML = `<div class="row" style="justify-content:space-between;align-items:flex-end"><div><h3 style="margin-bottom:2px">📅 Month-wise target vs achievement</h3>
+        <div class="muted" style="font-size:12.5px">${M.length} month${M.length === 1 ? '' : 's'} · target met in <b>${hit}</b> · ${best ? `best month <b>${esc(best.label)}</b> (${tgPct(best.pct)})` : ''} · overall ${tgPct(tot.t ? tot.a / tot.t : null)}</div></div>
+      <label class="field noprint">Show trend for<select id="tgWho"><option value="all">👥 Whole team</option>${regs.length ? `<optgroup label="Region">${regs.map(r => `<option value="r:${esc(r)}">🗺️ ${esc(r)}</option>`).join('')}</optgroup>` : ''}<optgroup label="Salesperson">${ppl.map(p => `<option value="p:${esc(keyOf(p.key))}">👤 ${esc(p.name)}</option>`).join('')}</optgroup></select></label></div>
+      <div class="chart-box" style="height:330px;margin-top:8px"><canvas id="tgTrend"></canvas></div>
+      <div style="overflow:auto;margin-top:10px"><table class="ptable tg-month"><tbody>
+        <tr><th style="position:static">Month</th>${M.map(m => `<th style="position:static">${esc(m.short)}</th>`).join('')}</tr>
+        <tr><td><b>Target</b></td>${M.map(m => `<td style="text-align:right">${wmoney(m.target)}</td>`).join('')}</tr>
+        <tr><td><b>Achieved</b></td>${M.map(m => `<td style="text-align:right">${wmoney(m.achieved)}</td>`).join('')}</tr>
+        <tr><td><b>Achievement</b></td>${M.map(m => `<td style="text-align:right;font-weight:700;color:${tgColor(m.status)}">${tgPct(m.pct)}</td>`).join('')}</tr></tbody></table></div>`;
+    $('#tgWho').value = this.trendWho || 'all';
+    $('#tgWho').onchange = e => { this.trendWho = e.target.value; this.drawTrend(R); };
+    this.lastTrend = {rows: M, who: $('#tgWho').selectedOptions[0].textContent.replace(/^\S+\s/, '')};
+    if (!window.Chart) return;
+    const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), pal = chartColors();
+    if (this.trendChart) this.trendChart.destroy();
+    this.trendChart = new Chart($('#tgTrend'), {type: 'bar', data: {labels: M.map(m => m.short), datasets: [
+      {label: 'Target', data: M.map(m => m.target), backgroundColor: pal[1], borderRadius: 4, barPercentage: .92, categoryPercentage: .7},
+      {label: 'Achieved', data: M.map(m => m.achieved), backgroundColor: pal[0], borderRadius: 4, barPercentage: .92, categoryPercentage: .7}]},
+      options: {responsive: true, maintainAspectRatio: false, layout: {padding: {top: 22}}, interaction: {mode: 'index', intersect: false},
+        plugins: {legend: {position: 'top', align: 'end', labels: {boxWidth: 14}}, tooltip: {callbacks: {label: c => ` ${c.dataset.label}: ${wmoney(c.raw)}`, footer: items => { const m = M[items[0].dataIndex]; return m.pct === null ? '' : 'Achievement: ' + tgPct(m.pct); }}}},
+        scales: {x: {grid: {display: false}}, y: {grid: {color: css('--line')}, ticks: {callback: v => v >= 1e5 ? fmtNum(Math.round(v / 1e5 * 10) / 10) + 'L' : fmtNum(v)}}}},
+      plugins: [{id: 'mpct', afterDatasetsDraw(ch) { const {ctx} = ch, m1 = ch.getDatasetMeta(1), m0 = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 11px ' + Chart.defaults.font.family; ctx.textAlign = 'center'; ctx.fillStyle = css('--text');
+        m1.data.forEach((b, i) => { if (M[i].pct === null) return; const top = Math.min(b.y, m0.data[i].y); ctx.fillText(Math.round(M[i].pct * 100) + '%', (b.x + m0.data[i].x) / 2, top - 6); }); ctx.restore(); }}]});
+  },
   /* plain values for the Export tab: view = 'person' | 'region' */
   reportAoa(view) {
     if (!this.cfg || !readTable(this.cfg.sales)) this.cfg = this.detect();
@@ -2743,6 +2975,12 @@ const Targets = {
     const title = [`${view === 'region' ? 'Region-wise ' : ''}Target vs Achievement – ${this.periodLabel(this.cfg.period)}`];
     const st = x => ({ok: 'Achieved', mid: 'Close', low: 'Below target', none: 'No target'}[x]);
     const r2 = v => Math.round(v * 100) / 100, pct = v => v === null ? '' : Math.round(v * 10000) / 10000;
+    if (view === 'trend') {
+      const M = this.trend(R, this.trendWho || 'all'); if (!M.length) return null;
+      return {title: [`Month-wise Target vs Achievement – ${(this.lastTrend && this.lastTrend.who) || 'Whole team'} – ${this.periodLabel(this.cfg.period)}`], header: ['Month', 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'],
+        rows: M.map(m => [m.label, r2(m.target), r2(m.achieved), r2(Math.max(0, m.target - m.achieved)), pct(m.pct), st(m.status)]),
+        total: (() => { const t = M.reduce((a, m) => a + m.target, 0), a = M.reduce((x, m) => x + m.achieved, 0); return ['Total', r2(t), r2(a), r2(Math.max(0, t - a)), pct(t ? a / t : null), '']; })(), money: [1, 2, 3], pct: [4]};
+    }
     if (view === 'region') {
       if (!R.regions) return null;
       const rows = this.sortList(R.regions).map(g => [g.name, g.count, r2(g.target), r2(g.achieved), r2(g.balance), pct(g.pct), st(g.status), (g.people.find(p => p.pct !== null) || {}).name || '']);
@@ -2778,7 +3016,9 @@ function buildTargets(ctx) {
     apply: () => {
       Targets.cfg = Object.assign({}, cfg, {period}); Targets.view = byRegion ? 'region' : 'person';
       if (wantSheet) { Targets.last = null; Targets.compute(); const n = Targets.createSheet(); return {msg: `Sheet <b>${esc(n)}</b> is ready, and the dashboard is on the 🎯 Targets tab.`, how: 'Achieved uses SUMIFS on the sales data for each salesperson. Target looks up each salesperson\'s target (× months for monthly targets). Achievement % = Achieved ÷ Target.'}; }
-      go('targets'); return {msg: 'Dashboard opened on the 🎯 Targets tab.'};
+      go('targets');
+      if (/\b(month|monthly|trend)\b/.test(ctx.low)) setTimeout(() => { const el = $('#tgTrendCard'); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 150);
+      return {msg: 'Dashboard opened on the 🎯 Targets tab' + (/\b(month|monthly|trend)\b/.test(ctx.low) ? ' (scrolled to the month-wise trend).' : '.')};
     }};
 }
 INTENTS.splice(1, 0, {name: 'targets', test: c => (/\btargets?\b/.test(c.low) && /\b(vs|versus|against|achieve(d|ment)?|dashboard|report|performance)\b/.test(c.low) || /\bachievement (dashboard|report)\b/.test(c.low)) && !/\bcolumn\b/.test(c.low), build: buildTargets});
@@ -2790,11 +3030,11 @@ INTENTS.splice(1, 0, {name: 'targets', test: c => (/\btargets?\b/.test(c.low) &&
 const Export = {
   format: 'xlsx', picked: null,
   FORMATS: [
-    ['xlsx', '📗', 'Normal Excel (.xlsx)', 'Values only, with money, % and date formats. Best for sharing and email.', true],
+    ['xlsx', '📗', 'Normal Excel (.xlsx)', 'Values only, keeps fonts, colours, borders, money, % and dates, plus a Dashboard sheet of charts. Best for sharing.', true],
     ['xlsxf', '🧮', 'Excel with formulas (.xlsx)', 'Keeps every formula (SUMIFS, VLOOKUP…) so numbers update in Excel.'],
     ['xls', '📒', 'Excel 97-2003 (.xls)', 'For very old Excel versions. Values only.'],
     ['csv', '📄', 'CSV (.csv)', 'Plain text, one file per sheet. Opens in any program.'],
-    ['pdf', '🖨️', 'PDF / Print', 'Opens a print view. Choose "Save as PDF" as the printer.']
+    ['pdf', '🖨️', 'PDF / Print', 'Charts and tables in a print view. Choose "Save as PDF" as the printer.']
   ],
   /* every exportable item: sheets + reports */
   items() {
@@ -2805,7 +3045,9 @@ const Export = {
       const per = 'Period: ' + Targets.periodLabel((Targets.cfg || {}).period || 'all') + ' (change it on the 🎯 Targets tab)';
       out.push({id: 'r:person', label: 'Target vs Achievement – by salesperson', icon: '🎯', info: per, group: 'reports'});
       const ra = Targets.reportAoa('region'); if (ra) out.push({id: 'r:region', label: 'Target vs Achievement – by region', icon: '🗺️', info: per, group: 'reports'});
+      if (Targets.reportAoa('trend')) out.push({id: 'r:trend', label: 'Target vs Achievement – month-wise trend', icon: '📅', info: per, group: 'reports'});
     }
+    if (typeof SampleReport !== 'undefined' && SampleReport.result) out.push({id: 'x:sample', label: 'Report from sample – ' + SampleReport.result.title, icon: '🧩', info: `${SampleReport.result.rows.length} rows · from ${SampleReport.master}`, group: 'reports'});
     if (App.lastResult) out.push({id: 'r:chart', label: 'Latest chart data – ' + App.lastResult.title, icon: '📈', info: `${App.lastResult.labels.length} rows`, group: 'reports'});
     return out.filter(i => !i.empty);
   },
@@ -2828,6 +3070,7 @@ const Export = {
   summary() {
     const n = this.picked.size, f = this.FORMATS.find(x => x[0] === this.format);
     $('#exFilter').closest('label').style.display = ['xlsx', 'xlsxf'].includes(this.format) ? '' : 'none';
+    $('#exChartsLbl').style.display = ['xlsx', 'xlsxf', 'pdf'].includes(this.format) ? '' : 'none';
     $('#exGo').disabled = !n;
     $('#exSummary').innerHTML = n ? `Ready: <b>${n}</b> item${n > 1 ? 's' : ''} as <b>${f[2]}</b>${this.format === 'csv' && n > 1 ? ` (${n} separate files)` : ''}.` : 'Tick at least one item above.';
   },
@@ -2842,7 +3085,20 @@ const Export = {
     if (fmt === 'pct') return '0.0%';
     return null;
   },
-  sheetWs(name, withFormulas, filter) {
+  /* app cell format -> Excel cell style (fonts, fills, borders, alignment) */
+  argb: h => 'FF' + String(h || '').replace('#', '').toUpperCase().padStart(6, '0').slice(0, 6),
+  xStyle(st, ruleColor, numFmt) {
+    if (!st && !ruleColor) return numFmt ? {numFmt} : null;
+    st = st || {}; const s = {font: {name: st.font || 'Calibri', sz: st.size || 11}};
+    if (st.b) s.font.bold = true; if (st.i) s.font.italic = true; if (st.u) s.font.underline = true;
+    if (st.color) s.font.color = {rgb: this.argb(st.color)};
+    const bg = ruleColor || st.bg; if (bg) s.fill = {patternType: 'solid', fgColor: {rgb: this.argb(bg)}};
+    if (st.al) s.alignment = {horizontal: {l: 'left', c: 'center', r: 'right'}[st.al]};
+    if (st.bd) { s.border = {}; [['t', 'top'], ['b', 'bottom'], ['l', 'left'], ['r', 'right']].forEach(([k, n]) => { if (st.bd[k]) s.border[n] = {style: st.bd[k] === 2 ? 'medium' : 'thin', color: {rgb: 'FF3E2723'}}; }); }
+    if (numFmt) s.numFmt = numFmt;
+    return s;
+  },
+  sheetWs(name, withFormulas, filter, styled = true) {
     const id = sheetId(name), d = App.hf.getSheetDimensions(id), m = getMeta(name), ws = {};
     for (let r = 0; r < d.height; r++) for (let c = 0; c < d.width; c++) {
       const s = App.hf.getCellSerialized({sheet: id, row: r, col: c}); if (s === null || s === undefined || s === '') continue;
@@ -2853,8 +3109,15 @@ const Export = {
       else { if (v === null || v === undefined || v === '') continue; cell.t = 's'; cell.v = String(v); }
       if (withFormulas && typeof s === 'string' && s.startsWith('=')) cell.f = toExcelFormula(s.slice(1));
       if (cell.t === 'n') { const st = m.styles[r + ',' + c] || {}, z = this.numFmt(id, r, c, st.fmt || m.colFmt[c]); if (z) cell.z = z; }
+      if (styled) { const st = m.styles[r + ',' + c], rule = r > 0 ? (m.rules || []).find(ru => ru.col === c && ruleMatch(ru, v && typeof v === 'object' ? v.value : (v ?? ''))) : null;
+        const hdr = r === 0 && m.frozen && !st ? {b: true, bg: '#C68642', color: '#FFFFFF'} : null;
+        const sx = this.xStyle(st || hdr, rule && rule.color, cell.z); if (sx) cell.s = sx; }
       ws[XLSX.utils.encode_cell({r, c})] = cell;
     }
+    if (styled) Object.entries(m.styles).forEach(([k, st]) => { // formatted empty cells (fills / borders)
+      const [r, c] = k.split(',').map(Number), a = XLSX.utils.encode_cell({r, c}); if (ws[a] || r >= d.height + 200) return;
+      const sx = this.xStyle(st); if (sx && (st.bg || st.bd)) ws[a] = {t: 's', v: '', s: sx};
+    });
     ws['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: Math.max(d.height - 1, 0), c: Math.max(d.width - 1, 0)}});
     ws['!cols'] = Array.from({length: d.width}, (_, c) => ({wpx: m.colW[c] || 110}));
     if (filter && m.frozen && d.height > 1 && d.width) ws['!autofilter'] = {ref: XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: d.height - 1, c: d.width - 1}})};
@@ -2865,14 +3128,115 @@ const Export = {
     const money = this.money(false);
     for (let r = 3; r < aoa.length; r++) { rep.money.forEach(c => { const a = XLSX.utils.encode_cell({r, c}); if (ws[a] && ws[a].t === 'n') ws[a].z = money; }); rep.pct.forEach(c => { const a = XLSX.utils.encode_cell({r, c}); if (ws[a] && ws[a].t === 'n') ws[a].z = '0.0%'; }); }
     ws['!cols'] = rep.header.map((h, i) => ({wch: Math.max(12, h.length + 2, ...rep.rows.map(r => String(r[i] ?? '').length + 2))}));
+    const box = {top: {style: 'thin', color: {rgb: 'FFD9C3A5'}}, bottom: {style: 'thin', color: {rgb: 'FFD9C3A5'}}, left: {style: 'thin', color: {rgb: 'FFD9C3A5'}}, right: {style: 'thin', color: {rgb: 'FFD9C3A5'}}};
+    const stat = {'Achieved': 'FFE3EFD3', 'Close': 'FFFCEBC8', 'Below target': 'FFF8DCDC'};
+    if (ws.A1) ws.A1.s = {font: {name: 'Calibri', sz: 14, bold: true, color: {rgb: 'FF8B5A2B'}}};
+    for (let r = 2; r < aoa.length; r++) for (let c = 0; c < rep.header.length; c++) {
+      const a = XLSX.utils.encode_cell({r, c}); if (!ws[a]) ws[a] = {t: 's', v: ''};
+      const head = r === 2, total = r === aoa.length - 1, cell = ws[a];
+      cell.s = {font: {name: 'Calibri', sz: 11, bold: head || total, color: {rgb: head ? 'FFFFFFFF' : 'FF3E2723'}}, border: box,
+        fill: head ? {patternType: 'solid', fgColor: {rgb: 'FFC68642'}} : total ? {patternType: 'solid', fgColor: {rgb: 'FFF3E3CF'}} : stat[cell.v] ? {patternType: 'solid', fgColor: {rgb: stat[cell.v]}} : undefined,
+        alignment: head ? {horizontal: 'center'} : undefined};
+      if (cell.z) cell.s.numFmt = cell.z;
+    }
     if (filter) ws['!autofilter'] = {ref: XLSX.utils.encode_range({s: {r: 2, c: 0}, e: {r: 2 + rep.rows.length, c: rep.header.length - 1}})};
     return ws;
   },
   report(id) {
+    if (id.startsWith('x:') && this.extraReports && this.extraReports[id]) return this.extraReports[id]();
     if (id === 'r:chart') { const L = App.lastResult; return {title: [L.title], header: ['Name', L.valueName || 'Value'], rows: L.labels.map((l, i) => [l, L.values[i]]), total: ['Total', L.values.reduce((a, b) => a + b, 0)], money: /sales|value|amount|revenue|target/i.test(L.valueName || '') ? [1] : [], pct: []}; }
-    return Targets.reportAoa(id === 'r:region' ? 'region' : 'person');
+    return Targets.reportAoa(id === 'r:region' ? 'region' : id === 'r:trend' ? 'trend' : 'person');
   },
-  sheetNameFor(id) { return {'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
+  sheetNameFor(id) { if (id.startsWith('x:') && this.extraNames && this.extraNames[id]) return this.extraNames[id]; return {'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:trend': 'Target_by_Month', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
+  /* ---- dashboard charts as pictures (drawn off-screen, light colours on white) ---- */
+  renderChart(cfg, w = 960, h = 460) {
+    const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.style.cssText = `position:fixed;left:-20000px;top:0;width:${w}px;height:${h}px`; document.body.appendChild(cv);
+    cfg.options = Object.assign({responsive: false, animation: false, devicePixelRatio: 2}, cfg.options || {});
+    cfg.plugins = [{id: 'bg', beforeDraw(ch) { const c = ch.ctx; c.save(); c.fillStyle = '#ffffff'; c.fillRect(0, 0, ch.width, ch.height); c.restore(); }}, ...(cfg.plugins || [])];
+    const prev = Chart.defaults.color; Chart.defaults.color = '#3E2723';
+    let url = null; try { const ch = new Chart(cv.getContext('2d'), cfg); url = ch.toBase64Image('image/png', 1); ch.destroy(); } finally { cv.remove(); Chart.defaults.color = prev; }
+    return {url, w, h};
+  },
+  titleOpt: t => ({display: true, text: t, color: '#8B5A2B', font: {size: 17, weight: '700'}, padding: {bottom: 12}}),
+  lakh: v => Math.abs(v) >= 1e5 ? fmtNum(Math.round(v / 1e5 * 10) / 10) + 'L' : fmtNum(v),
+  targetChart(items, title) { // grouped horizontal bars: target vs achieved, achieved coloured by status
+    const self = this, n = items.length, h = Math.max(360, Math.min(1400, n * 38 + 120));
+    return this.renderChart({type: 'bar', data: {labels: items.map(p => String(p.name)), datasets: [
+      {label: 'Target', data: items.map(p => p.target), backgroundColor: '#E8D5BF', borderColor: '#8B5A2B', borderWidth: 1, borderRadius: 4},
+      {label: 'Achieved', data: items.map(p => p.achieved), backgroundColor: items.map(p => tgColor(p.status)), borderRadius: 4}]},
+      options: {indexAxis: 'y', layout: {padding: {right: 60}}, plugins: {title: this.titleOpt(title), legend: {position: 'top', labels: {generateLabels: () => [{text: 'Target', fillStyle: '#E8D5BF', strokeStyle: '#8B5A2B', lineWidth: 1}, {text: 'Achieved (green ≥100%, amber 80–99%, red <80%)', fillStyle: '#6B8E23', strokeStyle: '#6B8E23'}]}}},
+        scales: {x: {ticks: {callback: v => self.lakh(v)}, grid: {color: '#EFE2D2'}}, y: {grid: {display: false}}}},
+      plugins: [{id: 'pl', afterDatasetsDraw(ch) { const {ctx} = ch, m = ch.getDatasetMeta(1), m0 = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#3E2723'; ctx.textBaseline = 'middle';
+        m.data.forEach((b, i) => { const p = items[i]; if (p.pct === null) return; ctx.fillText(Math.round(p.pct * 100) + '%', Math.max(b.x, m0.data[i].x) + 6, (b.y + m0.data[i].y) / 2); }); ctx.restore(); }}]}, 960, h);
+  },
+  trendChart(M, title) {
+    const self = this, pal = PALETTE_LIGHT;
+    return this.renderChart({type: 'bar', data: {labels: M.map(m => m.short), datasets: [{label: 'Target', data: M.map(m => m.target), backgroundColor: pal[1], borderRadius: 4}, {label: 'Achieved', data: M.map(m => m.achieved), backgroundColor: pal[0], borderRadius: 4}]},
+      options: {layout: {padding: {top: 10}}, plugins: {title: this.titleOpt(title), legend: {position: 'top'}}, scales: {x: {grid: {display: false}}, y: {ticks: {callback: v => self.lakh(v)}, grid: {color: '#EFE2D2'}}}},
+      plugins: [{id: 'mp', afterDatasetsDraw(ch) { const {ctx} = ch, m1 = ch.getDatasetMeta(1), m0 = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#3E2723';
+        m1.data.forEach((b, i) => { if (M[i].pct === null) return; ctx.fillText(Math.round(M[i].pct * 100) + '%', (b.x + m0.data[i].x) / 2, Math.min(b.y, m0.data[i].y) - 6); }); ctx.restore(); }}]});
+  },
+  doughnutChart(labels, values, title) {
+    const dd = foldOthers(labels, values), cols = dd.labels.map((l, i) => l === 'Others' ? OTHERS_COLOR : PALETTE_LIGHT[i]), tot = dd.values.reduce((a, b) => a + b, 0);
+    return this.renderChart({type: 'doughnut', data: {labels: dd.labels, datasets: [{data: dd.values, backgroundColor: cols, borderColor: '#ffffff', borderWidth: 2}]},
+      options: {cutout: '58%', plugins: {title: this.titleOpt(title), legend: {position: 'right', labels: {boxWidth: 16, font: {size: 13}}}}},
+      plugins: [{id: 'pc', afterDatasetsDraw(ch) { const {ctx} = ch; ctx.save(); ctx.font = '700 13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ch.getDatasetMeta(0).data.forEach((a, i) => { const p = tot ? dd.values[i] / tot : 0; if (p < .04) return; const pos = a.tooltipPosition(); ctx.fillStyle = inkOn(cols[i]); ctx.fillText(Math.round(p * 100) + '%', pos.x, pos.y); }); ctx.restore(); }}]}, 900, 460);
+  },
+  barChart(labels, values, title, money) {
+    const self = this;
+    return this.renderChart({type: 'bar', data: {labels, datasets: [{data: values, backgroundColor: PALETTE_LIGHT[0], borderRadius: 4, maxBarThickness: 46}]},
+      options: {layout: {padding: {top: 18}}, plugins: {title: this.titleOpt(title), legend: {display: false}}, scales: {x: {grid: {display: false}, ticks: {autoSkip: false, maxRotation: 50}}, y: {ticks: {callback: v => self.lakh(v)}, grid: {color: '#EFE2D2'}}}},
+      plugins: [{id: 'bv', afterDatasetsDraw(ch) { if (labels.length > 16) return; const {ctx} = ch; ctx.save(); ctx.font = '600 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#3E2723';
+        ch.getDatasetMeta(0).data.forEach((b, i) => ctx.fillText((money ? App.settings.currency : '') + self.lakh(values[i]), b.x, b.y - 5)); ctx.restore(); }}]});
+  },
+  /* which charts go with the picked items */
+  chartsFor(ids) {
+    const out = [];
+    try {
+      if (ids.some(id => ['r:person', 'r:region', 'r:trend'].includes(id))) {
+        if (!Targets.cfg || !readTable(Targets.cfg.sales)) Targets.cfg = Targets.detect();
+        const R = Targets.cfg && Targets.compute(), per = R ? Targets.periodLabel(Targets.cfg.period) : '';
+        if (R && ids.includes('r:person')) out.push({title: `Target vs achieved by salesperson – ${per}`, ...this.targetChart(Targets.sortList(R.list), `Target vs achieved by salesperson – ${per}`)});
+        if (R && R.regions && ids.includes('r:region')) out.push({title: `Target vs achieved by region – ${per}`, ...this.targetChart(Targets.sortList(R.regions), `Target vs achieved by region – ${per}`)});
+        if (R && ids.includes('r:trend')) { const M = Targets.trend(R, Targets.trendWho || 'all'); if (M.length) { const t = `Month-wise target vs achievement – ${(Targets.lastTrend && Targets.lastTrend.who) || 'Whole team'}`; out.push({title: t, ...this.trendChart(M, t)}); } }
+      }
+      const L = App.lastResult;
+      if (L && (ids.includes('r:chart') || ids.includes('s:' + L.sheet))) {
+        const money = /sales|value|amount|revenue|target|price/i.test(L.valueName || '');
+        out.push({title: L.title + ' (share)', ...this.doughnutChart(L.labels, L.values, L.title)});
+        out.push({title: L.title, ...this.barChart(L.labels.slice(0, 30), L.values.slice(0, 30), L.title, money)});
+      }
+      (this.extraCharts || []).forEach(f => { try { const c = f(ids); if (c) out.push(...[].concat(c)); } catch (e) { console.error(e); } });
+    } catch (e) { console.error(e); }
+    return out.filter(c => c.url);
+  },
+  /* put PNG pictures into the last sheet of an .xlsx (JSZip) */
+  async embedImages(buf, sheetNo, imgs) {
+    const zip = await JSZip.loadAsync(buf), sheetPath = `xl/worksheets/sheet${sheetNo}.xml`;
+    let anchors = '', rels = '';
+    imgs.forEach((im, i) => {
+      zip.file(`xl/media/es_image${i + 1}.png`, im.url.split(',')[1], {base64: true});
+      const cx = Math.round(im.w * 0.8 * 9525), cy = Math.round(im.h * 0.8 * 9525);
+      anchors += `<xdr:oneCellAnchor><xdr:from><xdr:col>${im.col}</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${im.row}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${i + 2}" name="Chart ${i + 1}" descr="${esc(im.title)}"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rIdImg${i + 1}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor>`;
+      rels += `<Relationship Id="rIdImg${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/es_image${i + 1}.png"/>`;
+    });
+    zip.file('xl/drawings/es_drawing1.xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${anchors}</xdr:wsDr>`);
+    zip.file('xl/drawings/_rels/es_drawing1.xml.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels}</Relationships>`);
+    const relPath = `xl/worksheets/_rels/sheet${sheetNo}.xml.rels`, dr = '<Relationship Id="rIdEsDr1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/es_drawing1.xml"/>';
+    const old = zip.file(relPath) ? await zip.file(relPath).async('string') : null;
+    zip.file(relPath, old ? old.replace('</Relationships>', dr + '</Relationships>') : `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${dr}</Relationships>`);
+    let sx = await zip.file(sheetPath).async('string');
+    if (!/xmlns:r=/.test(sx.slice(0, 600))) sx = sx.replace('<worksheet ', '<worksheet xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ');
+    sx = /<(legacyDrawing|tableParts|extLst)/.test(sx) ? sx.replace(/<(legacyDrawing|tableParts|extLst)/, '<drawing r:id="rIdEsDr1"/><$1') : sx.replace('</worksheet>', '<drawing r:id="rIdEsDr1"/></worksheet>');
+    zip.file(sheetPath, sx);
+    let ct = await zip.file('[Content_Types].xml').async('string');
+    if (!/Extension="png"/i.test(ct)) ct = ct.replace('<Default ', '<Default Extension="png" ContentType="image/png"/><Default ');
+    ct = ct.replace('</Types>', '<Override PartName="/xl/drawings/es_drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+    zip.file('[Content_Types].xml', ct);
+    return zip.generateAsync({type: 'blob', mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', compression: 'DEFLATE'});
+  },
+  saveBlob(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); },
   /* values as display text (CSV / print) */
   displayRows(id) {
     if (id.startsWith('s:')) {
@@ -2894,12 +3258,14 @@ const Export = {
     }
     const rep = this.report(id); return rep ? [rep.title, [], rep.header, ...rep.rows, rep.total] : [];
   },
-  download() {
-    const ids = this.items().map(i => i.id).filter(id => this.picked.has(id));
+  async download() {
+    const ids = [...new Set(this.items().map(i => i.id).filter(id => this.picked.has(id)))];
     if (!ids.length) return toast('Tick at least one item to export.', 'warn');
     const base = ($('#exName').value || 'Excel_Specialist').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'Excel_Specialist', filter = $('#exFilter').checked;
+    const wantCharts = $('#exCharts').checked && ['xlsx', 'xlsxf', 'pdf'].includes(this.format);
     try {
-      if (this.format === 'pdf') return this.print(ids, base);
+      const charts = wantCharts && window.Chart ? this.chartsFor(ids) : [];
+      if (this.format === 'pdf') return this.print(ids, base, charts);
       if (this.format === 'csv') {
         ids.forEach((id, k) => setTimeout(() => {
           const csv = XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(this.csvRows(id)));
@@ -2916,15 +3282,27 @@ const Export = {
         XLSX.utils.book_append_sheet(wb, ws, nm);
       });
       const ext = this.format === 'xls' ? 'xls' : 'xlsx';
+      if (charts.length && window.JSZip) { // a "Dashboard" sheet holding the chart pictures, two per row
+        const aoa = [[`Dashboard – ${base}`], [`${charts.length} chart(s) · made with Excel Specialist`]], pos = [];
+        let row = 3; for (let i = 0; i < charts.length; i += 2) { const pair = charts.slice(i, i + 2), hRows = Math.ceil(Math.max(...pair.map(c => c.h * .8)) / 20) + 3;
+          pair.forEach((c, k) => pos.push({...c, col: k ? 12 : 0, row})); row += hRows; }
+        const ws = XLSX.utils.aoa_to_sheet(aoa); ws.A1.s = {font: {name: 'Calibri', sz: 16, bold: true, color: {rgb: 'FF8B5A2B'}}}; ws.A2.s = {font: {name: 'Calibri', sz: 10, italic: true, color: {rgb: 'FF6D4C41'}}};
+        let nm = 'Dashboard', k = 2; while (used.has(nm.toLowerCase())) nm = 'Dashboard_' + k++;
+        XLSX.utils.book_append_sheet(wb, ws, nm);
+        const blob = await this.embedImages(XLSX.write(wb, {type: 'array', bookType: 'xlsx'}), wb.SheetNames.length, pos);
+        this.saveBlob(blob, `${base}.xlsx`);
+        return toast(`⬇️ <b>${esc(base)}.xlsx</b> downloaded with ${ids.length} sheet${ids.length > 1 ? 's' : ''} and a <b>Dashboard</b> sheet of ${charts.length} chart${charts.length > 1 ? 's' : ''}.`, 'ok', 6500);
+      }
       XLSX.writeFile(wb, `${base}.${ext}`, {bookType: this.format === 'xls' ? 'biff8' : 'xlsx'});
-      toast(`⬇️ <b>${esc(base)}.${ext}</b> downloaded (${ids.length} sheet${ids.length > 1 ? 's' : ''}, ${this.format === 'xlsxf' ? 'formulas kept' : 'values only'}).`, 'ok', 6000);
+      toast(`⬇️ <b>${esc(base)}.${ext}</b> downloaded (${ids.length} sheet${ids.length > 1 ? 's' : ''}, ${this.format === 'xlsxf' ? 'formulas kept' : 'values only'}${this.format === 'xls' ? '' : ', with fonts, colours and borders'}).`, 'ok', 6000);
     } catch (e) { console.error(e); toast('Sorry, the export failed: ' + esc(e.message || e), 'err', 7000); }
   },
-  print(ids, base) {
-    let h = `<title>${esc(base)}</title><style>body{font:12px Arial,sans-serif;color:#3E2723}h2{color:#8B5A2B;margin:18px 0 6px}table{border-collapse:collapse;margin-bottom:10px}td{border:1px solid #ddd;padding:3px 6px}tr.h td{background:#C68642;color:#fff;font-weight:bold}.pb{page-break-before:always}</style>`;
+  print(ids, base, charts = []) {
+    let h = `<title>${esc(base)}</title><style>body{font:12px Arial,sans-serif;color:#3E2723}h1{color:#8B5A2B;margin:0 0 4px}h2{color:#8B5A2B;margin:18px 0 6px}table{border-collapse:collapse;margin-bottom:10px}td{border:1px solid #ddd;padding:3px 6px}tr.h td{background:#C68642;color:#fff;font-weight:bold}.pb{page-break-before:always}.ch{display:flex;flex-wrap:wrap;gap:10px}.ch img{width:48%;min-width:320px;border:1px solid #eee;border-radius:8px;page-break-inside:avoid}</style>`;
+    if (charts.length) h += `<h1>📊 ${esc(base)}</h1><div class="ch">${charts.map(c => `<img src="${c.url}" alt="${esc(c.title)}">`).join('')}</div>`;
     ids.forEach((id, k) => {
       const rows = this.displayRows(id).slice(0, 3000), isRep = !id.startsWith('s:'), hdr = isRep ? 2 : 0;
-      h += `<h2 class="${k ? 'pb' : ''}">${esc(isRep ? rows[0][0] : id.slice(2))}</h2><table>` + rows.slice(isRep ? 2 : 0).map((r, i) => `<tr class="${i === 0 ? 'h' : ''}">${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('') + '</table>';
+      h += `<h2 class="${k || charts.length ? 'pb' : ''}">${esc(isRep ? rows[0][0] : id.slice(2))}</h2><table>` + rows.slice(isRep ? 2 : 0).map((r, i) => `<tr class="${i === 0 ? 'h' : ''}">${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('') + '</table>';
     });
     const w = window.open('', '_blank'); if (!w) return toast('Please allow pop-ups to print or save as PDF.', 'warn');
     w.document.write(h); w.document.close(); w.focus(); setTimeout(() => w.print(), 300);
@@ -2933,6 +3311,457 @@ const Export = {
 $('#exAll').onclick = () => { Export.picked = new Set(Export.items().map(i => i.id)); Export.init(); };
 $('#exNone').onclick = () => { Export.picked = new Set(); Export.init(); };
 $('#exGo').onclick = () => Export.download();
+/* =====================================================================
+   16. EXCEL-STYLE RIBBON (File · Home · Insert · Data · View)
+   and header filter buttons
+   ===================================================================== */
+$$('.rb-tab').forEach(t => t.onclick = () => {
+  $$('.rb-tab').forEach(x => x.classList.toggle('on', x === t));
+  $$('.rb-panel').forEach(p => p.classList.toggle('on', p.dataset.rb === t.dataset.rb));
+});
+const rbStyle = fn => { styleRange(fn); syncRibbon(); };
+$('#rbFont').onchange = e => rbStyle(st => { if (e.target.value === 'Calibri') delete st.font; else st.font = e.target.value; });
+$('#rbSize').onchange = e => rbStyle(st => { if (+e.target.value === 11) delete st.size; else st.size = +e.target.value; });
+$('#fontColor').addEventListener('input', e => rbStyle(st => { st.color = e.target.value; }));
+$('#rbNum').onchange = e => { const v = e.target.value; e.target.blur();
+  if (v === 'date') return toast('Dates show as dates automatically. Type them like 15/01/2025, or change the date style in ⚙️ Settings.', 'ok', 5000);
+  rbStyle(st => { if (v === 'gen') { delete st.fmt; delete st.d; } else st.fmt = v; }); };
+$('#rbBorder').onchange = e => { const v = e.target.value; e.target.value = ''; if (v) applyBorders(v); };
+
+function applyBorders(kind) {
+  const {r1, r2, c1, c2} = Grid.range();
+  rbStyle((st, r, c) => {
+    const bd = Object.assign({}, st.bd || {});
+    if (kind === 'none') { delete st.bd; return; }
+    if (kind === 'all') Object.assign(bd, {t: 1, b: 1, l: 1, r: 1});
+    const w = kind === 'thick' ? 2 : 1;
+    if (kind === 'box' || kind === 'thick') { if (r === r1) bd.t = w; if (r === r2) bd.b = w; if (c === c1) bd.l = w; if (c === c2) bd.r = w; }
+    if (kind === 'bottom' && r === r2) bd.b = 1; if (kind === 'top' && r === r1) bd.t = 1;
+    if (kind === 'left' && c === c1) bd.l = 1; if (kind === 'right' && c === c2) bd.r = 1;
+    if (Object.keys(bd).length) st.bd = bd;
+  });
+}
+/* show the selected cell's formatting on the ribbon */
+function syncRibbon() {
+  if (!App.active || !$('#rbFont')) return;
+  const st = getMeta().styles[Grid.sel.r + ',' + Grid.sel.c] || {};
+  $('#rbFont').value = st.font || 'Calibri'; $('#rbSize').value = String(st.size || 11);
+  $('#rbB').classList.toggle('on', !!st.b); $('#rbI').classList.toggle('on', !!st.i); $('#rbU').classList.toggle('on', !!st.u);
+  ['L', 'C', 'R'].forEach(a => $('#rbA' + a).classList.toggle('on', st.al === a.toLowerCase()));
+  $('#rbNum').value = st.fmt || getMeta().colFmt[Grid.sel.c] || 'gen';
+  ['#rbFilter', '#rbFilter2'].forEach(s => $(s).classList.toggle('on', !!Grid.fbOn));
+  $('#gridBtn').classList.toggle('on', App.settings.gridlines !== false);
+}
+async function ribbonAction(a) {
+  const st0 = Object.assign({}, getMeta().styles[Grid.sel.r + ',' + Grid.sel.c] || {});   // copy: decide once, then apply to every cell
+  switch (a) {
+    case 'italic': { const on = !st0.i; return rbStyle(st => { if (on) st.i = true; else delete st.i; }); }
+    case 'underline': { const on = !st0.u; return rbStyle(st => { if (on) st.u = true; else delete st.u; }); }
+    case 'alignL': case 'alignC': case 'alignR': { const v = a.slice(-1).toLowerCase(), off = st0.al === v; return rbStyle(st => { if (off) delete st.al; else st.al = v; }); }
+    case 'cut': { const t = selectionTSV(); try { await navigator.clipboard.writeText(t); } catch (e) {} Grid.clip = null; clearRange(); return toast('Cut ✂️ – select a cell and paste with Ctrl+V or 📥', 'ok', 2500); }
+    case 'paste': {
+      let text = ''; try { text = await navigator.clipboard.readText(); } catch (e) { return toast('Click a cell and press Ctrl+V to paste.', 'warn'); }
+      if (!text) return toast('The clipboard is empty.', 'warn');
+      const s = Grid.range(), rows = text.replace(/\r/g, '').replace(/\n$/, '').split('\n').map(l => l.split('\t').map(parseInput));
+      try { App.hf.setCellContents({sheet: sheetId(), row: s.r1, col: s.c1}, rows); } catch (e) { return toast('Could not paste here.', 'err'); }
+      return afterChange();
+    }
+    case 'xlsxNormal': Export.picked = new Set(sheetNames().map(n => 's:' + n)); Export.format = 'xlsx'; return Export.download();
+    case 'filterBtns': Grid.fbOn = !Grid.fbOn; if (!Grid.fbOn) Grid.colFilters = {}; afterChange(); syncRibbon();
+      return toast(Grid.fbOn ? '🔽 Filter buttons are on. Click ▾ on a heading to pick values or sort.' : 'Filter buttons off. All rows are shown.', 'ok', 3500);
+    case 'clearFilters': Grid.colFilters = {}; Grid.filter = null; $('#filterBar').classList.remove('show'); afterChange(); return toast('All rows are shown again.');
+    case 'gridlines': App.settings.gridlines = App.settings.gridlines === false; saveSettings(); $('#grid').classList.toggle('nogrid', App.settings.gridlines === false); return syncRibbon();
+    case 'focus': { const on = !$('#page-sheet').classList.contains('focus'); $('#page-sheet').classList.toggle('focus', on); $('#focusBtn').classList.toggle('on', on); return Grid.renderCells(); }
+    case 'theme': App.settings.theme = App.settings.theme === 'dark' ? 'light' : 'dark'; saveSettings(); applySettings(); return Grid.render();
+    case 'targets': return go('targets');
+    case 'sampleTab': return go('sample');
+    case 'fx': go('help'); return toast('Pick a formula and click <b>Try it</b> to put it in the selected cell.', 'ok', 4000);
+  }
+}
+
+/* ---- header filter buttons (like Excel's AutoFilter) ---- */
+function openFilterPopup(col, anchor) {
+  const id = sheetId(), m = getMeta(), d = App.hf.getSheetDimensions(id), start = m.frozen || Grid.fbOn ? 1 : 0;
+  const counts = new Map();
+  for (let r = 1; r < d.height; r++) { const t = displayValue(id, r, col, m).text; counts.set(t, (counts.get(t) || 0) + 1); }
+  const vals = sortKeys([...counts.keys()].map(v => v === '' ? '' : v)).slice(0, 2000), cur = (Grid.colFilters || {})[col];
+  const header = displayValue(id, 0, col, m).text || colName(col);
+  const pop = $('#fpop');
+  pop.innerHTML = `<div style="font-weight:700;margin-bottom:6px">🔽 ${esc(header)}</div>
+    <div class="row" style="gap:6px"><button class="btn sm light" data-s="asc">Sort A→Z</button><button class="btn sm light" data-s="desc">Sort Z→A</button></div>
+    <input type="text" class="fsearch" placeholder="Search…" style="width:100%;margin-top:8px">
+    <div class="fl"><label><input type="checkbox" class="fall" ${!cur ? 'checked' : ''}> <b>(Select all)</b></label>${vals.map(v => `<label title="${esc(v)}"><input type="checkbox" class="fv" value="${esc(v)}" ${!cur || cur.has(v) ? 'checked' : ''}> ${v === '' ? '<i class="muted">(Blanks)</i>' : esc(v)} <span class="muted">(${counts.get(v)})</span></label>`).join('')}</div>
+    <div class="row" style="justify-content:flex-end;gap:6px"><button class="btn sm ghost" data-a="clear">Clear</button><button class="btn sm light" data-a="cancel">Cancel</button><button class="btn sm" data-a="ok">OK</button></div>`;
+  const rc = anchor.getBoundingClientRect();
+  Object.assign(pop.style, {display: 'block', left: Math.max(8, Math.min(window.innerWidth - 262, rc.left - 220)) + 'px', top: Math.min(window.innerHeight - 380, rc.bottom + 4) + 'px'});
+  const boxes = () => $$('.fv', pop);
+  $('.fall', pop).onchange = e => boxes().forEach(b => { if (b.closest('label').style.display !== 'none') b.checked = e.target.checked; });
+  $('.fsearch', pop).oninput = e => { const q = e.target.value.toLowerCase(); boxes().forEach(b => { b.closest('label').style.display = b.value.toLowerCase().includes(q) ? '' : 'none'; }); };
+  $$('[data-s]', pop).forEach(b => b.onclick = () => { closeFilterPopup(); sortTableInPlace(App.active, col, b.dataset.s === 'desc'); afterChange(); });
+  $$('[data-a]', pop).forEach(b => b.onclick = () => {
+    const a = b.dataset.a; Grid.colFilters = Grid.colFilters || {};
+    if (a === 'clear') delete Grid.colFilters[col];
+    if (a === 'ok') { const on = boxes().filter(x => x.checked && x.closest('label').style.display !== 'none').map(x => x.value);
+      if (on.length === vals.length) delete Grid.colFilters[col]; else Grid.colFilters[col] = new Set(on); }
+    closeFilterPopup(); if (a !== 'cancel') { Grid.rebuildRows(); Grid.render(); const n = Grid.rows ? Grid.rows.length : null; if (n !== null) toast(`Showing ${n} row(s)`, 'ok', 1800); }
+  });
+  setTimeout(() => $('.fsearch', pop).focus(), 30);
+}
+function closeFilterPopup() { $('#fpop').style.display = 'none'; }
+document.addEventListener('mousedown', e => { if ($('#fpop').style.display === 'block' && !e.target.closest('#fpop') && !e.target.closest('.fbtn')) closeFilterPopup(); });
+/* =====================================================================
+   17. REPORT FROM SAMPLE
+   Upload a sample report (Excel/CSV or a picture). Its column headings are read,
+   matched to the master data, and the same report is built from the master file,
+   with charts, a sheet with formulas, and every export format.
+   ===================================================================== */
+const SampleReport = {
+  master: null, headings: [], map: [], title: '', result: null, charts: [], period: 'all', fcol: '', fval: '',
+  /* ---------- page ---------- */
+  init() {
+    const tables = sheetNames().filter(n => { const t = readTable(n); return t && t.rows.length && getMeta(n).kind !== 'result'; });
+    if (!tables.length) { $('#smMaster').innerHTML = ''; $('#smMasterInfo').innerHTML = 'No data yet. Upload your master file on <b>📂 My Files</b>, or <a href="#" onclick="loadDemo();go(\'sample\');return false">load the demo data</a>.'; this.renderMap(); return; }
+    if (!this.master || !tables.includes(this.master)) { const tg = Targets.cfg && readTable(Targets.cfg.sales) ? Targets.cfg : Targets.detect(); this.master = tg && tables.includes(tg.sales) ? tg.sales : tables.sort((a, b) => readTable(b).rows.length - readTable(a).rows.length)[0]; }
+    $('#smMaster').innerHTML = tables.map(n => `<option ${n === this.master ? 'selected' : ''}>${esc(n)}</option>`).join('');
+    const t = readTable(this.master);
+    $('#smMasterInfo').innerHTML = `${t.rows.length.toLocaleString()} rows · columns: ${t.headers.map(esc).join(', ')}`;
+    this.renderHeadings(); this.renderMap(); this.renderOut();
+  },
+  setHeadings(list, title, src) {
+    this.headings = list.map(h => String(h).trim()).filter(Boolean).slice(0, 25);
+    this.title = title || this.title || 'Report';
+    this.src = src || 'typed';
+    this.map = this.headings.map(h => this.guess(h));
+    this.result = null; this.renderHeadings(); this.renderMap(); this.renderOut();
+    if (this.headings.length) toast(`🧩 Found ${this.headings.length} column heading(s). Check what each one means in step 3, then click <b>Build report</b>.`, 'ok', 5000);
+    else toast('No column headings found. Type them in the box instead.', 'warn');
+  },
+  renderHeadings() {
+    $('#smHeads').innerHTML = this.headings.length ? `<span class="muted">Headings found${this.src && this.src !== 'typed' ? ' in <b>' + esc(this.src) + '</b>' : ''}:</span> ` + this.headings.map(h => `<span class="chip" style="cursor:default">${esc(h)}</span>`).join(' ') : '';
+  },
+  /* ---------- reading the sample ---------- */
+  async readFile(f) {
+    const ext = (f.name.split('.').pop() || '').toLowerCase(), prog = progressRow(f.name);
+    try {
+      if (['xlsx', 'xls', 'xlsm', 'csv', 'txt'].includes(ext)) {
+        const wb = ext === 'csv' || ext === 'txt' ? XLSX.read(await readText(f), {type: 'string', raw: true}) : XLSX.read(await readBuf(f), {type: 'array', cellDates: true});
+        const ws = wb.Sheets[wb.SheetNames[0]], aoa = XLSX.utils.sheet_to_json(ws, {header: 1, raw: true, defval: ''});
+        const firstText = aoa.find(r => r.filter(v => v !== '').length === 1 && typeof r.find(v => v !== '') === 'string');
+        const {data} = cleanTable(aoa);
+        this.setHeadings(data[0] || [], firstText ? String(firstText.find(v => v !== '')) : f.name.replace(/\.[^.]+$/, ''), f.name);
+      } else if (['jpg', 'jpeg', 'png'].includes(ext)) {
+        const ocr = await ensureOcr(prog);
+        const worker = await Tesseract.createWorker('eng', 1, Object.assign({logger: m => { if (m.status === 'recognizing text') prog.set(.1 + m.progress * .85, 'Reading ' + Math.round(m.progress * 100) + '%'); }}, ocr.opts));
+        const {data} = await worker.recognize(f); await worker.terminate();
+        const words = (data.words || []).filter(w => w.text && w.text.trim()).map(w => ({x0: w.bbox.x0, x1: w.bbox.x1, y: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0, text: w.text.trim().replace(/^[|_~`]+|[|_~`]+$/g, '')}));
+        const rows = linesToTable(groupLines(words)).map(r => r.map(v => String(v).trim()).filter(Boolean));
+        const head = rows.find(r => r.length >= 2 && r.filter(v => toNumber(v) === null).length >= r.length * .6) || rows[0] || [];
+        const title = rows.find(r => r.length === 1 && rows.indexOf(r) < rows.indexOf(head));
+        this.setHeadings(head, title ? title[0] : f.name.replace(/\.[^.]+$/, ''), f.name);
+      } else toast('Please choose an Excel, CSV, JPG or PNG sample.', 'err');
+    } catch (e) { console.error(e); toast('Could not read the sample. ' + esc(friendlyError(e)), 'err', 6000); }
+    prog.done();
+  },
+  /* ---------- understanding each heading ---------- */
+  ctx() {
+    const t = readTable(this.master); if (!t) return null;
+    let tg = Targets.cfg && Targets.cfg.sales === this.master && readTable(Targets.cfg.sales) ? Targets.cfg : null;
+    if (!tg) { const d = Targets.detect(); tg = d && d.sales === this.master ? d : null; }
+    if (!tg) { const pc = Targets.personCol(t), vc = Targets.valueCol(t); if (pc >= 0 && vc >= 0) { tg = {sales: this.master, pc, vc, period: 'all'}; Targets.detectTarget(tg); } }
+    return {t, tg, P: Targets.periods(t)};
+  },
+  guess(h) {
+    const C = this.ctx(); if (!C) return 'skip';
+    const {t, tg} = C, x = h.toLowerCase();
+    if (/(achiev|ach)\w*\s*(%|percent|pct)|%\s*(achiev|ach)|^%$|percent/.test(x)) return 'pct';
+    if (/balance|gap|short|pending|remaining|to go/.test(x)) return 'bal';
+    if (/status|result|remark/.test(x) && tg && tg.tt) return 'status';
+    if (/\btarget|\btgt\b|budget|goal|quota/.test(x)) return 'target';
+    if (/achiev|actual|achieved|\bach\b/.test(x)) return 'ach';
+    if (/\brank\b|position/.test(x)) return 'rank';
+    if (/month.*year|year.*month|period|mmm.?yy/.test(x)) return 'my';
+    if (/^\s*(month|mon|mth)\b/.test(x) || /\bmonth\s*(name)?\s*$/.test(x)) return 'month';
+    if (/^\s*(year|yr|fy)\b/.test(x)) return 'year';
+    if (/^(count|no\.? of|number of|#)\b/.test(x)) { const m = findColumnMentions(tokenize(h), t)[0]; return m && t.types[m.c] === 'number' && !isDim(t, m.c) ? 's:' + m.c : 'cnt'; }
+    const ms = findColumnMentions(tokenize(h), t); let c = ms.length ? ms[0].c : -1;
+    if (c < 0) { let bs = 0; t.headers.forEach((hh, i) => { const s = similarity(hh, h); if (s > bs) { bs = s; c = i; } }); if (bs < .5) c = -1; }
+    if (c < 0) return 'skip';
+    if (/avg|average|mean/.test(x) && t.types[c] === 'number') return 'a:' + c;
+    return t.types[c] === 'number' && !isDim(t, c) ? 's:' + c : 'g:' + c;
+  },
+  options(C) {
+    const {t, tg, P} = C, o = [['skip', '— leave empty —']];
+    t.headers.forEach((h, c) => { if (isDim(t, c)) o.push(['g:' + c, `Group by: ${h}`]); });
+    if (P.keys.length) o.push(['month', 'Month (from the data)'], ['year', 'Year (from the data)'], ['my', 'Month + Year']);
+    t.headers.forEach((h, c) => { if (t.types[c] === 'number' && !isDim(t, c)) o.push(['s:' + c, `Total of: ${h}`], ['a:' + c, `Average of: ${h}`]); });
+    o.push(['cnt', 'Count of rows']);
+    if (tg) o.push(['ach', `Achieved (total ${t.headers[tg.vc]})`]);
+    if (tg && tg.tt) o.push(['target', 'Target'], ['pct', 'Achievement %'], ['bal', 'Balance to target'], ['status', 'Status (Achieved / Close / Below)']);
+    o.push(['rank', 'Rank']);
+    return o;
+  },
+  renderMap() {
+    const C = this.master ? this.ctx() : null, card = $('#smMap');
+    if (!C || !this.headings.length) { card.innerHTML = '<p class="muted">Upload a sample or type the column headings in step 2 first.</p>'; $('#smBuild').disabled = true; return; }
+    const opts = this.options(C), years = [...new Set(C.P.keys.map(k => Math.floor(k / 100)))].filter(Boolean);
+    card.innerHTML = `<table class="ptable sm-map"><thead><tr><th>#</th><th>Sample heading</th><th>What it means in <b>${esc(this.master)}</b></th></tr></thead><tbody>${this.headings.map((h, i) => `<tr><td>${i + 1}</td><td><input type="text" class="smh" data-i="${i}" value="${esc(h)}" style="width:100%"></td><td><select class="smk" data-i="${i}" style="width:100%">${opts.map(([v, l]) => `<option value="${v}" ${this.map[i] === v ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></td></tr>`).join('')}</tbody></table>
+      <div class="row" style="margin-top:12px;align-items:flex-end">
+        <label class="field">📅 Period<select id="smPeriod"><option value="all">All data</option>${years.map(y => `<option value="y:${y}" ${this.period === 'y:' + y ? 'selected' : ''}>Year ${y}</option>`).join('')}${C.P.keys.map(k => `<option value="m:${k}" ${this.period === 'm:' + k ? 'selected' : ''}>${monthName(k % 100)} ${Math.floor(k / 100) || ''}</option>`).join('')}</select></label>
+        <label class="field">Only rows where<select id="smFcol"><option value="">— all rows —</option>${C.t.headers.map((h, c) => isDim(C.t, c) && C.t.types[c] === 'text' ? `<option value="${c}" ${String(this.fcol) === String(c) ? 'selected' : ''}>${esc(h)}</option>` : '').join('')}</select></label>
+        <label class="field">is<select id="smFval"></select></label>
+        <label class="field" style="flex:1;min-width:200px">Report title<input type="text" id="smTitle" value="${esc(this.title)}"></label>
+      </div>`;
+    const fillVals = () => { const c = $('#smFcol').value; $('#smFval').innerHTML = c === '' ? '<option value="">—</option>' : sortKeys([...new Set(C.t.rows.map(r => r[+c]).filter(v => v !== ''))]).slice(0, 500).map(v => `<option ${String(v) === String(this.fval) ? 'selected' : ''}>${esc(v)}</option>`).join(''); };
+    fillVals();
+    $('#smFcol').onchange = () => { this.fcol = $('#smFcol').value; this.fval = ''; fillVals(); };
+    $$('.smk', card).forEach(s => s.onchange = () => { this.map[+s.dataset.i] = s.value; });
+    $$('.smh', card).forEach(s => s.oninput = () => { this.headings[+s.dataset.i] = s.value; });
+    $('#smBuild').disabled = false;
+  },
+  /* ---------- building the report ---------- */
+  build() {
+    const C = this.ctx(); if (!C) return;
+    this.period = $('#smPeriod').value; this.fcol = $('#smFcol').value; this.fval = $('#smFval').value; this.title = $('#smTitle').value || this.title;
+    const {t, tg, P} = C, cols = this.headings.map((h, i) => ({h, k: this.map[i]})).filter(x => x.k !== 'skip');
+    if (!cols.length) return toast('Pick what at least one column means.', 'warn');
+    const isGroup = k => /^g:|^(month|year|my)$/.test(k), tgtKinds = ['target', 'pct', 'bal', 'status'];
+    const needT = cols.some(x => tgtKinds.includes(x.k)), notes = [];
+    if (needT && !(tg && tg.tt)) { notes.push('No target column was found for this data, so Target columns are left empty. Add a Target column or a target file (for example Employee ID + Monthly Target).'); }
+    // period + filter
+    const filters = Targets.periodFilters(t, P, this.period); if (this.fcol !== '' && this.fval !== '') filters.push({c: +this.fcol, op: 'eq', v: (t.rows.find(r => String(r[+this.fcol]) === this.fval) || [])[+this.fcol] ?? this.fval});
+    const rows = t.rows.filter(r => passes(r, filters));
+    const ym = r => { if (P.dc >= 0 && typeof r[P.dc] === 'number') { const d = serialToDate(r[P.dc]); return d.getUTCFullYear() * 100 + d.getUTCMonth(); } if (P.mc >= 0) { const m = monthIndex(String(r[P.mc])); return m < 0 ? null : (P.yc >= 0 ? (+r[P.yc] || 0) : 0) * 100 + m; } return null; };
+    const dimVal = (k, r) => { if (k.startsWith('g:')) { const v = r[+k.slice(2)]; return v === '' || v === null ? '(blank)' : v; } const y = ym(r); if (y === null) return '(no date)'; return k === 'month' ? y % 100 : k === 'year' ? Math.floor(y / 100) : y; };
+    const dimLabel = (k, v) => k === 'month' && typeof v === 'number' ? monthName(v) : k === 'my' && typeof v === 'number' ? monthName(v % 100) + ' ' + Math.floor(v / 100) : k.startsWith('g:') && t.types[+k.slice(2)] === 'date' && typeof v === 'number' ? fmtDate(v) : v;
+    // which group columns can carry a target (salesperson / region / time)
+    let R = null, rcS = -1;
+    if (tg && tg.tt) { const saved = Targets.cfg; Targets.cfg = Object.assign({}, tg, {period: this.period}); R = Targets.compute(); Targets.cfg = saved; rcS = R.rc; }
+    const personCols = tg ? [tg.pc, tg.keyS ?? tg.pc] : [], regionCol = t.headers.findIndex(h => /region|zone|territory/i.test(h));
+    const tCompat = k => !k.startsWith('g:') || personCols.includes(+k.slice(2)) || +k.slice(2) === regionCol;
+    let groups = cols.filter(x => isGroup(x.k)), split = null;
+    if (needT && R) { const bad = groups.filter(x => !tCompat(x.k)); if (bad.length) { split = bad[0]; groups = groups.filter(x => x !== split);
+      notes.push(`Targets are set per salesperson/region, so <b>${esc(split.h)}</b> is shown as separate Achieved columns (one per ${esc(split.h)}) instead of rows.`); if (bad.length > 1) notes.push(`<b>${bad.slice(1).map(b => esc(b.h)).join(', ')}</b> left out (only one breakdown column is possible next to targets).`); } }
+    // group rows
+    const gmap = new Map();
+    rows.forEach(r => { const key = groups.map(g => dimVal(g.k, r)); const s = JSON.stringify(key); if (!gmap.has(s)) gmap.set(s, {key, rows: []}); gmap.get(s).rows.push(r); });
+    if (!groups.length) gmap.set('[]', {key: [], rows});
+    // with targets: every salesperson / region × every month of the period gets a row, even with no sales
+    if (needT && R && groups.length) {
+      const inPer = k => this.period === 'all' || (this.period.startsWith('y:') ? Math.floor(k / 100) === +this.period.slice(2) : k === +this.period.slice(2));
+      const keysP = R.P.keys.filter(inPer), fRow = this.fcol !== '' && this.fval !== '';
+      const isTime = g => ['month', 'year', 'my'].includes(g.k), nonTime = groups.filter(g => !isTime(g));
+      const timeDomain = g => g.k === 'month' ? [...new Set(keysP.map(k => k % 100))] : g.k === 'year' ? [...new Set(keysP.map(k => Math.floor(k / 100)))] : keysP;
+      const peopleOnly = nonTime.length && !fRow && nonTime.every(g => personCols.includes(+g.k.slice(2)) || +g.k.slice(2) === regionCol);
+      let bases; // value lists for the non-time columns, each salesperson only with their own region
+      if (peopleOnly && nonTime.some(g => personCols.includes(+g.k.slice(2))))
+        bases = R.list.filter(p => p.target).map(p => nonTime.map(g => { const c = +g.k.slice(2); return c === regionCol ? (p.tRegion || p.region) : c === tg.pc ? p.name : p.key; }));
+      else if (peopleOnly && R.regions) bases = R.regions.map(x => [x.name]);
+      else bases = [...new Map([...gmap.values()].map(x => { const v = nonTime.map(g => x.key[groups.indexOf(g)]); return [JSON.stringify(v), v]; })).values()];
+      const timeG = groups.filter(isTime), size = bases.length * timeG.reduce((acc, g) => acc * Math.max(1, timeDomain(g).length), 1);
+      if (size <= 5000) {
+        const times = timeG.reduce((acc, g) => acc.flatMap(t => timeDomain(g).map(v => t.concat([v]))), [[]]);
+        bases.forEach(bv => times.forEach(tv => { const key = groups.map(g => isTime(g) ? tv[timeG.indexOf(g)] : bv[nonTime.indexOf(g)]); const s2 = JSON.stringify(key); if (!gmap.has(s2)) gmap.set(s2, {key, rows: []}); }));
+      }
+    }
+    let G = [...gmap.values()];
+    G.sort((a, b) => { for (let i = 0; i < a.key.length; i++) { if (a.key[i] === b.key[i]) continue; const x = sortKeys([a.key[i], b.key[i]]); return x[0] === a.key[i] ? -1 : 1; } return 0; });
+    // targets for each group
+    const keyOf = v => String(v).trim().toLowerCase(), months = R ? R.months : 1;
+    const tgtFor = g => {
+      if (!R) return null;
+      if (tg.tt === tg.sales) return g.rows.reduce((a, r) => a + (typeof r[tg.tc] === 'number' ? r[tg.tc] : 0), 0);
+      let people = R.list;
+      groups.forEach((gr, i) => { const v = g.key[i]; if (!gr.k.startsWith('g:')) return; const c = +gr.k.slice(2);
+        if (personCols.includes(c)) people = people.filter(p => keyOf(c === tg.pc ? p.name : p.key) === keyOf(v));
+        else if (c === regionCol) people = people.filter(p => String(p.tRegion || p.region) === String(v)); });
+      const tk = groups.map((gr, i) => [gr.k, g.key[i]]).filter(([k]) => ['month', 'year', 'my'].includes(k));
+      const m = tk.length ? R.P.keys.filter(k => tk.every(([kk, v]) => kk === 'month' ? k % 100 === v : kk === 'year' ? Math.floor(k / 100) === v : k === v)).filter(k => this.period === 'all' || (this.period.startsWith('y:') ? Math.floor(k / 100) === +this.period.slice(2) : k === +this.period.slice(2))).length : months;
+      return people.reduce((a, p) => a + p.target / (months || 1), 0) * m;
+    };
+    const sum = (rs, c) => rs.reduce((a, r) => a + (typeof r[c] === 'number' ? r[c] : 0), 0);
+    let splitVals = [];
+    if (split) { const tot = new Map(); rows.forEach(r => { const v = dimVal(split.k, r); tot.set(v, (tot.get(v) || 0) + (typeof r[tg.vc] === 'number' ? r[tg.vc] : 0)); }); splitVals = [...tot.entries()].sort((a, b) => b[1] - a[1]).map(e => e[0]).slice(0, 12); }
+    // header + values
+    const header = [], kinds = [];
+    cols.forEach(x => { if (x === split) { splitVals.forEach(v => { header.push(`${x.h}: ${dimLabel(split.k, v)}`); kinds.push({k: 'splitv', v}); }); return; } if (groups.includes(x) || !isGroup(x.k)) { header.push(x.h); kinds.push(x); } });
+    const out = G.map(g => {
+      const ach = tg ? sum(g.rows, tg.vc) : null, tgt = needT ? tgtFor(g) : null, pct = tgt ? ach / tgt : null;
+      return kinds.map(x => {
+        const gi = groups.indexOf(x); if (gi >= 0) return dimLabel(x.k, g.key[gi]);
+        switch (x.k.split(':')[0]) {
+          case 's': return sum(g.rows, +x.k.slice(2));
+          case 'a': { const ns = g.rows.map(r => r[+x.k.slice(2)]).filter(v => typeof v === 'number'); return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0; }
+          case 'cnt': return g.rows.length;
+          case 'ach': return ach;
+          case 'target': return tgt ?? '';
+          case 'pct': return pct === null ? '' : pct;
+          case 'bal': return tgt === null ? '' : Math.max(0, tgt - ach);
+          case 'status': return pct === null ? '' : pct >= 1 ? 'Achieved' : pct >= .8 ? 'Close' : 'Below target';
+          case 'splitv': return g.rows.filter(r => dimVal(split.k, r) === x.v).reduce((a, r) => a + (typeof r[tg.vc] === 'number' ? r[tg.vc] : 0), 0);
+          case 'rank': return 0;
+        }
+        return '';
+      });
+    });
+    // rank by achieved (or first total)
+    const ri = kinds.findIndex(x => x.k === 'rank');
+    if (ri >= 0) { const by = kinds.findIndex(x => x.k === 'ach') >= 0 ? kinds.findIndex(x => x.k === 'ach') : kinds.findIndex(x => /^s:/.test(x.k)); const vals = out.map(r => by >= 0 ? +r[by] || 0 : 0); out.forEach((r, i) => r[ri] = 1 + vals.filter(v => v > vals[i]).length); }
+    // totals row
+    const total = kinds.map((x, i) => {
+      if (groups.includes(x)) return groups.indexOf(x) === 0 ? 'Total' : '';
+      const k = x.k.split(':')[0], colSum = out.reduce((a, r) => a + (typeof r[i] === 'number' ? r[i] : 0), 0);
+      if (['s', 'cnt', 'ach', 'target', 'bal', 'splitv'].includes(k)) return k === 'target' && !R ? '' : colSum;
+      if (k === 'a') { const c = +x.k.slice(2), ns = rows.map(r => r[c]).filter(v => typeof v === 'number'); return ns.length ? ns.reduce((a, b) => a + b, 0) / ns.length : 0; }
+      if (k === 'pct') { const ti = kinds.findIndex(y => y.k === 'target'); const tt = out.reduce((a, r, j) => a + (tgtFor(G[j]) || 0), 0), aa = tg ? sum(rows, tg.vc) : 0; return tt ? aa / tt : ''; }
+      return '';
+    });
+    if (!groups.length) total.length = 0;   // a single summary row needs no total row
+    const moneyK = new Set(), pctK = new Set();
+    kinds.forEach((x, i) => { const k = x.k.split(':')[0]; if (k === 'pct') pctK.add(i); else if (['ach', 'target', 'bal', 'splitv'].includes(k) || ((k === 's' || k === 'a') && /sales|value|amount|revenue|price|target|cost|profit/i.test(t.headers[+x.k.slice(2)]))) moneyK.add(i); });
+    this.result = {header, rows: out, total, kinds, groups, G, filters, notes, money: [...moneyK], pct: [...pctK], t, tg, R, split, splitVals, period: this.period, title: this.title, dimLabel, dimVal};
+    this.renderOut();
+    toast(`🧩 Report ready: ${out.length} row(s). Scroll down to see it, the charts and the download buttons.`, 'ok', 4500);
+    setTimeout(() => $('#smOutCard').scrollIntoView({behavior: 'smooth', block: 'start'}), 100);
+  },
+  reportAoa() {
+    const R = this.result; if (!R) return null;
+    const per = Targets.periodLabel(R.period) + (this.fcol !== '' && this.fval ? ` · ${R.t.headers[+this.fcol]} = ${this.fval}` : '');
+    return {title: [`${R.title} – ${per}`], header: R.header, rows: R.rows.map(r => r.map(v => typeof v === 'number' ? Math.round(v * 10000) / 10000 : v)), total: R.total, money: R.money, pct: R.pct};
+  },
+  /* charts that match the report */
+  makeCharts() {
+    const R = this.result; if (!R || !window.Chart) return [];
+    const out = [], label = r => R.groups.map((g, i) => r[R.kinds.indexOf(g)]).join(' / ') || 'Total';
+    const ti = R.kinds.findIndex(x => x.k === 'target'), ai = R.kinds.findIndex(x => x.k === 'ach');
+    if (ti >= 0 && ai >= 0 && R.R) { // one bar per salesperson / region (months added together)
+      const nt = R.groups.filter(g => !['month', 'year', 'my'].includes(g.k)), lab = r => nt.map(g => r[R.kinds.indexOf(g)]).join(' / ') || 'Total', agg = new Map();
+      R.rows.forEach(r => { const k = lab(r), e = agg.get(k) || {t: 0, a: 0}; e.t += +r[ti] || 0; e.a += +r[ai] || 0; agg.set(k, e); });
+      const items = [...agg.entries()].map(([name, e]) => { const p = e.t ? e.a / e.t : null; return {name, target: e.t, achieved: e.a, pct: p, status: tgStatus(p)}; }).sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1)).slice(0, 40);
+      out.push({title: `${R.title}: target vs achieved`, ...Export.targetChart(items, `${R.title}: target vs achieved`)});
+    }
+    const mi = ai >= 0 ? ai : R.kinds.findIndex(x => /^(s|cnt|a):?/.test(x.k));
+    const g0 = R.groups.find(g => !['month', 'year', 'my'].includes(g.k)) || R.groups[0];
+    if (mi >= 0 && g0) {
+      const gi = R.kinds.indexOf(g0), agg = new Map(); R.rows.forEach(r => agg.set(r[gi], (agg.get(r[gi]) || 0) + (+r[mi] || 0)));
+      const L = [...agg.keys()].map(String), V = [...agg.values()], money = R.money.includes(mi);
+      out.push({title: `${R.header[mi]} by ${g0.h} (share)`, ...Export.doughnutChart(L, V, `${R.header[mi]} by ${g0.h}`)});
+      if (!(ti >= 0 && ai >= 0 && R.groups.length === 1)) out.push({title: `${R.header[mi]} by ${g0.h}`, ...Export.barChart(L.slice(0, 30), V.slice(0, 30), `${R.header[mi]} by ${g0.h}`, money)});
+    }
+    const tg = R.groups.find(g => ['my', 'month'].includes(g.k));
+    if (tg && mi >= 0) {
+      const gi = R.kinds.indexOf(tg), byM = new Map();
+      R.G.forEach((g, j) => { const kv = g.key[R.groups.indexOf(tg)]; const e = byM.get(kv) || {target: 0, achieved: 0}; e.achieved += +R.rows[j][mi] || 0; if (ti >= 0) e.target += +R.rows[j][ti] || 0; byM.set(kv, e); });
+      const keys = [...byM.keys()].sort((a, b) => a - b), M = keys.map(k => { const e = byM.get(k); return {short: R.dimLabel(tg.k, k), target: e.target, achieved: e.achieved, pct: e.target ? e.achieved / e.target : null}; });
+      if (ti >= 0) out.push({title: `${R.title}: month-wise trend`, ...Export.trendChart(M, `${R.title}: month-wise trend`)});
+      else out.push({title: `${R.header[mi]} by month`, ...Export.barChart(M.map(m => m.short), M.map(m => m.achieved), `${R.header[mi]} by month`, R.money.includes(mi))});
+    }
+    return out.filter(c => c.url);
+  },
+  renderOut() {
+    const card = $('#smOutCard'), R = this.result;
+    if (!R) { card.style.display = 'none'; return; }
+    card.style.display = '';
+    const fmt = (v, i) => typeof v !== 'number' ? esc(v) : R.pct.includes(i) ? tgPct(v) : R.money.includes(i) ? wmoney(v) : fmtNum(Math.round(v * 100) / 100);
+    const si = R.kinds.findIndex(x => x.k === 'status');
+    this.charts = this.makeCharts();
+    $('#smOut').innerHTML = `${R.notes.map(n => `<div class="sm-note">ℹ️ ${n}</div>`).join('')}
+      <div class="muted" style="margin:4px 0 8px">${esc(R.title)} · ${esc(Targets.periodLabel(R.period))} · ${R.rows.length} row(s) from <b>${esc(this.master)}</b></div>
+      <div style="overflow:auto;max-height:440px"><table class="ptable tg-table"><thead><tr>${R.header.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>
+        ${R.rows.slice(0, 500).map(r => `<tr>${r.map((v, i) => `<td style="${typeof v === 'number' ? 'text-align:right' : ''}">${i === si && v ? tgBadge({Achieved: 'ok', Close: 'mid', 'Below target': 'low'}[v] || 'none') : fmt(v, i)}</td>`).join('')}</tr>`).join('')}
+        ${R.total.length ? '' : '<!--'}<tr class="tg-total">${R.total.map((v, i) => `<td style="${typeof v === 'number' ? 'text-align:right' : ''}">${v === '' ? '' : fmt(v, i)}</td>`).join('')}</tr>${R.total.length ? '' : '-->'}</tbody></table></div>
+      ${R.rows.length > 500 ? `<p class="muted">Showing 500 of ${R.rows.length} rows. Downloads include all rows.</p>` : ''}
+      ${this.charts.length ? `<h3 style="margin-top:16px">📊 Dashboard</h3><div class="sm-charts">${this.charts.map(c => `<img src="${c.url}" alt="${esc(c.title)}">`).join('')}</div>` : ''}`;
+  },
+  /* sheet with live formulas where possible */
+  createSheet() {
+    const R = this.result; if (!R) return;
+    const {t, tg} = R, P = Targets.periods(t), per = critPairs(t, R.filters), H = R.header, first = 4;
+    const tt = tg && tg.tt ? readTable(tg.tt) : null, trc = tt ? tt.headers.findIndex(h => /region|zone|territory/i.test(h)) : -1, regionCol = t.headers.findIndex(h => /region|zone|territory/i.test(h));
+    const crit = g => { const out = [], tk = [];
+      R.groups.forEach((gr, i) => { const v = g.key[i];
+        if (gr.k.startsWith('g:')) { out.push(colRange(t, +gr.k.slice(2)), typeof v === 'number' ? v : fstr(v)); return; }
+        tk.push([gr.k, v]); });
+      if (tk.length) { const my = tk.find(x => x[0] === 'my'), mo = tk.find(x => x[0] === 'month'), yr = tk.find(x => x[0] === 'year');
+        const y = my ? Math.floor(my[1] / 100) : yr ? yr[1] : null, m = my ? my[1] % 100 : mo ? mo[1] : null;
+        if (P.dc >= 0 && y !== null && m !== null) { const d2s = d => d / 864e5 + 25569; out.push(colRange(t, P.dc), fstr('>=' + d2s(Date.UTC(y, m, 1))), colRange(t, P.dc), fstr('<=' + d2s(Date.UTC(y, m + 1, 0)))); }
+        else if (P.dc >= 0 && y !== null && m === null) { const d2s = d => d / 864e5 + 25569; out.push(colRange(t, P.dc), fstr('>=' + d2s(Date.UTC(y, 0, 1))), colRange(t, P.dc), fstr('<=' + d2s(Date.UTC(y, 11, 31)))); }
+        else if (P.mc >= 0 && m !== null) { out.push(colRange(t, P.mc), fstr(P.monthText[Object.keys(P.monthText).find(k => +k % 100 === m)] || monthName(m))); if (y !== null && P.yc >= 0) out.push(colRange(t, P.yc), y); }
+        else if (P.yc >= 0 && y !== null) out.push(colRange(t, P.yc), y);
+        else return null; }
+      return out.concat(per); };
+    const L = colName, aoa = [[R.title], [`${Targets.periodLabel(R.period)} · from ${this.master} · live formulas`], [], H];
+    R.G.forEach((g, j) => {
+      const r = first + j + 1, cr = crit(g), row = [];
+      R.kinds.forEach((x, i) => {
+        const v = R.rows[j][i], k = x.k.split(':')[0], col = n => R.kinds.findIndex(y => y.k === n);
+        const cell = (f, fallback) => cr ? '=' + f : fallback;
+        if (R.groups.includes(x)) return row.push(v);
+        if (k === 's') return row.push(cell(aggFormula('sum', colRange(t, +x.k.slice(2)), cr || []), v));
+        if (k === 'a') return row.push(cell(aggFormula('average', colRange(t, +x.k.slice(2)), cr || []), v));
+        if (k === 'cnt') return row.push(cell(cr && cr.length ? `COUNTIFS(${cr.join(',')})` : `ROWS(${colRange(t, 0)})`, v));
+        if (k === 'ach') return row.push(cell(aggFormula('sum', colRange(t, tg.vc), cr || []), v));
+        if (k === 'splitv') { const sc = R.split.k.startsWith('g:') ? +R.split.k.slice(2) : -1; return row.push(cr && sc >= 0 ? '=' + aggFormula('sum', colRange(t, tg.vc), [...cr, colRange(t, sc), typeof x.v === 'number' ? x.v : fstr(x.v)]) : v); }
+        if (k === 'target') { if (v === '') return row.push('');
+          if (tt && tg.tt === tg.sales && cr) return row.push('=' + aggFormula('sum', colRange(t, tg.tc), cr));
+          const pg = R.groups.findIndex(gr => gr.k.startsWith('g:') && [tg.pc, tg.keyS ?? tg.pc].includes(+gr.k.slice(2))), rg = R.groups.findIndex(gr => gr.k === 'g:' + regionCol);
+          const onlyPeople = R.groups.every(gr => !gr.k.startsWith('g:') || gr === R.groups[pg] || gr === R.groups[rg]);
+          if (tt && onlyPeople && pg >= 0 && (tg.keyS ?? tg.pc) === +R.groups[pg].k.slice(2)) { const mul = Math.round(v / Math.max(1, (R.R.list.find(p => keyOf2(p.key) === keyOf2(g.key[pg])) || {target: 0}).target / (R.R.months || 1)) || 0);
+            return row.push(mul > 0 ? `=SUMIFS(${colRange(tt, tg.tc)},${colRange(tt, tg.keyT)},${fstr(g.key[pg])})*${mul}` : v); }
+          if (tt && onlyPeople && pg < 0 && rg >= 0 && trc >= 0) { const base = R.R.regions && R.R.regions.find(x => String(x.name) === String(g.key[rg])), mul = base && base.target ? Math.round(v / (base.target / (R.R.months || 1))) : 0;
+            return row.push(mul > 0 ? `=SUMIFS(${colRange(tt, tg.tc)},${colRange(tt, trc)},${fstr(g.key[rg])})*${mul}` : v); }
+          return row.push(v); }
+        const ti = col('target'), ai = col('ach');
+        if (k === 'pct') return row.push(ti >= 0 && ai >= 0 ? `=IFERROR(${L(ai)}${r}/${L(ti)}${r},"")` : v);
+        if (k === 'bal') return row.push(ti >= 0 && ai >= 0 ? `=MAX(0,${L(ti)}${r}-${L(ai)}${r})` : v);
+        if (k === 'status') { const pi = col('pct'); return row.push(pi >= 0 ? `=IF(${L(pi)}${r}="","",IF(${L(pi)}${r}>=1,"Achieved",IF(${L(pi)}${r}>=0.8,"Close","Below target")))` : v); }
+        row.push(v);
+      });
+      aoa.push(row);
+    });
+    const tr = first + R.G.length + 1, last = tr - 1;
+    aoa.push(R.kinds.map((x, i) => { const k = x.k.split(':')[0]; if (R.groups.includes(x)) return R.groups.indexOf(x) === 0 ? 'Total' : '';
+      if (['s', 'cnt', 'ach', 'target', 'bal', 'splitv'].includes(k)) return `=SUM(${L(i)}${first + 1}:${L(i)}${last})`;
+      if (k === 'pct') { const ti = R.kinds.findIndex(y => y.k === 'target'), ai = R.kinds.findIndex(y => y.k === 'ach'); return ti >= 0 && ai >= 0 ? `=IFERROR(${L(ai)}${tr}/${L(ti)}${tr},"")` : R.total[i]; }
+      return R.total[i] ?? ''; }));
+    if (!R.groups.length) aoa[aoa.length - 1][0] = aoa[aoa.length - 1][0] || 'Total';
+    const colFmt = {}, styles = {'0,0': {b: true, size: 14, color: '#8B5A2B'}};
+    R.money.forEach(i => colFmt[i] = 'cur'); R.pct.forEach(i => colFmt[i] = 'pct');
+    H.forEach((h, i) => { styles['3,' + i] = {b: true, bg: '#C68642', color: '#ffffff', al: 'c', bd: {t: 1, b: 1, l: 1, r: 1}}; styles[(tr - 1) + ',' + i] = {b: true, bg: '#F3E3CF', bd: {t: 2, b: 1, l: 1, r: 1}}; });
+    const si = R.kinds.findIndex(x => x.k === 'status');
+    const n = writeResult((R.title || 'Report').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 24) || 'Report', aoa, {colFmt, styles, rules: si >= 0 ? [{col: si, op: 'eq', val: 'Achieved', color: '#D4E8C2'}, {col: si, op: 'eq', val: 'Close', color: '#FCEBC8'}, {col: si, op: 'eq', val: 'Below target', color: '#F8DCDC'}] : []});
+    this.sheet = n; switchSheet(n); go('sheet'); refreshAll(); scheduleSave();
+    toast(`📊 Sheet <b>${esc(n)}</b> created${aoa.slice(4).some(r => r.some(v => typeof v === 'string' && v.startsWith('='))) ? ' with live formulas (SUMIFS)' : ''}.`, 'ok', 5000);
+    return n;
+  },
+  exportAs(format) {
+    if (!this.result) return;
+    Export.picked = new Set(['x:sample']); Export.format = format;
+    if (format === 'more') { Export.format = 'xlsx'; return go('export'); }
+    $('#exName').value = (this.result.title || 'Report').replace(/[\\/:*?"<>|]+/g, '_');
+    $('#exCharts').checked = true;
+    Export.download();
+  }
+};
+const keyOf2 = v => String(v).trim().toLowerCase();
+/* hook into the Export tab */
+Export.extraReports = {'x:sample': () => SampleReport.reportAoa()};
+Export.extraNames = {get 'x:sample'() { return ((SampleReport.result && SampleReport.result.title) || 'Sample_Report').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 31); }};
+Export.extraCharts = [ids => ids.includes('x:sample') ? (SampleReport.charts.length ? SampleReport.charts : SampleReport.makeCharts()) : null];
+/* page wiring */
+$('#smMaster').onchange = e => { SampleReport.master = e.target.value; SampleReport.map = SampleReport.headings.map(h => SampleReport.guess(h)); SampleReport.result = null; SampleReport.init(); };
+$('#smChoose').onclick = () => $('#smFile').click();
+$('#smFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (f) SampleReport.readFile(f); };
+$('#smDrop').addEventListener('dragover', e => { e.preventDefault(); $('#smDrop').classList.add('over'); });
+$('#smDrop').addEventListener('dragleave', () => $('#smDrop').classList.remove('over'));
+$('#smDrop').addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); $('#smDrop').classList.remove('over'); const f = e.dataTransfer.files[0]; if (f) SampleReport.readFile(f); });
+$('#smUseTyped').onclick = () => { const v = $('#smTyped').value; if (!v.trim()) return toast('Type the column headings, separated by commas.', 'warn'); SampleReport.setHeadings(v.split(/[,;\t|\n]+/), $('#smTitle') ? $('#smTitle').value : 'Report', 'typed'); };
+$$('.sm-ex').forEach(b => b.onclick = () => { $('#smTyped').value = b.dataset.h; SampleReport.title = b.dataset.t; $('#smUseTyped').click(); });
+$('#smBuild').onclick = () => SampleReport.build();
+$('#smSheet').onclick = () => SampleReport.createSheet();
+$('#smXlsx').onclick = () => SampleReport.exportAs('xlsx');
+$('#smXlsxF').onclick = () => SampleReport.exportAs('xlsxf');
+$('#smPdf').onclick = () => SampleReport.exportAs('pdf');
+$('#smMore').onclick = () => SampleReport.exportAs('more');
 /* =====================================================================
    9. NAVIGATION, TOOLBAR & PANELS
    ===================================================================== */
@@ -2945,6 +3774,7 @@ function go(page) {
   if (page === 'charts') Charts.init();
   if (page === 'targets') Targets.init();
   if (page === 'export') Export.init();
+  if (page === 'sample') SampleReport.init();
   if (page === 'settings') libStatus();
 }
 $$('.tab').forEach(t => t.onclick = () => go(t.dataset.page));
@@ -2953,6 +3783,7 @@ function refreshAll() {
   if ($('#page-sheet').classList.contains('active')) { Grid.rebuildRows(); Grid.render(); updateFormulaBar(); }
   if ($('#page-charts').classList.contains('active')) Charts.init();
   if ($('#page-targets').classList.contains('active')) Targets.init();
+  if ($('#page-sample').classList.contains('active')) SampleReport.init();
 }
 function renderHome() {
   const files = dataTables(), rows = files.reduce((a, n) => a + Math.max(App.hf.getSheetDimensions(sheetId(n)).height - 1, 0), 0);
@@ -3002,7 +3833,7 @@ async function toolbarAction(a) {
     case 'template': return loadTemplate();
     case 'undo': return doUndo();
     case 'redo': return doRedo();
-    case 'bold': { const k = Grid.sel.r + ',' + Grid.sel.c, on = !(getMeta().styles[k] || {}).b; return styleRange(st => { if (on) st.b = true; else delete st.b; }); }
+    case 'bold': { const k = Grid.sel.r + ',' + Grid.sel.c, on = !(getMeta().styles[k] || {}).b; styleRange(st => { if (on) st.b = true; else delete st.b; }); return syncRibbon(); }
     case 'clearFmt': return styleRange(st => { Object.keys(st).forEach(k => delete st[k]); });
     case 'fmtCur': return formatCols('cur');
     case 'fmtPct': return formatCols('pct');
@@ -3036,6 +3867,7 @@ async function toolbarAction(a) {
     case 'copy': { const t = selectionTSV(); try { await navigator.clipboard.writeText(t); toast('Copied 📋'); } catch (e) { toast('Press Ctrl+C to copy.', 'warn'); } Grid.clip = {text: t, range: Grid.range(), sheet: App.active}; return; }
     case 'print': return printSheet();
     case 'exportTab': Export.picked = new Set(['s:' + App.active]); return go('export');
+    default: return ribbonAction(a);
   }
 }
 function shiftColMeta(from, by) {
@@ -3138,7 +3970,19 @@ function printSheet() {
 /* =====================================================================
    11. CHARTS
    ===================================================================== */
-const PALETTE = ['#C68642', '#8B5A2B', '#E0A030', '#A0522D', '#6B8E23', '#D9A066', '#5D4037', '#F2C48D', '#B5651D', '#8D6E63', '#CC9966', '#7B5E57'];
+/* Chart colours: 8 distinct hues in a fixed order, checked for colour-blind separation and contrast on the
+   caramel light and dark surfaces. Never cycled: more than 8 categories fold into a grey "Others". */
+const PALETTE_LIGHT = ['#eb6834', '#2a78d6', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6', '#e34948'];
+const PALETTE_DARK = ['#d95926', '#3987e5', '#199e70', '#c98500', '#d55181', '#008300', '#9085e9', '#e66767'];
+const OTHERS_COLOR = '#a8a29a';
+const chartColors = () => document.documentElement.dataset.theme === 'dark' ? PALETTE_DARK : PALETTE_LIGHT;
+const inkOn = hex => { const n = parseInt(hex.slice(1), 16), r = n >> 16, g = n >> 8 & 255, b = n & 255; return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > .6 ? '#2b1d14' : '#ffffff'; };
+function foldOthers(labels, values, max = 8) { // keep the biggest max-1, add the rest as "Others"
+  if (labels.length <= max) return {labels, values};
+  const idx = values.map((v, i) => i).sort((a, b) => values[b] - values[a]), keep = new Set(idx.slice(0, max - 1));
+  const L = [], V = []; let rest = 0; labels.forEach((l, i) => { if (keep.has(i)) { L.push(l); V.push(values[i]); } else rest += values[i]; });
+  L.push('Others'); V.push(rest); return {labels: L, values: V};
+}
 const Charts = {
   source: 'last', dough: null, bar: null, horiz: false, sortOverride: null,
   init() {
@@ -3175,9 +4019,10 @@ const Charts = {
     }
     let pairs = labels.map((l, i) => [l, values[i]]);
     const s = $('#chSort').value; if (s !== 'none') pairs.sort((a, b) => s === 'desc' ? b[1] - a[1] : a[1] - b[1]);
+    const all = {labels: pairs.map(p => p[0]), values: pairs.map(p => Math.round(p[1] * 100) / 100)};
     const top = +$('#chTop').value;
     if (top && pairs.length > top) { const rest = pairs.slice(top).reduce((a, p) => a + p[1], 0); pairs = pairs.slice(0, top); if (rest) pairs.push(['Others', rest]); }
-    return {labels: pairs.map(p => p[0]), values: pairs.map(p => Math.round(p[1] * 100) / 100), title: $('#chTitle').value || title, vname, table};
+    return {labels: pairs.map(p => p[0]), values: pairs.map(p => Math.round(p[1] * 100) / 100), all, title: $('#chTitle').value || title, vname, table};
   },
   draw() {
     const d = this.data();
@@ -3187,20 +4032,22 @@ const Charts = {
     if (!d || !d.labels.length || !window.Chart) return;
     const txt = getComputedStyle(document.documentElement).getPropertyValue('--text').trim(), line = getComputedStyle(document.documentElement).getPropertyValue('--line').trim();
     Chart.defaults.color = txt; Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
-    const colors = d.labels.map((_, i) => PALETTE[i % PALETTE.length]);
+    const pal = chartColors(), dd = foldOthers(d.all.labels, d.all.values);   // doughnut: max 8 slices
+    const colors = dd.labels.map((l, i) => l === 'Others' ? OTHERS_COLOR : pal[i]);
     const isMoney = /sales|value|amount|revenue|price|target/i.test(d.vname || '');
     const fmtV = v => isMoney ? money(v) : fmtNum(v);
     $('#doughTitle').textContent = '🍩 ' + d.title; $('#barTitle').textContent = '📊 ' + d.title;
-    const total = d.values.reduce((a, b) => a + b, 0);
-    const pctLabels = {id: 'pct', afterDatasetsDraw(ch) { const {ctx} = ch, meta = ch.getDatasetMeta(0); ctx.save(); ctx.font = '600 12px ' + Chart.defaults.font.family; ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      meta.data.forEach((arc, i) => { const p = total ? d.values[i] / total : 0; if (p < .04) return; const pos = arc.tooltipPosition(); ctx.fillText(Math.round(p * 100) + '%', pos.x, pos.y); }); ctx.restore(); }};
+    const total = dd.values.reduce((a, b) => a + b, 0);
+    const short = v => Math.abs(v) >= 1e5 ? (isMoney ? App.settings.currency : '') + fmtNum(Math.round(v / 1e5 * 10) / 10) + 'L' : fmtV(v);
+    const pctLabels = {id: 'pct', afterDatasetsDraw(ch) { const {ctx} = ch, meta = ch.getDatasetMeta(0); ctx.save(); ctx.font = '600 12px ' + Chart.defaults.font.family; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      meta.data.forEach((arc, i) => { const p = total ? dd.values[i] / total : 0; if (p < .04) return; const pos = arc.tooltipPosition(); ctx.fillStyle = inkOn(colors[i]); ctx.fillText(Math.round(p * 100) + '%', pos.x, pos.y); }); ctx.restore(); }};
     const centerText = {id: 'center', afterDraw(ch) { const {ctx, chartArea: a} = ch; ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = txt; ctx.font = '700 17px ' + Chart.defaults.font.family; const cx = (a.left + a.right) / 2, cy = (a.top + a.bottom) / 2; ctx.fillText(fmtV(total), cx, cy + 2); ctx.font = '12px ' + Chart.defaults.font.family; ctx.fillText('Total', cx, cy - 16); ctx.restore(); }};
-    const barLabels = {id: 'bl', afterDatasetsDraw(ch) { const {ctx} = ch, meta = ch.getDatasetMeta(0); if (meta.data.length > 25) return; ctx.save(); ctx.font = '600 11px ' + Chart.defaults.font.family; ctx.fillStyle = txt;
-      meta.data.forEach((b, i) => { const v = fmtV(d.values[i]); if (Charts.horiz) { ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(v, b.x + 4, b.y); } else { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(v, b.x, b.y - 3); } }); ctx.restore(); }};
+    const barLabels = {id: 'bl', afterDatasetsDraw(ch) { const {ctx} = ch, meta = ch.getDatasetMeta(0); if (meta.data.length > 16) return; ctx.save(); ctx.font = (meta.data.length > 10 ? '600 10px ' : '600 11px ') + Chart.defaults.font.family; ctx.fillStyle = txt;
+      meta.data.forEach((b, i) => { const v = meta.data.length > 6 ? short(d.values[i]) : fmtV(d.values[i]); if (Charts.horiz) { ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText(v, b.x + 4, b.y); } else { ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillText(v, b.x, b.y - 3); } }); ctx.restore(); }};
     if (this.dough) this.dough.destroy(); if (this.bar) this.bar.destroy();
-    this.dough = new Chart($('#doughCanvas'), {type: 'doughnut', data: {labels: d.labels, datasets: [{data: d.values, backgroundColor: colors, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card').trim(), borderWidth: 2}]},
+    this.dough = new Chart($('#doughCanvas'), {type: 'doughnut', data: {labels: dd.labels, datasets: [{data: dd.values, backgroundColor: colors, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--card').trim(), borderWidth: 2}]},
       options: {responsive: true, maintainAspectRatio: false, cutout: '58%', plugins: {legend: {position: 'right', labels: {boxWidth: 14}}, tooltip: {callbacks: {label: c => ` ${c.label}: ${fmtV(c.raw)} (${total ? Math.round(c.raw / total * 1000) / 10 : 0}%)`}}}}, plugins: [pctLabels, centerText]});
-    this.bar = new Chart($('#barCanvas'), {type: 'bar', data: {labels: d.labels, datasets: [{label: d.vname, data: d.values, backgroundColor: colors, borderRadius: 8, maxBarThickness: 48}]},
+    this.bar = new Chart($('#barCanvas'), {type: 'bar', data: {labels: d.labels, datasets: [{label: d.vname, data: d.values, backgroundColor: d.labels.map(l => l === 'Others' ? OTHERS_COLOR : pal[0]), borderRadius: 4, maxBarThickness: 44}]},
       options: {responsive: true, maintainAspectRatio: false, indexAxis: this.horiz ? 'y' : 'x', layout: {padding: {top: 20, right: this.horiz ? 70 : 10}}, plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => ' ' + fmtV(c.raw)}}},
         scales: {x: {grid: {color: line}, ticks: {callback: (v, i) => this.horiz ? fmtNum(v) : String(d.labels[i]).slice(0, 18)}}, y: {grid: {color: line}, ticks: {callback: (v, i) => this.horiz ? String(d.labels[i]).slice(0, 22) : fmtNum(v)}}}}, plugins: [barLabels]});
   },
@@ -3309,6 +4156,7 @@ function applySettings() {
   document.documentElement.dataset.theme = App.settings.theme;
   $('#setTheme').value = App.settings.theme; $('#setCur').value = App.settings.currency; $('#setDec').value = String(App.settings.decimals); $('#setDate').value = App.settings.dateFmt;
   $('#curBtn').textContent = App.settings.currency.trim() || '#';
+  $('#grid').classList.toggle('nogrid', App.settings.gridlines === false);
 }
 ['#setTheme', '#setCur', '#setDec', '#setDate'].forEach(s => $(s).onchange = () => {
   App.settings.theme = $('#setTheme').value; App.settings.currency = $('#setCur').value; App.settings.decimals = +$('#setDec').value; App.settings.dateFmt = $('#setDate').value;
@@ -3316,7 +4164,7 @@ function applySettings() {
 });
 function libStatus() {
   const local = n => { const ss = $$('script').filter(x => x.src && x.src.includes(n)); if (!ss.length) return '📦 built into this file (offline)'; return ss.some(x => /^https?:/.test(x.src)) ? '🌐 from internet' : '📦 from libs folder (offline)'; };
-  const rows = [['Excel & CSV reader', !!window.XLSX, local('xlsx.full')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
+  const rows = [['Excel & CSV reader / writer', !!window.XLSX, local('xlsx-js-style')], ['Chart pictures in Excel', !!window.JSZip, local('jszip')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
     ['PDF reader', true, App.libs.pdf === 'internet' ? '🌐 from internet' : App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : window.pdfjsLib ? '📦 built into this file (offline)' : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, App.libs.ocr === 'built-in' || (window.OCR_ENG_JS && !App.libs.ocr) ? '📦 built into this file (offline)' : App.libs.ocr === 'local' ? '📦 from libs folder (offline)' : App.libs.ocr === 'internet' ? '🌐 from internet' : 'loads when you upload a picture (offline from libs/tesseract)']];
   $('#libStatus').innerHTML = rows.map(([n, ok, how]) => `<div class="row" style="padding:3px 0">${ok ? '✅' : '❌'} <b>${n}</b> <span class="muted">${how}</span></div>`).join('');
 }

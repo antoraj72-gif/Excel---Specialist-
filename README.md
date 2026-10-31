@@ -18,9 +18,10 @@ No installation, no login and **no internet needed**: every library, including t
 |---|---|
 | 🏠 Home | Quick start, stats and recent files |
 | 📂 My Files | Upload Excel (.xlsx/.xls), CSV, PDF, JPG, PNG. Preview, rename, set a ⭐ Master file, delete |
-| 📊 Work Sheet | Excel-style sheet with the ✨ request box, toolbar, formula bar and sheet tabs |
-| 🎯 Targets | **Target vs achievement by salesperson or by region** (switch with **View by**). The region view adds up each region's targets and sales, shows the best salesperson per region, and lists every salesperson inside each region card. For each view: team gauge, target-vs-achieved chart, report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
-| ⬇️ Export | Tick any sheets and reports (target vs achievement by salesperson or region, latest chart data), then choose **Normal Excel (.xlsx, values only)**, **Excel with formulas**, **Excel 97-2003 (.xls)**, **CSV** or **PDF / Print**. Normal Excel keeps money (₹ with Indian grouping), % and date formats and adds filter buttons to header rows |
+| 📊 Work Sheet | Excel-style sheet with the ✨ request box, formula bar, sheet tabs and an **Excel-style ribbon**: **File** (Normal Excel, Excel with formulas, CSV, more export, print), **Home** (cut/copy/paste, font style, font size, **B** *I* <u>U</u>, font colour, fill colour, borders/box, alignment, number formats, colour rules, insert/delete rows and columns), **Insert** (sheet, sales template, pivot, chart, targets, report from sample, function), **Data** (sort, **filter buttons on the header row** like Excel, clear filters, custom filter, remove duplicates, find) and **View** (freeze top row, gridlines, focus mode, dark mode). Shortcuts: Ctrl+B / I / U / Z / Y / C / X / V / F |
+| 🎯 Targets | **Target vs achievement by salesperson or by region** (switch with **View by**). The region view adds up each region's targets and sales, shows the best salesperson per region, and lists every salesperson inside each region card. For each view: team gauge, target-vs-achieved chart, a **month-wise target vs achievement trend** (whole team, one region or one salesperson, with % per month), report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
+| 🧩 Sample Report | Upload a **sample report** as Excel/CSV or a **photo/screenshot** (or type its headings). The app reads the column headings (e.g. *Employee Name, Category, Month/Year, Target, Achievement, Achievement %*), shows what each one means (you can change any of them), and builds the same report from your master data, with a dashboard of charts. Every salesperson × month gets a row, even with no sales. When a column like Category can't carry a target, it becomes separate Achieved columns (one per category). Download as Normal Excel + charts, Excel with formulas, a sheet in the app, or PDF |
+| ⬇️ Export | Tick any sheets and reports (target vs achievement by salesperson, region or month, sample report, latest chart data), then choose **Normal Excel (.xlsx, values only)**, **Excel with formulas**, **Excel 97-2003 (.xls)**, **CSV** or **PDF / Print**. Excel files keep **fonts, sizes, bold/italic/underline, colours, fills, borders, alignment**, colour rules, money (₹ with Indian grouping), % and dates, add filter buttons to header rows, and include a **Dashboard sheet with the charts as pictures**. PDF includes the charts too |
 | 📈 Charts | Doughnut and bar charts of your latest result, plus summary cards. Download as PNG or print |
 | 📘 Formula Help | Every formula explained simply, with a **Try it** button |
 | ⚙️ Settings | Light/dark caramel theme, money symbol, decimals, date format |
@@ -29,6 +30,7 @@ No installation, no login and **no internet needed**: every library, including t
 All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
 
 **🎯 Target vs achievement**
+- `Month wise target vs achievement trend`
 - `Target vs achievement dashboard` · `Target vs achievement for 2025` · `Target vs achievement for March`
 - `Target vs achievement sheet for each salesperson` (creates a sheet with formulas)
 - `Region wise target vs achievement` · `Region wise target vs achievement sheet for 2025`
@@ -95,11 +97,14 @@ SUM, SUMIF(S), AVERAGE, AVERAGEIF(S), COUNT, COUNTA, COUNTBLANK, COUNTIF(S), MIN
 - Photo reading takes a few seconds the first time (it loads about 8 MB from `libs`). Check the preview, because photos can have small reading mistakes.
 - PDF reading works best with PDFs that contain real text. For scanned pages, upload a photo or screenshot (JPG/PNG) instead. You can fix any cell in the preview before saving.
 - Runs smoothly with tens of thousands of rows.
+- Chart colours are a fixed set of 8 colours checked to stay distinguishable for colour-blind readers. More than 8 slices are grouped into a grey "Others".
 
 ## Libraries in `libs/` (open source)
 | File | Library | Licence |
 |---|---|---|
-| `xlsx.full.min.js` | SheetJS Community 0.18.5 | Apache-2.0 |
+| `xlsx-js-style.min.js` | xlsx-js-style 1.2.0 (SheetJS 0.18.5 with cell styles) | Apache-2.0 |
+| `cpexcel.js` | SheetJS code pages (old .xls / CSV encodings) | Apache-2.0 |
+| `jszip.min.js` | JSZip 3.10.1 (chart pictures inside Excel files) | MIT |
 | `hyperformula.full.min.js` | HyperFormula 2.7.1 | GPL-3.0 (used with the `gpl-v3` key) |
 | `chart.umd.min.js` | Chart.js 4.4.1 | MIT |
 | `pdf.min.js`, `pdf.worker.min.js` | PDF.js 3.11.174 | Apache-2.0 |

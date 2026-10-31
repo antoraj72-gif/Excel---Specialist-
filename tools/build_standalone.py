@@ -10,8 +10,8 @@ def inline(path):
     if re.search(r'<!--|<script|</script', js, re.I):
         return '<script>/* '+path+' */__caramelLib("'+base64.b64encode(js.encode('utf-8')).decode()+'")</script>'
     return '<script>/* '+path+' */\n'+js+'\n</script>'
-html=html.replace('<script src="libs/xlsx.full.min.js"></script>', LOADER+'<script src="libs/xlsx.full.min.js"></script>',1)
-for lib in ['xlsx.full.min.js','hyperformula.full.min.js','chart.umd.min.js']:
+html=html.replace('<script src="libs/cpexcel.js"></script>', LOADER+'<script src="libs/cpexcel.js"></script>',1)
+for lib in ['cpexcel.js','xlsx-js-style.min.js','jszip.min.js','hyperformula.full.min.js','chart.umd.min.js']:
     tag='<script src="libs/%s"></script>'%lib
     assert tag in html, lib
     html=html.replace(tag, inline('libs/'+lib))
