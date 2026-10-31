@@ -19,7 +19,8 @@ No installation, no login and **no internet needed**: every library, including t
 | 🏠 Home | Quick start, stats and recent files |
 | 📂 My Files | Upload Excel (.xlsx/.xls), CSV, PDF, JPG, PNG. Preview, rename, set a ⭐ Master file, delete |
 | 📊 Work Sheet | Excel-style sheet with the ✨ request box, toolbar, formula bar and sheet tabs |
-| 🎯 Targets | **Target vs achievement for each salesperson**: team gauge, target-vs-achieved chart, report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
+| 🎯 Targets | **Target vs achievement by salesperson or by region** (switch with **View by**). The region view adds up each region's targets and sales, shows the best salesperson per region, and lists every salesperson inside each region card. For each view: team gauge, target-vs-achieved chart, report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
+| ⬇️ Export | Tick any sheets and reports (target vs achievement by salesperson or region, latest chart data), then choose **Normal Excel (.xlsx, values only)**, **Excel with formulas**, **Excel 97-2003 (.xls)**, **CSV** or **PDF / Print**. Normal Excel keeps money (₹ with Indian grouping), % and date formats and adds filter buttons to header rows |
 | 📈 Charts | Doughnut and bar charts of your latest result, plus summary cards. Download as PNG or print |
 | 📘 Formula Help | Every formula explained simply, with a **Try it** button |
 | ⚙️ Settings | Light/dark caramel theme, money symbol, decimals, date format |
@@ -30,6 +31,7 @@ All of these work on the demo data. Click **More ideas…** in the app to run an
 **🎯 Target vs achievement**
 - `Target vs achievement dashboard` · `Target vs achievement for 2025` · `Target vs achievement for March`
 - `Target vs achievement sheet for each salesperson` (creates a sheet with formulas)
+- `Region wise target vs achievement` · `Region wise target vs achievement sheet for 2025`
 - Targets can come from a **Target** column in the sales file, or from a separate file (for example *Employee ID, Monthly Target*), matched by name or ID.
 
 **🔎 Lookups (VLOOKUP)**
@@ -79,7 +81,7 @@ All of these work on the demo data. Click **More ideas…** in the app to run an
 **Tips**
 - Use the names of your columns and files as they appear (small spelling mistakes are fine). "emp name", "employee" and "salesperson" all find *Employee Name*.
 - Before changing anything, the app shows a preview: **✅ Apply / ✏️ Change / ❌ Cancel**.
-- Results use **real Excel formulas**, so they update when data changes and still work after **⬇️ Excel** download.
+- Results use **real Excel formulas**, so they update when data changes. Download them with formulas, or as a normal values-only Excel file, from the **⬇️ Export** tab.
 - Each result shows **"How I did it"**, the formula plus a one-line explanation, so you can learn as you go.
 - Made a mistake? Click **↶ Undo** (or press Ctrl+Z).
 - If the app isn't sure what you mean, it asks a question with buttons to click.

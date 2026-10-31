@@ -270,6 +270,16 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 .pcard{display:flex;gap:14px;align-items:center;padding:14px 16px}
 .pcard .pname{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ring{flex:none;width:86px;height:86px;border-radius:50%;display:grid;place-items:center}
+.ex-h{margin:14px 0 8px;color:var(--text-soft)}
+.ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+.ex-item,.ex-fmt{display:flex;gap:10px;align-items:center;border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;background:var(--card);transition:.15s}
+.ex-item:hover,.ex-fmt:hover{border-color:var(--caramel)}
+.ex-item:has(input:checked),.ex-fmt.on{border-color:var(--caramel);background:var(--latte-2);box-shadow:0 0 0 3px rgba(198,134,66,.15)}
+.ex-ic{font-size:22px;flex:none}
+.ex-fmts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px}
+.rpeople{margin-top:12px;border-top:1px solid var(--line);padding-top:8px;display:flex;flex-direction:column;gap:5px}
+.rp{display:flex;align-items:center;gap:8px;font-size:12.5px}.rp .rpn{width:110px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.rp b{width:48px;text-align:right;flex:none}.rp .pbar{min-width:60px;height:8px}
+.rcards{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .ring>span{width:66px;height:66px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-weight:700;font-size:14px}
 /* ---------- Help ---------- */
 .fhelp h3{color:var(--caramel-dark);font-size:17px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
@@ -318,6 +328,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <button class="tab" data-page="sheet" data-tip="Your Excel sheet and smart helper">📊 <span class="t">Work Sheet</span></button>
     <button class="tab" data-page="charts" data-tip="See your results as charts">📈 <span class="t">Charts</span></button>
     <button class="tab" data-page="targets" data-tip="Target vs achievement for each salesperson">🎯 <span class="t">Targets</span></button>
+    <button class="tab" data-page="export" data-tip="Download your sheets and reports">⬇️ <span class="t">Export</span></button>
     <button class="tab" data-page="help" data-tip="Every formula explained simply">📘 <span class="t">Formula Help</span></button>
     <button class="tab" data-page="settings" data-tip="Colours, money symbol, dates">⚙️ <span class="t">Settings</span></button>
   </nav>
@@ -417,6 +428,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <span class="sep"></span>
     <button class="tb" data-act="xlsx" data-tip="Download as Excel (keeps formulas)">⬇️ <span class="t">Excel</span></button>
     <button class="tb" data-act="csv" data-tip="Download this sheet as CSV">⬇️ CSV</button>
+    <button class="tb" data-act="exportTab" data-tip="More download options: normal Excel, old Excel, PDF…">⬇️ <span class="t">Export…</span></button>
     <button class="tb" data-act="copy" data-tip="Copy selected cells">📋</button>
     <button class="tb" data-act="print" data-tip="Print">🖨️</button>
   </div>
@@ -492,6 +504,24 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <div class="row noprint"><button class="btn light" id="tgSheet" data-tip="Make a sheet with live formulas">📊 Create Excel sheet</button><button class="btn light" id="tgPng">⬇️ Chart PNG</button><button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button></div></div>
   <div class="card noprint" id="tgSetup"></div>
   <div id="tgBody" style="display:flex;flex-direction:column;gap:16px"></div>
+ </div>
+</section>
+
+<!-- ================= EXPORT ================= -->
+<section class="page" id="page-export">
+ <div class="wrap" style="display:flex;flex-direction:column;gap:16px;max-width:1000px">
+  <h2 style="margin:0">⬇️ Export</h2>
+  <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">1️⃣ What do you want to export?</h3>
+    <div class="row"><button class="btn sm light" id="exAll">Select all</button><button class="btn sm ghost" id="exNone">Clear</button></div></div>
+    <div id="exItems"></div></div>
+  <div class="card"><h3>2️⃣ Choose a format</h3><div class="ex-fmts" id="exFormats"></div></div>
+  <div class="card"><h3>3️⃣ Download</h3>
+    <div class="row" style="align-items:flex-end">
+      <label class="field" style="flex:1;min-width:240px">File name<input type="text" id="exName"></label>
+      <label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:9px"><input type="checkbox" id="exFilter" checked> Add filter buttons to header rows</label>
+      <button class="btn big" id="exGo">⬇️ Download</button>
+    </div>
+    <p class="muted" id="exSummary" style="margin:10px 0 0"></p></div>
  </div>
 </section>
 
@@ -2380,7 +2410,9 @@ const EXAMPLE_GROUPS = [
     'Target vs achievement dashboard',
     'Target vs achievement for 2025',
     'Target vs achievement for March',
-    'Target vs achievement sheet for each salesperson']],
+    'Target vs achievement sheet for each salesperson',
+    'Region wise target vs achievement',
+    'Region wise target vs achievement sheet for 2025']],
   ['🔎 Lookups (VLOOKUP)', [
     'From Master, bring Designation and Monthly Target by Employee ID',
     'From Master, bring Designation by Employee Name',
@@ -2550,26 +2582,35 @@ const Targets = {
     s.rows.forEach(r => { const k = keyOf(r[c.keyS ?? c.pc]); if (!k) return; if (!people.has(k)) people.set(k, {key: r[c.keyS ?? c.pc], name: r[c.pc], region: rc >= 0 ? r[rc] : '', achieved: 0, target: 0}); });
     const data = s.rows.filter(r => passes(r, filters));
     data.forEach(r => { const p = people.get(keyOf(r[c.keyS ?? c.pc])); if (p && typeof r[c.vc] === 'number') p.achieved += r[c.vc]; });
-    let tName = '';
+    let tName = '', trc = -1;
     if (c.tt) {
       const t = readTable(c.tt); tName = t.headers[c.tc];
       if (c.tt === c.sales) data.forEach(r => { const p = people.get(keyOf(r[c.keyS])); if (p && typeof r[c.tc] === 'number') p.target += r[c.tc]; });
       else {
-        const tn = t.headers.findIndex(h => this.personRe.test(h)), trc = t.headers.findIndex(h => /region|zone|territory/i.test(h));
+        const tn = t.headers.findIndex(h => this.personRe.test(h)); trc = t.headers.findIndex(h => /region|zone|territory/i.test(h));
         t.rows.forEach(r => {
           const k = keyOf(r[c.keyT]); if (!k || typeof r[c.tc] !== 'number') return;
           if (!people.has(k)) people.set(k, {key: r[c.keyT], name: tn >= 0 ? r[tn] : r[c.keyT], region: trc >= 0 ? r[trc] : '', achieved: 0, target: 0});
-          const p = people.get(k); p.target += r[c.tc] * (c.monthly ? months : 1); if (!p.region && trc >= 0) p.region = r[trc];
+          const p = people.get(k); p.target += r[c.tc] * (c.monthly ? months : 1); if (trc >= 0 && r[trc] !== '') { p.tRegion = r[trc]; if (!p.region) p.region = r[trc]; }
         });
       }
     }
     const list = [...people.values()].map(p => {
       const pct = p.target ? p.achieved / p.target : null;
-      return Object.assign(p, {pct, balance: Math.max(0, p.target - p.achieved), status: pct === null ? 'none' : pct >= 1 ? 'ok' : pct >= .8 ? 'mid' : 'low'});
+      return Object.assign(p, {pct, balance: Math.max(0, p.target - p.achieved), status: tgStatus(pct)});
     });
     const tot = {target: list.reduce((a, p) => a + p.target, 0), achieved: list.reduce((a, p) => a + p.achieved, 0)};
     tot.pct = tot.target ? tot.achieved / tot.target : null;
-    return {list, tot, months, filters, P, s, tName, rc};
+    // region groups: targets by each salesperson's region (target file first), achieved by each sale's region
+    let regions = null;
+    if (rc >= 0 || list.some(p => p.tRegion || p.region)) {
+      const map = new Map(), get = n => { const k = String(n === '' || n === undefined || n === null ? '(no region)' : n); if (!map.has(k)) map.set(k, {name: k, target: 0, achieved: 0, people: []}); return map.get(k); };
+      list.forEach(p => { const g = get(p.tRegion || p.region); g.target += p.target; g.people.push(p); if (rc < 0) g.achieved += p.achieved; });
+      if (rc >= 0) data.forEach(r => { if (typeof r[c.vc] === 'number') get(r[rc]).achieved += r[c.vc]; });
+      regions = [...map.values()].map(g => { const pct = g.target ? g.achieved / g.target : null;
+        return Object.assign(g, {pct, count: g.people.length, balance: Math.max(0, g.target - g.achieved), status: tgStatus(pct), people: g.people.slice().sort((a, b) => (b.pct ?? -1) - (a.pct ?? -1))}); });
+    }
+    return {list, tot, months, filters, P, s, tName, rc, trc, regions};
   },
   sortList(list) {
     const k = this.sort || 'pct';
@@ -2594,7 +2635,10 @@ const Targets = {
     const years = [...new Set(P.keys.map(k => Math.floor(k / 100)))].filter(Boolean);
     const periodOpts = opt('all', 'All data', c.period === 'all') + years.map(y => opt('y:' + y, 'Year ' + y, c.period === 'y:' + y)).join('') + P.keys.map(k => opt('m:' + k, monthName(k % 100) + (Math.floor(k / 100) ? ' ' + Math.floor(k / 100) : ''), c.period === 'm:' + k)).join('');
     const tt = c.tt ? readTable(c.tt) : null;
+    const hasRegion = s.headers.some(h => /region|zone|territory/i.test(h)) || (tt && tt.headers.some(h => /region|zone|territory/i.test(h)));
+    if (!hasRegion) this.view = 'person';
     $('#tgSetup').innerHTML = `<div class="row" style="align-items:flex-end">
+      <label class="field">👁️ View by<select id="tgView">${opt('person', '👤 Salesperson', this.view !== 'region')}${hasRegion ? opt('region', '🗺️ Region', this.view === 'region') : ''}</select></label>
       <label class="field">📅 Period<select id="tgPeriod">${periodOpts}</select></label>
       <label class="field">Sales data<select id="tgSales">${tables.map(n => opt(n, n, n === c.sales)).join('')}</select></label>
       <label class="field">Salesperson<select id="tgPc">${s.headers.map((h, i) => opt(i, h, i === c.pc)).join('')}</select></label>
@@ -2606,6 +2650,7 @@ const Targets = {
     </div>`;
     const re = () => { this.renderSetup(); this.draw(); };
     $('#tgPeriod').onchange = e => { c.period = e.target.value; this.draw(); };
+    $('#tgView').onchange = e => { this.view = e.target.value; this.draw(); };
     $('#tgSales').onchange = e => { this.cfg = Object.assign({}, c, {sales: e.target.value, period: 'all'}); const s2 = readTable(this.cfg.sales); this.cfg.pc = Math.max(0, this.personCol(s2)); this.cfg.vc = Math.max(0, this.valueCol(s2)); this.detectTarget(this.cfg); re(); };
     $('#tgPc').onchange = e => { c.pc = +e.target.value; this.detectTarget(c); re(); };
     $('#tgVc').onchange = e => { c.vc = +e.target.value; this.draw(); };
@@ -2623,6 +2668,7 @@ const Targets = {
   draw() {
     const R = this.compute(); this.last = R; const body = $('#tgBody');
     if (!R) { body.innerHTML = ''; return; }
+    if (this.view === 'region' && R.regions) return this.drawRegion(R);
     const {list, tot, months} = R, c = this.cfg, s = R.s;
     const noTarget = !c.tt || !list.some(p => p.target);
     const per = this.periodLabel(c.period) + (c.tt && c.tt !== c.sales && c.monthly ? ` · monthly target × ${months} month${months > 1 ? 's' : ''}` : '');
@@ -2683,6 +2729,7 @@ const Targets = {
   /* Excel sheet with live formulas */
   createSheet() {
     const R = this.last || this.compute(); if (!R) return toast('No sales data yet.', 'warn');
+    if (this.view === 'region' && R.regions) return this.createRegionSheet(R);
     const c = this.cfg, s = R.s, t = c.tt ? readTable(c.tt) : null, sorted = this.sortList(R.list);
     const useKey = (c.keyS ?? c.pc) !== c.pc, hasReg = sorted.some(p => p.region);
     const H = ['Salesperson']; if (useKey) H.push(s.headers[c.keyS]); if (hasReg) H.push('Region');
@@ -2709,8 +2756,87 @@ const Targets = {
     switchSheet(n); go('sheet'); refreshAll(); scheduleSave();
     toast(`📊 Sheet <b>${esc(n)}</b> created with live formulas (SUMIFS for achieved and target). Use ⬇️ Excel to download it.`, 'ok', 6000);
     return n;
+  },
+  drawRegion(R) {
+    const c = this.cfg, s = R.s, tot = R.tot, regs = this.sortList(R.regions), body = $('#tgBody');
+    const noTarget = !c.tt || !regs.some(g => g.target);
+    const per = this.periodLabel(c.period) + (c.tt && c.tt !== c.sales && c.monthly ? ` · monthly target × ${R.months} month${R.months > 1 ? 's' : ''}` : '');
+    const top = regs.filter(g => g.pct !== null)[0], cnt = st => regs.filter(g => g.status === st).length;
+    const bar = (pct, st) => `<div class="pbar"><i style="width:${Math.min(100, (pct || 0) * 100)}%;background:${tgColor(st)}"></i></div>`;
+    const best = g => g.people.find(p => p.pct !== null);
+    body.innerHTML = `
+      ${noTarget ? `<div class="card" style="border-left:5px solid var(--warn)"><b>⚠️ No targets found.</b> <span class="muted">Pick a target file in <b>Targets from</b>. Achieved amounts are shown below.</span></div>` : ''}
+      <div class="muted" style="margin-top:-6px">📅 ${esc(per)} · 🗺️ Region view · Achieved = total <b>${esc(s.headers[c.vc])}</b> by each sale's region · Target = salespeople's targets added up by their region</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">🎯 Team target</div><div class="v">${wmoney(tot.target)}</div></div>
+        <div class="kpi"><div class="l">💰 Team achieved</div><div class="v">${wmoney(tot.achieved)}</div></div>
+        <div class="kpi"><div class="l">📊 Team achievement</div><div class="v" style="color:${tgColor(tgStatus(tot.pct))}">${tgPct(tot.pct)}</div></div>
+        <div class="kpi"><div class="l">📉 Balance to target</div><div class="v">${wmoney(Math.max(0, tot.target - tot.achieved))}</div></div>
+        <div class="kpi"><div class="l">🏆 Top region</div><div class="v wrap">${top ? esc(top.name) + ' · ' + tgPct(top.pct) : '–'}</div></div>
+        <div class="kpi"><div class="l">🗺️ Regions</div><div class="v wrap">✅ ${cnt('ok')} · 🟡 ${cnt('mid')} · 🔴 ${cnt('low')}</div></div>
+      </div>
+      <div class="tg-charts">
+        <div class="card"><h3>🎯 Team achievement</h3><div class="chart-box" style="height:250px"><canvas id="tgGauge"></canvas></div>
+          <div class="muted" style="text-align:center;font-size:12.5px">${wmoney(tot.achieved)} of ${wmoney(tot.target)}</div></div>
+        <div class="card"><h3 style="margin-bottom:2px">🗺️ Target vs achieved by region</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Achieved bar: 🟢 100% or more · 🟡 80–99% · 🔴 below 80%</div><div class="chart-box" style="height:${Math.max(280, Math.min(640, regs.length * 60 + 80))}px"><canvas id="tgBar"></canvas></div></div>
+      </div>
+      <div class="card"><h3>📋 Region report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>Region</th><th style="text-align:right">Salespeople</th><th style="text-align:right">Target</th><th style="text-align:right">Achieved</th><th style="text-align:right">Balance</th><th>Achievement</th><th>Status</th><th>Best salesperson</th></tr></thead><tbody>
+        ${regs.map((g, i) => { const b = best(g); return `<tr><td>${i + 1}</td><td><b>${esc(g.name)}</b></td><td style="text-align:right">${g.count}</td><td style="text-align:right">${wmoney(g.target)}</td><td style="text-align:right">${wmoney(g.achieved)}</td><td style="text-align:right">${wmoney(g.balance)}</td>
+          <td><div class="row" style="gap:8px;flex-wrap:nowrap">${bar(g.pct, g.status)}<b style="min-width:52px">${tgPct(g.pct)}</b></div></td><td>${tgBadge(g.status)}</td><td>${b ? esc(b.name) + ' <span class="muted">(' + tgPct(b.pct) + ')</span>' : '–'}</td></tr>`; }).join('')}
+        <tr class="tg-total"><td></td><td>Team total</td><td style="text-align:right">${R.list.length}</td><td style="text-align:right">${wmoney(tot.target)}</td><td style="text-align:right">${wmoney(tot.achieved)}</td><td style="text-align:right">${wmoney(Math.max(0, tot.target - tot.achieved))}</td><td><b>${tgPct(tot.pct)}</b></td><td></td><td></td></tr>
+      </tbody></table></div></div>
+      <div><h3>🗺️ Each region and its salespeople</h3><div class="pcards rcards">${regs.map(g => { const v = Math.min(100, (g.pct || 0) * 100);
+        return `<div class="card"><div class="pcard" style="padding:0;box-shadow:none"><div class="ring" style="background:conic-gradient(${tgColor(g.status)} ${v}%, var(--latte) 0)"><span>${tgPct(g.pct)}</span></div>
+          <div style="min-width:0"><div class="pname" style="font-size:16px">${esc(g.name)}</div><div class="muted" style="font-size:12px">${g.count} ${g.count === 1 ? 'salesperson' : 'salespeople'}</div>
+          <div style="font-size:12.5px;margin-top:4px">🎯 ${wmoney(g.target)}<br>💰 ${wmoney(g.achieved)}${g.balance > 0 ? `<br><span class="muted">Needs ${wmoney(g.balance)} more</span>` : g.target ? `<br><span style="color:var(--ok)">+${wmoney(g.achieved - g.target)} above</span>` : ''}</div>
+          <div style="margin-top:6px">${tgBadge(g.status)}</div></div></div>
+          <div class="rpeople">${g.people.map(p => `<div class="rp"><span class="rpn">${esc(p.name)}</span>${bar(p.pct, p.status)}<b>${tgPct(p.pct)}</b></div>`).join('')}</div></div>`; }).join('')}</div></div>`;
+    this.drawCharts(regs, tot, tgColor);
+  },
+  createRegionSheet(R) {
+    const c = this.cfg, s = R.s, t = c.tt ? readTable(c.tt) : null, regs = this.sortList(R.regions), per = critPairs(s, R.filters), L = colName;
+    const H = ['Region', 'Salespeople', 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], first = 5, last = first + regs.length - 1;
+    const aoa = [[`Region-wise Target vs Achievement – ${this.periodLabel(c.period)}`], [`Achieved = total ${s.headers[c.vc]} by region from ${c.sales}` + (t ? ` · Target = ${t.headers[c.tc]} from ${c.tt}, added up by region` + (c.tt !== c.sales && c.monthly ? ` × ${R.months} month(s)` : '') : '')], [], H];
+    regs.forEach((g, i) => {
+      const r = first + i, reg = `$A${r}`;
+      let tf = String(Math.round(g.target * 100) / 100);
+      if (t && c.tt === c.sales && R.rc >= 0) tf = aggFormula('sum', colRange(s, c.tc), [colRange(s, R.rc), reg, ...per]);
+      else if (t && R.trc >= 0) tf = `SUMIFS(${colRange(t, c.tc)},${colRange(t, R.trc)},${reg})` + (c.monthly && R.months !== 1 ? `*${R.months}` : '');
+      const af = R.rc >= 0 ? aggFormula('sum', colRange(s, c.vc), [colRange(s, R.rc), reg, ...per]) : String(Math.round(g.achieved * 100) / 100);
+      aoa.push([g.name, g.count, '=' + tf, '=' + af, `=MAX(0,C${r}-D${r})`, `=IFERROR(D${r}/C${r},"")`, `=IF(F${r}="","No target",IF(F${r}>=1,"Achieved",IF(F${r}>=0.8,"Close","Below target")))`]);
+    });
+    const tr = last + 1;
+    aoa.push(['Team total', `=SUM(B${first}:B${last})`, `=SUM(C${first}:C${last})`, `=SUM(D${first}:D${last})`, `=MAX(0,C${tr}-D${tr})`, `=IFERROR(D${tr}/C${tr},"")`, '']);
+    const styles = {'0,0': {b: true}}; H.forEach((h, i) => { styles['3,' + i] = {b: true, bg: '#C68642', color: '#fff'}; styles[(tr - 1) + ',' + i] = {b: true, bg: '#F3E3CF', color: '#3E2723'}; });
+    const n = writeResult('Region_Target_vs_Achievement', aoa, {colFmt: {2: 'cur', 3: 'cur', 4: 'cur', 5: 'pct'}, styles,
+      rules: [{col: 6, op: 'eq', val: 'Achieved', color: '#D4E8C2'}, {col: 6, op: 'eq', val: 'Close', color: '#FCEBC8'}, {col: 6, op: 'eq', val: 'Below target', color: '#F8DCDC'}]});
+    switchSheet(n); go('sheet'); refreshAll(); scheduleSave();
+    toast(`📊 Sheet <b>${esc(n)}</b> created with live formulas (SUMIFS by region). Use ⬇️ Export to download it.`, 'ok', 6000);
+    return n;
+  },
+  /* plain values for the Export tab: view = 'person' | 'region' */
+  reportAoa(view) {
+    if (!this.cfg || !readTable(this.cfg.sales)) this.cfg = this.detect();
+    if (!this.cfg) return null;
+    const R = this.compute(); if (!R) return null;
+    const title = [`${view === 'region' ? 'Region-wise ' : ''}Target vs Achievement – ${this.periodLabel(this.cfg.period)}`];
+    const st = x => ({ok: 'Achieved', mid: 'Close', low: 'Below target', none: 'No target'}[x]);
+    const r2 = v => Math.round(v * 100) / 100, pct = v => v === null ? '' : Math.round(v * 10000) / 10000;
+    if (view === 'region') {
+      if (!R.regions) return null;
+      const rows = this.sortList(R.regions).map(g => [g.name, g.count, r2(g.target), r2(g.achieved), r2(g.balance), pct(g.pct), st(g.status), (g.people.find(p => p.pct !== null) || {}).name || '']);
+      return {title, header: ['Region', 'Salespeople', 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status', 'Best salesperson'], rows, total: ['Team total', R.list.length, r2(R.tot.target), r2(R.tot.achieved), r2(Math.max(0, R.tot.target - R.tot.achieved)), pct(R.tot.pct), '', ''], money: [2, 3, 4], pct: [5]};
+    }
+    const hasReg = R.list.some(p => p.region);
+    const rows = this.sortList(R.list).map(p => [p.name, ...(hasReg ? [p.region || ''] : []), r2(p.target), r2(p.achieved), r2(p.balance), pct(p.pct), st(p.status)]);
+    const o = hasReg ? 1 : 0;
+    return {title, header: ['Salesperson', ...(hasReg ? ['Region'] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], rows, total: ['Team total', ...(hasReg ? [''] : []), r2(R.tot.target), r2(R.tot.achieved), r2(Math.max(0, R.tot.target - R.tot.achieved)), pct(R.tot.pct), ''], money: [1 + o, 2 + o, 3 + o], pct: [4 + o]};
   }
 };
+const tgStatus = p => p === null || p === undefined ? 'none' : p >= 1 ? 'ok' : p >= .8 ? 'mid' : 'low';
+const tgPct = p => p === null || p === undefined ? '–' : fmtNum(Math.round(p * 1000) / 10) + '%';
+const tgColor = st => ({ok: '#6B8E23', mid: '#E0A030', low: '#B23A3A', none: '#A1887F'}[st]);
+const tgBadge = st => ({ok: '<span class="tg-badge st-ok">✅ Achieved</span>', mid: '<span class="tg-badge st-mid">🟡 Close (80–99%)</span>', low: '<span class="tg-badge st-low">🔴 Below 80%</span>', none: '<span class="tg-badge">No target</span>'}[st]);
 const wmoney = v => App.settings.currency + fmtNum(Math.round(v), 0);   // whole rupees on the dashboard
 const monthName = m => MONTHS[m][0].toUpperCase() + MONTHS[m].slice(1);
 $('#tgSheet').onclick = () => Targets.createSheet();
@@ -2725,16 +2851,167 @@ function buildTargets(ctx) {
   const ym = ctx.low.match(/\b((?:19|20)\d{2})\b/), mm = ctx.low.match(/\b(jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|may|june?|july?|aug(ust)?|sep(t|tember)?|oct(ober)?|nov(ember)?|dec(ember)?)\b/);
   if (mm) { const mi = monthIndex(mm[1]), keys = P.keys.filter(k => k % 100 === mi && (!ym || Math.floor(k / 100) === +ym[1])); if (keys.length) period = 'm:' + keys[keys.length - 1]; }
   else if (ym && P.keys.some(k => Math.floor(k / 100) === +ym[1])) period = 'y:' + ym[1];
-  const wantSheet = /\b(sheet|excel|table|formula)/.test(ctx.low);
+  const wantSheet = /\b(sheet|excel|table|formula)/.test(ctx.low), byRegion = /\b(region|zone|area|territor)/.test(ctx.low);
   const t = cfg.tt ? readTable(cfg.tt) : null;
-  return {title: '🎯 Target vs Achievement', describe: `I will ${wantSheet ? 'create a sheet with formulas and open' : 'open'} the <b>Target vs Achievement</b> dashboard for each <b>${esc(s.headers[cfg.pc])}</b> (${esc(Targets.periodLabel(period))}). Achieved = total <b>${esc(s.headers[cfg.vc])}</b> from <b>${esc(cfg.sales)}</b>; ${t ? `Target = <b>${esc(t.headers[cfg.tc])}</b> from <b>${esc(cfg.tt)}</b>${cfg.tt !== cfg.sales && cfg.monthly ? ' × number of months' : ''}` : '<b>no target column found yet</b>'}.`,
+  return {title: '🎯 Target vs Achievement', describe: `I will ${wantSheet ? 'create a sheet with formulas and open' : 'open'} the <b>${byRegion ? 'region-wise ' : ''}Target vs Achievement</b> dashboard for each <b>${byRegion ? 'region' : esc(s.headers[cfg.pc])}</b> (${esc(Targets.periodLabel(period))}). Achieved = total <b>${esc(s.headers[cfg.vc])}</b> from <b>${esc(cfg.sales)}</b>; ${t ? `Target = <b>${esc(t.headers[cfg.tc])}</b> from <b>${esc(cfg.tt)}</b>${cfg.tt !== cfg.sales && cfg.monthly ? ' × number of months' : ''}` : '<b>no target column found yet</b>'}.`,
     apply: () => {
-      Targets.cfg = Object.assign({}, cfg, {period});
+      Targets.cfg = Object.assign({}, cfg, {period}); Targets.view = byRegion ? 'region' : 'person';
       if (wantSheet) { Targets.last = null; Targets.compute(); const n = Targets.createSheet(); return {msg: `Sheet <b>${esc(n)}</b> is ready, and the dashboard is on the 🎯 Targets tab.`, how: 'Achieved uses SUMIFS on the sales data for each salesperson. Target looks up each salesperson\'s target (× months for monthly targets). Achievement % = Achieved ÷ Target.'}; }
       go('targets'); return {msg: 'Dashboard opened on the 🎯 Targets tab.'};
     }};
 }
 INTENTS.splice(1, 0, {name: 'targets', test: c => (/\btargets?\b/.test(c.low) && /\b(vs|versus|against|achieve(d|ment)?|dashboard|report|performance)\b/.test(c.low) || /\bachievement (dashboard|report)\b/.test(c.low)) && !/\bcolumn\b/.test(c.low), build: buildTargets});
+/* =====================================================================
+   15. EXPORT TAB – pick sheets / reports and a format
+   Formats: normal Excel (values only), Excel with formulas, Excel 97-2003,
+   CSV (one file per item) and PDF / print.
+   ===================================================================== */
+const Export = {
+  format: 'xlsx', picked: null,
+  FORMATS: [
+    ['xlsx', '📗', 'Normal Excel (.xlsx)', 'Values only, with money, % and date formats. Best for sharing and email.', true],
+    ['xlsxf', '🧮', 'Excel with formulas (.xlsx)', 'Keeps every formula (SUMIFS, VLOOKUP…) so numbers update in Excel.'],
+    ['xls', '📒', 'Excel 97-2003 (.xls)', 'For very old Excel versions. Values only.'],
+    ['csv', '📄', 'CSV (.csv)', 'Plain text, one file per sheet. Opens in any program.'],
+    ['pdf', '🖨️', 'PDF / Print', 'Opens a print view. Choose "Save as PDF" as the printer.']
+  ],
+  /* every exportable item: sheets + reports */
+  items() {
+    const out = sheetNames().map(n => { const d = App.hf.getSheetDimensions(sheetId(n)), m = getMeta(n);
+      return {id: 's:' + n, label: n, icon: m.kind === 'file' ? '📄' : m.kind === 'result' ? '✨' : '📊', info: `${Math.max(d.height - 1, 0).toLocaleString()} rows × ${d.width} columns`, group: 'sheets', empty: d.height === 0}; });
+    const tgOk = !!(Targets.cfg && readTable(Targets.cfg.sales)) || !!Targets.detect();
+    if (tgOk) {
+      const per = 'Period: ' + Targets.periodLabel((Targets.cfg || {}).period || 'all') + ' (change it on the 🎯 Targets tab)';
+      out.push({id: 'r:person', label: 'Target vs Achievement – by salesperson', icon: '🎯', info: per, group: 'reports'});
+      const ra = Targets.reportAoa('region'); if (ra) out.push({id: 'r:region', label: 'Target vs Achievement – by region', icon: '🗺️', info: per, group: 'reports'});
+    }
+    if (App.lastResult) out.push({id: 'r:chart', label: 'Latest chart data – ' + App.lastResult.title, icon: '📈', info: `${App.lastResult.labels.length} rows`, group: 'reports'});
+    return out.filter(i => !i.empty);
+  },
+  init() {
+    const items = this.items();
+    if (!this.picked) this.picked = new Set(items.filter(i => i.id === 's:' + App.active).map(i => i.id));
+    [...this.picked].forEach(id => { if (!items.some(i => i.id === id)) this.picked.delete(id); });
+    const row = i => `<label class="ex-item"><input type="checkbox" value="${esc(i.id)}" ${this.picked.has(i.id) ? 'checked' : ''}><span class="ex-ic">${i.icon}</span><span style="min-width:0"><b>${esc(i.label)}</b><br><span class="muted" style="font-size:12px">${esc(i.info)}</span></span></label>`;
+    const sheets = items.filter(i => i.group === 'sheets'), reps = items.filter(i => i.group === 'reports');
+    $('#exItems').innerHTML = (items.length ? '' : '<p class="muted">Nothing to export yet. Upload a file or load the demo data first.</p>') +
+      (sheets.length ? `<h4 class="ex-h">📊 Sheets</h4><div class="ex-grid">${sheets.map(row).join('')}</div>` : '') +
+      (reps.length ? `<h4 class="ex-h">🎯 Reports</h4><div class="ex-grid">${reps.map(row).join('')}</div>` : '');
+    $$('#exItems input').forEach(cb => cb.onchange = () => { cb.checked ? this.picked.add(cb.value) : this.picked.delete(cb.value); this.summary(); });
+    $('#exFormats').innerHTML = this.FORMATS.map(([id, ic, name, desc, rec]) => `<label class="ex-fmt ${this.format === id ? 'on' : ''}"><input type="radio" name="exfmt" value="${id}" ${this.format === id ? 'checked' : ''}>
+      <span class="ex-ic" style="font-size:26px">${ic}</span><span><b>${name}</b>${rec ? ' <span class="badge master">Recommended</span>' : ''}<br><span class="muted" style="font-size:12.5px">${desc}</span></span></label>`).join('');
+    $$('#exFormats input').forEach(r => r.onchange = () => { this.format = r.value; $$('.ex-fmt').forEach(l => l.classList.toggle('on', l.querySelector('input').checked)); this.summary(); });
+    if (!$('#exName').value) $('#exName').value = `Excel_Specialist_${new Date().toISOString().slice(0, 10)}`;
+    this.summary();
+  },
+  summary() {
+    const n = this.picked.size, f = this.FORMATS.find(x => x[0] === this.format);
+    $('#exFilter').closest('label').style.display = ['xlsx', 'xlsxf'].includes(this.format) ? '' : 'none';
+    $('#exGo').disabled = !n;
+    $('#exSummary').innerHTML = n ? `Ready: <b>${n}</b> item${n > 1 ? 's' : ''} as <b>${f[2]}</b>${this.format === 'csv' && n > 1 ? ` (${n} separate files)` : ''}.` : 'Tick at least one item above.';
+  },
+  /* ---- builders ---- */
+  money(dec) { // Indian grouping (1,00,000) when the money symbol is ₹
+    const sym = App.settings.currency ? '"' + App.settings.currency.trim() + '"' : '', d = dec ? '.00' : '';
+    return App.settings.currency === '₹' ? `[>=10000000]${sym}##\\,##\\,##\\,##0${d};[>=100000]${sym}##\\,##\\,##0${d};${sym}##,##0${d}` : sym + '#,##0' + d;
+  },
+  numFmt(id, r, c, fmt) {
+    if (isDateCell(id, r, c)) return 'dd-mm-yyyy';
+    if (fmt === 'cur') return this.money(true);
+    if (fmt === 'pct') return '0.0%';
+    return null;
+  },
+  sheetWs(name, withFormulas, filter) {
+    const id = sheetId(name), d = App.hf.getSheetDimensions(id), m = getMeta(name), ws = {};
+    for (let r = 0; r < d.height; r++) for (let c = 0; c < d.width; c++) {
+      const s = App.hf.getCellSerialized({sheet: id, row: r, col: c}); if (s === null || s === undefined || s === '') continue;
+      const v = App.hf.getCellValue({sheet: id, row: r, col: c}), cell = {};
+      if (v && typeof v === 'object') { if (withFormulas) { cell.t = 'e'; cell.v = 0x2A; cell.w = v.value; } else { cell.t = 's'; cell.v = v.value; } }
+      else if (typeof v === 'number') cell.t = 'n', cell.v = v;
+      else if (typeof v === 'boolean') cell.t = 'b', cell.v = v;
+      else { if (v === null || v === undefined || v === '') continue; cell.t = 's'; cell.v = String(v); }
+      if (withFormulas && typeof s === 'string' && s.startsWith('=')) cell.f = toExcelFormula(s.slice(1));
+      if (cell.t === 'n') { const st = m.styles[r + ',' + c] || {}, z = this.numFmt(id, r, c, st.fmt || m.colFmt[c]); if (z) cell.z = z; }
+      ws[XLSX.utils.encode_cell({r, c})] = cell;
+    }
+    ws['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: Math.max(d.height - 1, 0), c: Math.max(d.width - 1, 0)}});
+    ws['!cols'] = Array.from({length: d.width}, (_, c) => ({wpx: m.colW[c] || 110}));
+    if (filter && m.frozen && d.height > 1 && d.width) ws['!autofilter'] = {ref: XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: d.height - 1, c: d.width - 1}})};
+    return ws;
+  },
+  reportWs(rep, filter) {
+    const aoa = [rep.title, [], rep.header, ...rep.rows, rep.total], ws = XLSX.utils.aoa_to_sheet(aoa);
+    const money = this.money(false);
+    for (let r = 3; r < aoa.length; r++) { rep.money.forEach(c => { const a = XLSX.utils.encode_cell({r, c}); if (ws[a] && ws[a].t === 'n') ws[a].z = money; }); rep.pct.forEach(c => { const a = XLSX.utils.encode_cell({r, c}); if (ws[a] && ws[a].t === 'n') ws[a].z = '0.0%'; }); }
+    ws['!cols'] = rep.header.map((h, i) => ({wch: Math.max(12, h.length + 2, ...rep.rows.map(r => String(r[i] ?? '').length + 2))}));
+    if (filter) ws['!autofilter'] = {ref: XLSX.utils.encode_range({s: {r: 2, c: 0}, e: {r: 2 + rep.rows.length, c: rep.header.length - 1}})};
+    return ws;
+  },
+  report(id) {
+    if (id === 'r:chart') { const L = App.lastResult; return {title: [L.title], header: ['Name', L.valueName || 'Value'], rows: L.labels.map((l, i) => [l, L.values[i]]), total: ['Total', L.values.reduce((a, b) => a + b, 0)], money: /sales|value|amount|revenue|target/i.test(L.valueName || '') ? [1] : [], pct: []}; }
+    return Targets.reportAoa(id === 'r:region' ? 'region' : 'person');
+  },
+  sheetNameFor(id) { return {'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
+  /* values as display text (CSV / print) */
+  displayRows(id) {
+    if (id.startsWith('s:')) {
+      const n = id.slice(2), sid = sheetId(n), d = App.hf.getSheetDimensions(sid), m = getMeta(n), out = [];
+      for (let r = 0; r < d.height; r++) { const row = []; for (let c = 0; c < d.width; c++) row.push(displayValue(sid, r, c, m).text); out.push(row); }
+      return out;
+    }
+    const rep = this.report(id); if (!rep) return [];
+    const f = (v, c) => typeof v !== 'number' ? v : rep.pct.includes(c) ? fmtNum(Math.round(v * 1000) / 10) + '%' : rep.money.includes(c) ? wmoney(v) : fmtNum(v);
+    return [rep.title, [], rep.header, ...rep.rows.map(r => r.map(f)), rep.total.map(f)];
+  },
+  /* plain values for CSV: numbers without symbols, dates as text */
+  csvRows(id) {
+    if (id.startsWith('s:')) {
+      const n = id.slice(2), sid = sheetId(n), d = App.hf.getSheetDimensions(sid), out = [];
+      for (let r = 0; r < d.height; r++) { const row = []; for (let c = 0; c < d.width; c++) { let v = App.hf.getCellValue({sheet: sid, row: r, col: c});
+        if (v && typeof v === 'object') v = v.value; else if (typeof v === 'number' && isDateCell(sid, r, c)) v = fmtDate(v); row.push(v ?? ''); } out.push(row); }
+      return out;
+    }
+    const rep = this.report(id); return rep ? [rep.title, [], rep.header, ...rep.rows, rep.total] : [];
+  },
+  download() {
+    const ids = this.items().map(i => i.id).filter(id => this.picked.has(id));
+    if (!ids.length) return toast('Tick at least one item to export.', 'warn');
+    const base = ($('#exName').value || 'Excel_Specialist').replace(/[\\/:*?"<>|]+/g, '_').trim() || 'Excel_Specialist', filter = $('#exFilter').checked;
+    try {
+      if (this.format === 'pdf') return this.print(ids, base);
+      if (this.format === 'csv') {
+        ids.forEach((id, k) => setTimeout(() => {
+          const csv = XLSX.utils.sheet_to_csv(XLSX.utils.aoa_to_sheet(this.csvRows(id)));
+          const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type: 'text/csv;charset=utf-8'}));
+          a.download = (ids.length > 1 ? base + '_' : '') + this.sheetNameFor(id) + '.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+        }, k * 450));
+        return toast(`⬇️ ${ids.length} CSV file${ids.length > 1 ? 's' : ''} downloading. If your browser asks, allow multiple downloads.`, 'ok', 6000);
+      }
+      const wb = XLSX.utils.book_new(), used = new Set();
+      ids.forEach(id => {
+        const ws = id.startsWith('s:') ? this.sheetWs(id.slice(2), this.format === 'xlsxf', filter) : (() => { const rep = this.report(id); return rep ? this.reportWs(rep, filter) : null; })();
+        if (!ws) return;
+        let nm = this.sheetNameFor(id).replace(/[\[\]:*?\/\\]/g, '_').slice(0, 31), k = 2; while (used.has(nm.toLowerCase())) nm = nm.slice(0, 28) + '_' + k++; used.add(nm.toLowerCase());
+        XLSX.utils.book_append_sheet(wb, ws, nm);
+      });
+      const ext = this.format === 'xls' ? 'xls' : 'xlsx';
+      XLSX.writeFile(wb, `${base}.${ext}`, {bookType: this.format === 'xls' ? 'biff8' : 'xlsx'});
+      toast(`⬇️ <b>${esc(base)}.${ext}</b> downloaded (${ids.length} sheet${ids.length > 1 ? 's' : ''}, ${this.format === 'xlsxf' ? 'formulas kept' : 'values only'}).`, 'ok', 6000);
+    } catch (e) { console.error(e); toast('Sorry, the export failed: ' + esc(e.message || e), 'err', 7000); }
+  },
+  print(ids, base) {
+    let h = `<title>${esc(base)}</title><style>body{font:12px Arial,sans-serif;color:#3E2723}h2{color:#8B5A2B;margin:18px 0 6px}table{border-collapse:collapse;margin-bottom:10px}td{border:1px solid #ddd;padding:3px 6px}tr.h td{background:#C68642;color:#fff;font-weight:bold}.pb{page-break-before:always}</style>`;
+    ids.forEach((id, k) => {
+      const rows = this.displayRows(id).slice(0, 3000), isRep = !id.startsWith('s:'), hdr = isRep ? 2 : 0;
+      h += `<h2 class="${k ? 'pb' : ''}">${esc(isRep ? rows[0][0] : id.slice(2))}</h2><table>` + rows.slice(isRep ? 2 : 0).map((r, i) => `<tr class="${i === 0 ? 'h' : ''}">${r.map(v => `<td>${esc(v)}</td>`).join('')}</tr>`).join('') + '</table>';
+    });
+    const w = window.open('', '_blank'); if (!w) return toast('Please allow pop-ups to print or save as PDF.', 'warn');
+    w.document.write(h); w.document.close(); w.focus(); setTimeout(() => w.print(), 300);
+  }
+};
+$('#exAll').onclick = () => { Export.picked = new Set(Export.items().map(i => i.id)); Export.init(); };
+$('#exNone').onclick = () => { Export.picked = new Set(); Export.init(); };
+$('#exGo').onclick = () => Export.download();
 /* =====================================================================
    9. NAVIGATION, TOOLBAR & PANELS
    ===================================================================== */
@@ -2746,6 +3023,7 @@ function go(page) {
   if (page === 'home') renderHome();
   if (page === 'charts') Charts.init();
   if (page === 'targets') Targets.init();
+  if (page === 'export') Export.init();
   if (page === 'settings') libStatus();
 }
 $$('.tab').forEach(t => t.onclick = () => go(t.dataset.page));
@@ -2836,6 +3114,7 @@ async function toolbarAction(a) {
     case 'csv': return exportCsv();
     case 'copy': { const t = selectionTSV(); try { await navigator.clipboard.writeText(t); toast('Copied 📋'); } catch (e) { toast('Press Ctrl+C to copy.', 'warn'); } Grid.clip = {text: t, range: Grid.range(), sheet: App.active}; return; }
     case 'print': return printSheet();
+    case 'exportTab': Export.picked = new Set(['s:' + App.active]); return go('export');
   }
 }
 function shiftColMeta(from, by) {
@@ -2914,26 +3193,11 @@ function chartSelection() {
 /* =====================================================================
    10. EXPORT & PRINT
    ===================================================================== */
-function exportXlsx() {
+function exportXlsx() { // all sheets, formulas kept (same builder as the Export tab)
   const wb = XLSX.utils.book_new();
-  sheetNames().forEach(n => {
-    const id = sheetId(n), d = App.hf.getSheetDimensions(id), m = getMeta(n), ws = {};
-    for (let r = 0; r < d.height; r++) for (let c = 0; c < d.width; c++) {
-      const s = App.hf.getCellSerialized({sheet: id, row: r, col: c}); if (s === null || s === undefined || s === '') continue;
-      let v = App.hf.getCellValue({sheet: id, row: r, col: c}); const ref = XLSX.utils.encode_cell({r, c}), cell = {};
-      if (v && typeof v === 'object') { cell.t = 'e'; cell.v = 0x2A; cell.w = v.value; }
-      else if (typeof v === 'number') { cell.t = 'n'; cell.v = v; } else if (typeof v === 'boolean') { cell.t = 'b'; cell.v = v; } else { cell.t = 's'; cell.v = v === null ? '' : String(v); }
-      if (typeof s === 'string' && s.startsWith('=')) cell.f = toExcelFormula(s.slice(1));
-      const st = m.styles[r + ',' + c] || {}, fmt = st.fmt || m.colFmt[c];
-      if (cell.t === 'n') { if (isDateCell(id, r, c)) cell.z = 'dd-mm-yyyy'; else if (fmt === 'cur') cell.z = (App.settings.currency ? '"' + App.settings.currency.trim() + '"' : '') + '#,##0.00'; else if (fmt === 'pct') cell.z = '0.0%'; }
-      ws[ref] = cell;
-    }
-    ws['!ref'] = XLSX.utils.encode_range({s: {r: 0, c: 0}, e: {r: Math.max(d.height - 1, 0), c: Math.max(d.width - 1, 0)}});
-    ws['!cols'] = Array.from({length: d.width}, (_, c) => ({wpx: m.colW[c] || 110}));
-    XLSX.utils.book_append_sheet(wb, ws, n.slice(0, 31));
-  });
+  sheetNames().forEach(n => XLSX.utils.book_append_sheet(wb, Export.sheetWs(n, true, false), n.slice(0, 31)));
   XLSX.writeFile(wb, `Excel_Specialist_${new Date().toISOString().slice(0, 10)}.xlsx`);
-  toast('⬇️ Excel file downloaded (all sheets, formulas kept).');
+  toast('⬇️ Excel file downloaded (all sheets, formulas kept). For a values-only file or other formats, use the ⬇️ Export tab.');
 }
 function exportCsv() {
   const id = sheetId(), d = App.hf.getSheetDimensions(id), m = getMeta(), aoa = [];
