@@ -1,10 +1,10 @@
-# 🍮 Caramel Sheets – your smart offline Excel helper
+# 📊 Excel Specialist – your smart offline Excel helper
 
-Upload your sales files, then **type what you want in plain English**. Caramel Sheets writes the Excel formulas for you: lookups, pivots, totals, IF columns, charts and more.
+Upload your sales files, then **type what you want in plain English**. Excel Specialist writes the Excel formulas for you: lookups, pivots, totals, IF columns, charts and more.
 It runs in your browser and nothing is sent anywhere.
 
 ## How to start
-**Easiest: one file.** Download **`Caramel-Sheets-Standalone.html`** (about 12 MB) and double-click it. Every library is built in, so it works on its own, with no other files and no internet.
+**Easiest: one file.** Download **`Excel Specialist.html`** (about 12 MB) and double-click it. Every library is built in, so it works on its own, with no other files and no internet.
 
 **Or: the folder version.** Keep **`index.html`** and the **`libs`** folder together and double-click `index.html`. It opens in Chrome or Edge. Both versions work the same.
 
@@ -71,4 +71,4 @@ The three `ocr-*.js` files hold the original files wrapped as JavaScript text. B
 
 If the `libs` folder is missing, the app loads these libraries from the internet instead.
 
-`Caramel-Sheets-Standalone.html` is made from `index.html` and `libs/` by running `python3 tools/build_standalone.py`.
+`Excel Specialist.html` is made from `index.html` and `libs/` by running `python3 tools/build_standalone.py`.

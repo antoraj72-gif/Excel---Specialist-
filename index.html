@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Caramel Sheets</title>
+<title>Excel Specialist</title>
 <!--
-  CARAMEL SHEETS – offline smart Excel app (single file)
+  EXCEL SPECIALIST – offline smart Excel app (single file)
   ------------------------------------------------------
   Open this file by double-clicking it (Chrome or Edge). Keep the "libs" folder next to it.
   Library files used (all open source). Each one is loaded from ./libs first, and from the internet only if missing:
@@ -218,7 +218,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 </head>
 <body>
 <header class="topbar">
-  <div class="brand"><div class="logo">🍮</div><div>Caramel Sheets<small>Your smart offline Excel helper</small></div></div>
+  <div class="brand"><div class="logo">📊</div><div>Excel Specialist<small>Your smart offline Excel helper</small></div></div>
   <nav class="tabs" id="tabs">
     <button class="tab active" data-page="home" data-tip="Start here">🏠 <span class="t">Home</span></button>
     <button class="tab" data-page="files" data-tip="Upload Excel, CSV, PDF or pictures">📂 <span class="t">My Files</span></button>
@@ -235,9 +235,9 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 <section class="page active" id="page-home">
  <div class="wrap" style="display:flex;flex-direction:column;gap:18px">
   <div class="card hero">
-    <div class="big-emoji">🍮</div>
+    <div class="big-emoji">📊</div>
     <div style="flex:1;min-width:260px">
-      <h1>Welcome to Caramel Sheets</h1>
+      <h1>Welcome to Excel Specialist</h1>
       <p class="muted" style="font-size:15px;margin:0 0 14px">Upload your sales files, then just <b>type what you want in plain English</b>, like
       <i>"total sales by region"</i> or <i>"from Master bring target by employee ID"</i>. The app writes the Excel formulas for you, and it works without internet.</p>
       <div class="row">
@@ -672,7 +672,7 @@ const DB = {
   async open() {
     if (this.db) return this.db;
     return this.db = await new Promise((res, rej) => {
-      try { const r = indexedDB.open('caramel-sheets', 1); r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
+      try { const r = indexedDB.open('caramel-sheets', 1) /* storage name kept so saved work survives the rename */; r.onupgradeneeded = () => r.result.createObjectStore('kv'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }
       catch (e) { rej(e); }
     });
   },
@@ -706,7 +706,7 @@ function saveSettings() { try { localStorage.setItem('caramel-settings', JSON.st
 async function clearEverything() {
   if (!await confirmBox('Clear everything?', 'This removes all uploaded files, sheets and history from this browser. This cannot be undone.', 'Yes, clear all', 'danger')) return;
   await DB.clear(); App.meta = {}; App.history = []; App.lastResult = null; newEngine({}); App.active = null;
-  ensureSheet(); refreshAll(); toast('Everything cleared. Fresh start! 🍮');
+  ensureSheet(); refreshAll(); toast('Everything cleared. Fresh start! ✨');
 }
 
 /* =====================================================================
@@ -2473,7 +2473,7 @@ function exportXlsx() {
     ws['!cols'] = Array.from({length: d.width}, (_, c) => ({wpx: m.colW[c] || 110}));
     XLSX.utils.book_append_sheet(wb, ws, n.slice(0, 31));
   });
-  XLSX.writeFile(wb, `Caramel_Sheets_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  XLSX.writeFile(wb, `Excel_Specialist_${new Date().toISOString().slice(0, 10)}.xlsx`);
   toast('⬇️ Excel file downloaded (all sheets, formulas kept).');
 }
 function exportCsv() {
@@ -2679,7 +2679,7 @@ function libStatus() {
 
 async function start() {
   if (!window.HyperFormula || !window.XLSX) {
-    document.body.innerHTML = `<div style="padding:40px;font-family:sans-serif;max-width:700px;margin:auto"><h2>🍮 Caramel Sheets could not start</h2><p>The helper files are missing. Keep the <b>libs</b> folder in the same place as this file, or connect to the internet once.</p></div>`;
+    document.body.innerHTML = `<div style="padding:40px;font-family:sans-serif;max-width:700px;margin:auto"><h2>📊 Excel Specialist could not start</h2><p>The helper files are missing. Keep the <b>libs</b> folder in the same place as this file, or connect to the internet once.</p></div>`;
     return;
   }
   installExtraFormulas(HyperFormula);
