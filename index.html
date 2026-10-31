@@ -12,6 +12,7 @@
     libs/xlsx-js-style.min.js     xlsx-js-style 1.2.0  – read/write Excel & CSV, with fonts, colours and borders (SheetJS 0.18.5 based)
     libs/cpexcel.js               SheetJS codepages    – old .xls / CSV text encodings
     libs/jszip.min.js             JSZip 3.10.1         – puts chart pictures inside exported Excel files
+    libs/pptxgen.min.js           PptxGenJS 3.12.0     – makes PowerPoint presentations offline
     libs/jspdf.umd.min.js         jsPDF 2.5.1          – makes PDF files offline
     libs/jspdf.plugin.autotable.min.js  jsPDF-AutoTable 3.8.2 – tables inside the PDF files
     libs/hyperformula.full.min.js HyperFormula 2.7.1   – Excel formula engine (GPLv3 licence key "gpl-v3")
@@ -30,6 +31,8 @@
 <script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.min.js"><\/script>')</script>
 <script src="libs/jszip.min.js"></script>
 <script>window.JSZip||document.write('<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"><\/script>')</script>
+<script src="libs/pptxgen.min.js"></script>
+<script>window.PptxGenJS||document.write('<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.min.js"><\/script>')</script>
 <script src="libs/jspdf.umd.min.js"></script>
 <script>window.jspdf||document.write('<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"><\/script>')</script>
 <script src="libs/jspdf.plugin.autotable.min.js"></script>
@@ -323,6 +326,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <button class="tab" data-page="sheet" data-tip="Your Excel sheet and smart helper">📊 <span class="t">Work Sheet</span></button>
     <button class="tab" data-page="charts" data-tip="See your results as charts">📈 <span class="t">Charts</span></button>
     <button class="tab" data-page="targets" data-tip="Target vs achievement for each salesperson">🎯 <span class="t">Targets</span></button>
+    <button class="tab" data-page="growth" data-tip="Growth and degrowth vs previous month / year">📈 <span class="t">Growth</span></button>
     <button class="tab" data-page="sample" data-tip="Make a report shaped like your sample file or picture">🧩 <span class="t">Sample Report</span></button>
     <button class="tab" data-page="export" data-tip="Download your sheets and reports">⬇️ <span class="t">Export</span></button>
     <button class="tab" data-page="help" data-tip="Every formula explained simply">📘 <span class="t">Formula Help</span></button>
@@ -405,6 +409,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
         <button class="rb-btn big" data-act="xlsx" data-tip="All sheets, formulas kept">🧮<span>Excel with formulas</span></button>
         <button class="rb-btn big" data-act="csv" data-tip="This sheet as CSV">📄<span>CSV</span></button>
         <button class="rb-btn big" data-act="pdfFile" data-tip="This sheet as a PDF file">📕<span>PDF file</span></button>
+        <button class="rb-btn big" data-act="pptFile" data-tip="This sheet as a ready presentation">📽️<span>PowerPoint</span></button>
         <button class="rb-btn big" data-act="exportTab" data-tip="Choose sheets, reports and format">⬇️<span>More export…</span></button>
         <button class="rb-btn big" data-act="share" data-tip="WhatsApp, Gmail, Outlook, email, print">📤<span>Share</span></button>
         <button class="rb-btn big" data-act="print" data-tip="Print or save as PDF">🖨️<span>Print / PDF</span></button>
@@ -553,7 +558,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 <section class="page" id="page-charts">
  <div class="wrap" style="display:flex;flex-direction:column;gap:16px">
   <div class="row" style="justify-content:space-between"><h2 style="margin:0">📈 Charts</h2>
-    <div class="row noprint"><button class="btn light" id="chShare">📤 Share</button><button class="btn light" id="dlDough">⬇️ Doughnut PNG</button><button class="btn light" id="dlBar">⬇️ Bar PNG</button><button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button></div></div>
+    <div class="row noprint"><button class="btn light" id="chShare">📤 Share</button><button class="btn light" id="chPpt">📽️ PowerPoint</button><button class="btn light" id="dlDough">⬇️ Doughnut PNG</button><button class="btn light" id="dlBar">⬇️ Bar PNG</button><button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button></div></div>
   <div class="kpis" id="kpis"></div>
   <div class="card noprint">
     <div class="row" style="align-items:flex-end">
@@ -579,9 +584,19 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
 <section class="page" id="page-targets">
  <div class="wrap" style="display:flex;flex-direction:column;gap:16px">
   <div class="row" style="justify-content:space-between"><h2 style="margin:0">🎯 Target vs Achievement</h2>
-    <div class="row noprint"><button class="btn light" id="tgShare" data-tip="WhatsApp, Gmail, Outlook, email, print">📤 Share</button><button class="btn light" id="tgSheet" data-tip="Make a sheet with live formulas">📊 Create Excel sheet</button><button class="btn light" id="tgPng">⬇️ Chart PNG</button><button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button></div></div>
+    <div class="row noprint"><button class="btn light" id="tgShare" data-tip="WhatsApp, Gmail, Outlook, email, print">📤 Share</button><button class="btn light" id="tgPpt" data-tip="A ready presentation of this dashboard">📽️ PowerPoint</button><button class="btn light" id="tgSheet" data-tip="Make a sheet with live formulas">📊 Create Excel sheet</button><button class="btn light" id="tgPng">⬇️ Chart PNG</button><button class="btn" onclick="window.print()">🖨️ Print / Save PDF</button></div></div>
   <div class="card noprint" id="tgSetup"></div>
   <div id="tgBody" style="display:flex;flex-direction:column;gap:16px"></div>
+ </div>
+</section>
+
+<!-- ================= GROWTH ================= -->
+<section class="page" id="page-growth">
+ <div class="wrap" style="display:flex;flex-direction:column;gap:16px">
+  <div class="row" style="justify-content:space-between"><h2 style="margin:0">📈 Growth &amp; Degrowth</h2>
+    <div class="row noprint"><button class="btn light" id="grShare">📤 Share</button><button class="btn light" id="grPpt">📽️ PowerPoint</button><button class="btn light" id="grSheet" data-tip="Make a sheet with live growth formulas">📊 Create Excel sheet</button><button class="btn light" id="grPng">⬇️ Chart PNG</button></div></div>
+  <div class="card noprint" id="grSetup"></div>
+  <div id="grBody" style="display:flex;flex-direction:column;gap:16px"></div>
  </div>
 </section>
 
@@ -607,7 +622,7 @@ label.field{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:va
     <div id="smHeads" style="margin-top:10px"></div></div>
   <div class="card"><div class="row" style="justify-content:space-between"><h3 style="margin:0">3️⃣ Check what each column means</h3><button class="btn big" id="smBuild" disabled>✨ Build report</button></div><div id="smMap" style="margin-top:10px"></div></div>
   <div class="card" id="smOutCard" style="display:none"><div class="row" style="justify-content:space-between"><h3 style="margin:0">4️⃣ Your report</h3>
-    <div class="row noprint"><button class="btn light" id="smSheet">📊 Create sheet (formulas)</button><button class="btn" id="smXlsx">📗 Normal Excel + charts</button><button class="btn light" id="smXlsxF">🧮 Excel with formulas</button><button class="btn light" id="smPdf">🖨️ PDF</button><button class="btn light" id="smShare">📤 Share</button><button class="btn ghost" id="smMore">⬇️ More…</button></div></div>
+    <div class="row noprint"><button class="btn light" id="smSheet">📊 Create sheet (formulas)</button><button class="btn" id="smXlsx">📗 Normal Excel + charts</button><button class="btn light" id="smXlsxF">🧮 Excel with formulas</button><button class="btn light" id="smPdf">🖨️ PDF</button><button class="btn light" id="smShare">📤 Share</button><button class="btn light" id="smPpt">📽️ PowerPoint</button><button class="btn ghost" id="smMore">⬇️ More…</button></div></div>
     <div id="smOut" style="margin-top:10px"></div></div>
  </div>
 </section>
@@ -1626,10 +1641,16 @@ function loadDemo() {
     ['Appliances', 'Microwave Oven', 11500], ['Furniture', 'Office Chair', 6500], ['Furniture', 'Study Table', 8200], ['Stationery', 'Notebook Pack', 450], ['Stationery', 'Printer Paper Box', 1350]];
   const customers = ['Sri Balaji Traders', 'Metro Retail', 'Sunrise Stores', 'Royal Mart', 'Green Valley Supplies', 'City Electronics', 'Lakshmi Enterprises', 'Om Sai Distributors', 'Star Bazaar', 'Kaveri Agencies', 'Global Office Needs', 'Prime Home Store', 'New India Traders', 'Ganesh Stores', 'Apex Solutions'];
   const sales = [['Date', 'Invoice No', 'Region', 'City', 'Employee ID', 'Employee Name', 'Customer Name', 'Product Category', 'Product Name', 'Qty', 'Unit Price', 'Discount %', 'Sales Value', 'Month', 'Year']];
-  for (let i = 0; i < 240; i++) {
-    const e = pick(emps), p = pick(products), mo = Math.floor(rnd() * 12), y = mo >= 6 ? 2024 : 2025, day = 1 + Math.floor(rnd() * 28);
-    const qty = p[2] > 10000 ? 1 + Math.floor(rnd() * 12) : 2 + Math.floor(rnd() * 48), disc = pick([0, 0, 0.05, 0.1]);
-    sales.push([`${y}-${String(mo + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`, 'INV-' + (1001 + i), e[2], e[3], e[0], e[1], pick(customers), p[0], p[1], qty, p[2], disc, Math.round(qty * p[2] * (1 - disc)), MONTHS[mo][0].toUpperCase() + MONTHS[mo].slice(1), y]);
+  // two years: Jul 2023 – Jun 2025. The current year (Jul 2024 on) grows for most products; a few fall (degrowth)
+  const growth = {'Air Cooler': 1.3, 'Smartphone': .82, 'Study Table': 1.15, 'Office Chair': 1.2, 'LED TV 43"': 1.1, 'Notebook Pack': .78, 'Mixer Grinder': 1.12, 'Bluetooth Speaker': 1.05, 'Microwave Oven': .95, 'Printer Paper Box': 1.18};
+  const regionGrowth = {South: 1.08, North: 1.02, East: .92, West: 1.06};
+  // 20 sales a month for 12 months; each also gets a matching sale one year earlier, scaled down by its product/region growth
+  const row = (e, p, y, mo, qty) => { const disc = pick([0, 0, 0.05, 0.1]), day = 1 + Math.floor(rnd() * 28);
+    return [`${y}-${String(mo + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`, '', e[2], e[3], e[0], e[1], pick(customers), p[0], p[1], qty, p[2], disc, Math.round(qty * p[2] * (1 - disc)), MONTHS[mo][0].toUpperCase() + MONTHS[mo].slice(1), y]; };
+  for (let i = 0; i < 12; i++) for (let j = 0; j < 20; j++) {
+    const mo = (6 + i) % 12, y = mo >= 6 ? 2024 : 2025, p = products[(j + i) % products.length], e = pick(emps);
+    const qty = p[2] > 10000 ? 3 + Math.floor(rnd() * 7) : 15 + Math.floor(rnd() * 26), g = (growth[p[1]] || 1) * (regionGrowth[e[2]] || 1) * (0.92 + rnd() * 0.16);
+    sales.push(row(e, p, y, mo, qty), row(e, p, y - 1, mo, Math.max(1, Math.round(qty / g))));
   }
   sales.sort((a, b) => a === sales[0] ? -1 : b === sales[0] ? 1 : a[0].localeCompare(b[0]));
   const s = sales.slice(1); s.forEach((r, i) => r[1] = 'INV-' + (1001 + i));
@@ -1640,7 +1661,7 @@ function loadDemo() {
   addSheet('Product_Targets', pt, {kind: 'file', source: 'Demo – product targets', type: 'demo', uploaded: Date.now(), colFmt: {2: 'cur'}});
   dataTables().forEach(t => { if (t !== m) getMeta(t).master = false; });
   App.hf.clearUndoStack(); switchSheet(sn); refreshAll(); scheduleSave();
-  toast('🎁 Demo data added: <b>Master</b> (12 employees), <b>Sales</b> (240 invoices) and <b>Product_Targets</b> (10 products). Try the example buttons on the Work Sheet tab!', 'ok', 6500);
+  toast('🎁 Demo data added: <b>Master</b> (12 employees), <b>Sales</b> (480 invoices, Jul 2023 – Jun 2025) and <b>Product_Targets</b> (10 products). Try the example buttons on the Work Sheet tab!', 'ok', 6500);
   go('sheet');
 }
 
@@ -2542,6 +2563,17 @@ function renderHistory() {
 }
 /* Example requests for sales teams, grouped by task (all work on the demo data) */
 const EXAMPLE_GROUPS = [
+  ['📈 Growth & degrowth (vs previous)', [
+    'Sales growth vs last year by region',
+    'Product wise degrowth vs last year',
+    'This month vs last month by salesperson',
+    'Quarter vs previous quarter growth by category',
+    'Financial year growth vs previous FY',
+    'YTD growth vs last year sheet']],
+  ['📽️ PowerPoint', [
+    'Make a PowerPoint of target vs achievement',
+    'Presentation of region wise target vs achievement',
+    'PPT of sales growth vs last year']],
   ['🎯 Target vs achievement', [
     'Target vs achievement dashboard',
     'Target vs achievement for 2025',
@@ -3209,6 +3241,7 @@ const Export = {
     ['xlsxf', '🧮', 'Excel with formulas (.xlsx)', 'Keeps every formula (SUMIFS, VLOOKUP…) so numbers update in Excel.'],
     ['xls', '📒', 'Excel 97-2003 (.xls)', 'For very old Excel versions. Values only.'],
     ['csv', '📄', 'CSV (.csv)', 'Plain text, one file per sheet. Opens in any program.'],
+    ['pptx', '📽️', 'PowerPoint (.pptx)', 'A ready presentation: title, key numbers, editable charts, tables, insights and summary.'],
     ['pdff', '📕', 'PDF file (.pdf)', 'A ready PDF with the charts and tables. Easy to send on WhatsApp or email. (₹ is written as Rs.)'],
     ['pdf', '🖨️', 'Print / Save as PDF', 'Opens the print window for printing on paper or choosing "Save as PDF".']
   ],
@@ -3224,6 +3257,7 @@ const Export = {
       if (Targets.reportAoa('product')) out.push({id: 'r:product', label: 'Target vs Achievement – by product', icon: '📦', info: per, group: 'reports'});
       if (Targets.reportAoa('trend')) out.push({id: 'r:trend', label: 'Target vs Achievement – month-wise trend', icon: '📅', info: per, group: 'reports'});
     }
+    if (typeof Growth !== 'undefined') { try { if (!Growth.cfg) Growth.cfg = Growth.detect(); const g = Growth.cfg && Growth.reportAoa(); if (g) out.push({id: 'r:growth', label: `Growth / degrowth – ${g.curL} vs ${g.prevL}`, icon: '📈', info: 'Settings from the 📈 Growth tab', group: 'reports'}); } catch (e) { console.error(e); } }
     if (typeof SampleReport !== 'undefined' && SampleReport.result) out.push({id: 'x:sample', label: 'Report from sample – ' + SampleReport.result.title, icon: '🧩', info: `${SampleReport.result.rows.length} rows · from ${SampleReport.master}`, group: 'reports'});
     if (App.lastResult) out.push({id: 'r:chart', label: 'Latest chart data – ' + App.lastResult.title, icon: '📈', info: `${App.lastResult.labels.length} rows`, group: 'reports'});
     return out.filter(i => !i.empty);
@@ -3247,7 +3281,7 @@ const Export = {
   summary() {
     const n = this.picked.size, f = this.FORMATS.find(x => x[0] === this.format);
     $('#exFilter').closest('label').style.display = ['xlsx', 'xlsxf'].includes(this.format) ? '' : 'none';
-    $('#exChartsLbl').style.display = ['xlsx', 'xlsxf', 'pdf', 'pdff'].includes(this.format) ? '' : 'none';
+    $('#exChartsLbl').style.display = ['xlsx', 'xlsxf', 'pdf', 'pdff'].includes(this.format) ? '' : 'none';   // PowerPoint always has its own charts
     $('#exGo').disabled = !n;
     $('#exSummary').innerHTML = n ? `Ready: <b>${n}</b> item${n > 1 ? 's' : ''} as <b>${f[2]}</b>${this.format === 'csv' && n > 1 ? ` (${n} separate files)` : ''}.` : 'Tick at least one item above.';
   },
@@ -3320,11 +3354,12 @@ const Export = {
     return ws;
   },
   report(id) {
+    if (id === 'r:growth') return Growth.reportAoa();
     if (id.startsWith('x:') && this.extraReports && this.extraReports[id]) return this.extraReports[id]();
     if (id === 'r:chart') { const L = App.lastResult; return {title: [L.title], header: ['Name', L.valueName || 'Value'], rows: L.labels.map((l, i) => [l, L.values[i]]), total: ['Total', L.values.reduce((a, b) => a + b, 0)], money: /sales|value|amount|revenue|target/i.test(L.valueName || '') ? [1] : [], pct: []}; }
     return Targets.reportAoa(id === 'r:region' ? 'region' : id === 'r:trend' ? 'trend' : id === 'r:product' ? 'product' : 'person');
   },
-  sheetNameFor(id) { if (id.startsWith('x:') && this.extraNames && this.extraNames[id]) return this.extraNames[id]; return {'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:product': 'Target_by_Product', 'r:trend': 'Target_by_Month', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
+  sheetNameFor(id) { if (id.startsWith('x:') && this.extraNames && this.extraNames[id]) return this.extraNames[id]; return {'r:growth': 'Growth_Degrowth', 'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:product': 'Target_by_Product', 'r:trend': 'Target_by_Month', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
   /* ---- dashboard charts as pictures (drawn off-screen, light colours on white) ---- */
   renderChart(cfg, w = 960, h = 460) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.style.cssText = `position:fixed;left:-20000px;top:0;width:${w}px;height:${h}px`; document.body.appendChild(cv);
@@ -3367,6 +3402,18 @@ const Export = {
       plugins: [{id: 'bv', afterDatasetsDraw(ch) { if (labels.length > 16) return; const {ctx} = ch; ctx.save(); ctx.font = '600 11px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#3E2723';
         ch.getDatasetMeta(0).data.forEach((b, i) => ctx.fillText((money ? App.settings.currency : '') + self.lakh(values[i]), b.x, b.y - 5)); ctx.restore(); }}]});
   },
+  compareChart(labels, prev, cur, prevL, curL, title, horiz) {
+    const self = this, n = labels.length, h = horiz ? Math.max(360, Math.min(1400, n * 38 + 120)) : 460;
+    return this.renderChart({type: 'bar', data: {labels, datasets: [{label: prevL, data: prev, backgroundColor: PALETTE_LIGHT[1], borderRadius: 4}, {label: curL, data: cur, backgroundColor: PALETTE_LIGHT[0], borderRadius: 4}]},
+      options: {indexAxis: horiz ? 'y' : 'x', plugins: {title: this.titleOpt(title), legend: {position: 'top'}}, scales: {[horiz ? 'x' : 'y']: {ticks: {callback: v => self.lakh(v)}, grid: {color: '#EFE2D2'}}, [horiz ? 'y' : 'x']: {grid: {display: false}}}}}, 960, h);
+  },
+  growthChart(labels, pcts, title, horiz) {
+    const g = pcts.map(p => p === null ? 0 : Math.round(p * 1000) / 10), n = labels.length, h = horiz ? Math.max(360, Math.min(1400, n * 38 + 120)) : 460;
+    return this.renderChart({type: 'bar', data: {labels, datasets: [{data: g, backgroundColor: g.map(v => v >= 0 ? '#6B8E23' : '#B23A3A'), borderRadius: 4}]},
+      options: {indexAxis: horiz ? 'y' : 'x', layout: {padding: {right: 50, top: 14}}, plugins: {title: this.titleOpt(title), legend: {display: false}}, scales: {[horiz ? 'x' : 'y']: {ticks: {callback: v => v + '%'}, grid: {color: '#EFE2D2'}}, [horiz ? 'y' : 'x']: {grid: {display: false}}}},
+      plugins: [{id: 'gl', afterDatasetsDraw(ch) { const {ctx} = ch, m = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 12px sans-serif'; ctx.fillStyle = '#3E2723'; ctx.textBaseline = 'middle';
+        m.data.forEach((b, i) => { if (pcts[i] === null) return; const t = (g[i] > 0 ? '+' : '') + g[i] + '%'; if (horiz) { ctx.textAlign = g[i] >= 0 ? 'left' : 'right'; ctx.fillText(t, b.x + (g[i] >= 0 ? 4 : -4), b.y); } else { ctx.textAlign = 'center'; ctx.fillText(t, b.x, g[i] >= 0 ? b.y - 9 : b.y + 9); } }); ctx.restore(); }}]}, 960, h);
+  },
   /* which charts go with the picked items */
   chartsFor(ids) {
     const out = [];
@@ -3379,6 +3426,10 @@ const Export = {
         if (R && ids.includes('r:product')) { const Rp = Targets.computeProduct(); if (Rp && Rp.list.some(p => p.target)) out.push({title: `Target vs achieved by product – ${per}`, ...this.targetChart(Targets.sortList(Rp.list), `Target vs achieved by product – ${per}`)}); }
         if (R && ids.includes('r:trend')) { const M = Targets.trend(R, Targets.trendWho || 'all'); if (M.length) { const t = `Month-wise target vs achievement – ${(Targets.lastTrend && Targets.lastTrend.who) || 'Whole team'}`; out.push({title: t, ...this.trendChart(M, t)}); } }
       }
+      if (ids.includes('r:growth') && typeof Growth !== 'undefined') { const R = Growth.compute(); if (R && R.list.length) { const by = R.gc >= 0, it = Growth.sortList(R.list);
+        const labels = by ? it.map(x => x.name) : R.months.map(m => m.label), pv = by ? it.map(x => x.prev) : R.months.map(m => m.prevV), cv = by ? it.map(x => x.cur) : R.months.map(m => m.curV);
+        out.push({title: `${R.S.curL} vs ${R.S.prevL}`, ...this.compareChart(labels, pv, cv, R.S.prevL, R.S.curL, `${R.t.headers[Growth.cfg.mc]}: ${R.S.curL} vs ${R.S.prevL}`, by)});
+        out.push({title: 'Growth / degrowth %', ...this.growthChart(labels, labels.map((l, i) => pv[i] ? (cv[i] - pv[i]) / pv[i] : null), `Growth / degrowth % – ${R.S.curL} vs ${R.S.prevL}`, by)}); } }
       const L = App.lastResult;
       if (L && (ids.includes('r:chart') || ids.includes('s:' + L.sheet))) {
         const money = /sales|value|amount|revenue|target|price/i.test(L.valueName || '');
@@ -3444,7 +3495,7 @@ const Export = {
     const base = this.baseName(), filter = $('#exFilter').checked;
     const wantCharts = $('#exCharts').checked && ['xlsx', 'xlsxf', 'pdf', 'pdff'].includes(this.format);
     try {
-      const charts = wantCharts && window.Chart ? this.chartsFor(ids) : [];
+      const charts = wantCharts && window.Chart && this.format !== 'pptx' ? this.chartsFor(ids) : [];
       if (this.format === 'pdf') return this.print(ids, base, charts);
       if (this.format === 'csv') {
         ids.forEach((id, k) => setTimeout(() => {
@@ -3461,6 +3512,7 @@ const Export = {
   /* one file (Excel, old Excel or PDF) as a Blob – used by Download and Share */
   async buildFile(ids, format, base, {filter = true, charts = []} = {}) {
     if (format === 'pdff') return this.buildPdf(ids, base, charts);
+    if (format === 'pptx') return PPT.build(ids, base);
     const wb = XLSX.utils.book_new(), used = new Set();
     ids.forEach(id => {
       const ws = id.startsWith('s:') ? this.sheetWs(id.slice(2), format === 'xlsxf', filter) : (() => { const rep = this.report(id); return rep ? this.reportWs(rep, filter) : null; })();
@@ -3602,6 +3654,7 @@ async function ribbonAction(a) {
     case 'focus': { const on = !$('#page-sheet').classList.contains('focus'); $('#page-sheet').classList.toggle('focus', on); $('#focusBtn').classList.toggle('on', on); return Grid.renderCells(); }
     case 'theme': App.settings.theme = App.settings.theme === 'dark' ? 'light' : 'dark'; saveSettings(); applySettings(); return Grid.render();
     case 'targets': return go('targets');
+    case 'pptFile': return PPT.quick(['s:' + App.active], App.active);
     case 'share': return Share.open(['s:' + App.active], App.active, 'this sheet');
     case 'pdfFile': try { const f = Export.buildPdf(['s:' + App.active], App.active, []); Export.saveBlob(f.blob, f.name); return toast(`📕 <b>${esc(f.name)}</b> downloaded (${f.note}).`); } catch (e) { return toast('Could not make the PDF: ' + esc(e.message), 'err'); }
     case 'sampleTab': return go('sample');
@@ -4014,7 +4067,7 @@ const Share = {
     modal('📤 Share ' + (title || 'report'), `
       <div class="muted" style="margin-bottom:8px">Sharing: <b>${ids.map(id => esc(Export.sheetNameFor(id).replace(/_/g, ' '))).join(', ')}</b></div>
       <h4 style="margin:6px 0">1️⃣ Send it as</h4>
-      <div class="ex-fmts sh-fmts">${fmt('pdff', '📕', 'PDF file', 'Charts + tables. Opens on any phone.')}${fmt('xlsx', '📗', 'Excel file', 'Values, colours and a Dashboard of charts.')}${fmt('xlsxf', '🧮', 'Excel with formulas', 'For people who will edit it in Excel.')}</div>
+      <div class="ex-fmts sh-fmts">${fmt('pdff', '📕', 'PDF file', 'Charts + tables. Opens on any phone.')}${fmt('xlsx', '📗', 'Excel file', 'Values, colours and a Dashboard of charts.')}${fmt('xlsxf', '🧮', 'Excel with formulas', 'For people who will edit it in Excel.')}${fmt('pptx', '📽️', 'PowerPoint', 'A ready presentation with charts and insights.')}</div>
       <div class="row" style="margin:10px 0"><label class="field" style="flex:1">File name<input type="text" id="shName" value="${esc(this.base)}"></label><label class="field" style="flex:2">Message<textarea id="shMsg" rows="2">${esc(msg)}</textarea></label></div>
       <h4 style="margin:6px 0">2️⃣ Send with</h4>
       <div class="sh-grid">
@@ -4045,7 +4098,7 @@ const Share = {
     };
     const win = urls[ch] ? window.open('about:blank', '_blank') : null; // open now, so pop-up blockers allow it
     try {
-      const charts = window.Chart ? Export.chartsFor(this.ids) : [];
+      const charts = window.Chart && this.format !== 'pptx' ? Export.chartsFor(this.ids) : [];
       if (ch === 'print') { closeModal(); return Export.print(this.ids, base, charts); }
       const f = await Export.buildFile(this.ids, this.format, base, {filter: true, charts});
       const file = new File([f.blob], f.name, {type: f.type});
@@ -4055,7 +4108,7 @@ const Share = {
           catch (e) { if (e && e.name === 'AbortError') return; }
         }
         Export.saveBlob(f.blob, f.name);
-        return toast(`This computer can't attach ${this.format === 'pdff' ? 'PDF' : 'Excel'} files to other apps directly, so <b>${esc(f.name)}</b> was saved to Downloads. ${this.format !== 'pdff' && this.canShareType('application/pdf', 'a.pdf') ? 'Tip: choose <b>PDF file</b> to attach it directly.' : 'Attach it from there.'}`, 'warn', 9000);
+        return toast(`This computer can't attach ${{pdff: 'PDF', pptx: 'PowerPoint'}[this.format] || 'Excel'} files to other apps directly, so <b>${esc(f.name)}</b> was saved to Downloads. ${this.format !== 'pdff' && this.canShareType('application/pdf', 'a.pdf') ? 'Tip: choose <b>PDF file</b> to attach it directly.' : 'Attach it from there.'}`, 'warn', 9000);
       }
       if (ch === 'mailapp') {
         Export.saveBlob(f.blob, f.name);
@@ -4071,6 +4124,379 @@ const Share = {
   }
 };
 /* =====================================================================
+   19. GROWTH / DEGROWTH – current period vs previous period
+   Growth % = (Current − Previous) ÷ Previous. Positive = growth, negative = degrowth.
+   ===================================================================== */
+const Growth = {
+  cfg: null, chart: null, chart2: null, chart3: null, last: null,
+  MODES: [
+    ['mom', 'Month vs previous month'], ['yom', 'Month vs same month last year'], ['qoq', 'Quarter vs previous quarter'],
+    ['yoy', 'Calendar year vs previous year'], ['ytd', 'Year-to-date vs last year (Jan–month)'],
+    ['fy', 'Financial year (Apr–Mar) vs previous FY'], ['fytd', 'FY-to-date vs same period last FY']],
+  detect() {
+    const tg = Targets.cfg && readTable(Targets.cfg.sales) ? Targets.cfg : Targets.detect();
+    const tables = sheetNames().filter(n => { const t = readTable(n); return t && t.rows.length && getMeta(n).kind !== 'result' && Targets.periods(t).keys.length; });
+    if (!tables.length) return null;
+    const table = tg && tables.includes(tg.sales) ? tg.sales : tables[0], t = readTable(table), P = Targets.periods(t);
+    const cur = P.keys[P.keys.length - 1], full = cur % 100 === 11;   // like-for-like: a part year is compared with the same months last year
+    return {table, mc: defaultMeasure(t) ?? t.types.indexOf('number'), group: 'total', mode: P.keys.length >= 13 ? (full ? 'yoy' : 'ytd') : 'mom', cur};
+  },
+  /* the months of the current and previous period */
+  sets(mode, k) {
+    const y = Math.floor(k / 100), m = k % 100, key = (yy, mm) => { while (mm < 0) { mm += 12; yy--; } while (mm > 11) { mm -= 12; yy++; } return yy * 100 + mm; };
+    const range = (yy, from, to) => { const o = []; for (let i = from; i <= to; i++) o.push(key(yy, i)); return o; };
+    const lab = kk => monthName(kk % 100) + ' ' + Math.floor(kk / 100), fyStart = m >= 3 ? y : y - 1, fyLab = s => `FY ${s}-${String(s + 1).slice(2)}`;
+    switch (mode) {
+      case 'yom': return {cur: [k], prev: [key(y - 1, m)], curL: lab(k), prevL: lab(key(y - 1, m))};
+      case 'qoq': { const q = Math.floor(m / 3), cur = range(y, q * 3, q * 3 + 2), prev = cur.map(x => key(Math.floor(x / 100), x % 100 - 3)); return {cur, prev, curL: `Q${q + 1} ${y}`, prevL: `Q${(q + 3) % 4 + 1} ${q ? y : y - 1}`}; }
+      case 'yoy': return {cur: range(y, 0, 11), prev: range(y - 1, 0, 11), curL: String(y), prevL: String(y - 1)};
+      case 'ytd': return {cur: range(y, 0, m), prev: range(y - 1, 0, m), curL: `Jan–${monthName(m)} ${y}`, prevL: `Jan–${monthName(m)} ${y - 1}`};
+      case 'fy': return {cur: range(fyStart, 3, 14), prev: range(fyStart - 1, 3, 14), curL: fyLab(fyStart), prevL: fyLab(fyStart - 1)};
+      case 'fytd': { const n = (m - 3 + 12) % 12; return {cur: range(fyStart, 3, 3 + n), prev: range(fyStart - 1, 3, 3 + n), curL: `${fyLab(fyStart)} (Apr–${monthName(m)})`, prevL: `${fyLab(fyStart - 1)} (Apr–${monthName(m)})`}; }
+      default: return {cur: [k], prev: [key(y, m - 1)], curL: lab(k), prevL: lab(key(y, m - 1))};
+    }
+  },
+  compute() {
+    const c = this.cfg; if (!c) return null; const t = readTable(c.table); if (!t) return null;
+    const P = Targets.periods(t), S = this.sets(c.mode, c.cur), cs = new Set(S.cur), ps = new Set(S.prev), gc = c.group === 'total' ? -1 : +c.group.slice(2);
+    const items = new Map(), get = n => { const k = String(n === '' || n === null ? '(blank)' : n); if (!items.has(k)) items.set(k, {name: k, prev: 0, cur: 0}); return items.get(k); };
+    const monthTot = new Map(); S.cur.concat(S.prev).forEach(k => monthTot.set(k, 0));
+    t.rows.forEach(r => { const k = Targets.rowYm(P, r); if (k === null || !(cs.has(k) || ps.has(k))) return; const v = typeof r[c.mc] === 'number' ? r[c.mc] : 0;
+      const it = get(gc < 0 ? 'Total' : r[gc]); if (cs.has(k)) it.cur += v; else it.prev += v; monthTot.set(k, monthTot.get(k) + v); });
+    const status = (p, cu) => !p && !cu ? 'flat' : !p ? 'new' : cu > p ? 'up' : cu < p ? 'down' : 'flat';
+    const list = [...items.values()].map(it => Object.assign(it, {change: it.cur - it.prev, pct: it.prev ? (it.cur - it.prev) / it.prev : null, status: status(it.prev, it.cur)}));
+    const tot = {prev: list.reduce((a, x) => a + x.prev, 0), cur: list.reduce((a, x) => a + x.cur, 0)}; tot.change = tot.cur - tot.prev; tot.pct = tot.prev ? tot.change / tot.prev : null; tot.status = status(tot.prev, tot.cur);
+    const have = new Set(P.keys), missing = {cur: S.cur.filter(k => !have.has(k)).length, prev: S.prev.filter(k => !have.has(k)).length};
+    return {list, tot, S, P, t, gc, missing, months: S.cur.map((k, i) => ({cur: k, prev: S.prev[i], label: monthName(k % 100), curV: monthTot.get(k) || 0, prevV: monthTot.get(S.prev[i]) || 0}))};
+  },
+  sortList(list) { const k = this.sort || 'pct'; const f = {pct: (a, b) => (b.pct ?? 9e9) - (a.pct ?? 9e9), change: (a, b) => b.change - a.change, cur: (a, b) => b.cur - a.cur, name: (a, b) => String(a.name).localeCompare(String(b.name))}[k]; return list.slice().sort(f); },
+  /* ---------- page ---------- */
+  init() {
+    if (!this.cfg || !readTable(this.cfg.table)) this.cfg = this.detect();
+    if (!this.cfg) { $('#grSetup').style.display = 'none'; $('#grBody').innerHTML = `<div class="card" style="text-align:center"><h3>📈 No dated sales data yet</h3><p class="muted">Growth needs a <b>Date</b> (or Month + Year) column. Upload your sales file, or load the demo data.</p><button class="btn" onclick="loadDemo();go('growth')">🎁 Load Demo Data</button></div>`; return; }
+    $('#grSetup').style.display = ''; this.renderSetup(); this.draw();
+  },
+  renderSetup() {
+    const c = this.cfg, t = readTable(c.table), P = Targets.periods(t), opt = (v, l, sel) => `<option value="${esc(v)}" ${sel ? 'selected' : ''}>${esc(l)}</option>`;
+    const tables = sheetNames().filter(n => { const x = readTable(n); return x && x.rows.length && getMeta(n).kind !== 'result' && Targets.periods(x).keys.length; });
+    if (!P.keys.includes(c.cur)) c.cur = P.keys[P.keys.length - 1];
+    $('#grSetup').innerHTML = `<div class="row" style="align-items:flex-end">
+      <label class="field">📊 Compare<select id="grMode">${this.MODES.map(([v, l]) => opt(v, l, c.mode === v)).join('')}</select></label>
+      <label class="field">Current period ends in<select id="grCur">${P.keys.slice().reverse().map(k => opt(k, monthName(k % 100) + ' ' + Math.floor(k / 100), k === c.cur)).join('')}</select></label>
+      <label class="field">Group by<select id="grGroup">${opt('total', 'Total only', c.group === 'total')}${t.headers.map((h, i) => isDim(t, i) && t.types[i] === 'text' ? opt('g:' + i, h, c.group === 'g:' + i) : '').join('')}</select></label>
+      <label class="field">Number<select id="grMc">${t.headers.map((h, i) => t.types[i] === 'number' && !isDim(t, i) ? opt(i, h, i === c.mc) : '').join('')}</select></label>
+      <label class="field">Data<select id="grTable">${tables.map(n => opt(n, n, n === c.table)).join('')}</select></label>
+      <label class="field">Sort by<select id="grSort">${[['pct', 'Growth %'], ['change', 'Change'], ['cur', 'Current'], ['name', 'Name']].map(([v, l]) => opt(v, l, (this.sort || 'pct') === v)).join('')}</select></label></div>`;
+    $('#grMode').onchange = e => { c.mode = e.target.value; this.draw(); };
+    $('#grCur').onchange = e => { c.cur = +e.target.value; this.draw(); };
+    $('#grGroup').onchange = e => { c.group = e.target.value; this.draw(); };
+    $('#grMc').onchange = e => { c.mc = +e.target.value; this.draw(); };
+    $('#grSort').onchange = e => { this.sort = e.target.value; this.draw(); };
+    $('#grTable').onchange = e => { const n = e.target.value, x = readTable(n), PP = Targets.periods(x); this.cfg = {table: n, mc: defaultMeasure(x) ?? x.types.indexOf('number'), group: 'total', mode: c.mode, cur: PP.keys[PP.keys.length - 1]}; this.renderSetup(); this.draw(); };
+  },
+  badge: st => ({up: '<span class="tg-badge st-ok">📈 Growth</span>', down: '<span class="tg-badge st-low">📉 Degrowth</span>', flat: '<span class="tg-badge">➖ No change</span>', new: '<span class="tg-badge" style="background:#EAF2FB;color:#1c5cab">🆕 New</span>'}[st]),
+  color: st => ({up: '#6B8E23', down: '#B23A3A', flat: '#8D6E63', new: '#2a78d6'}[st]),
+  pctTxt: p => p === null || p === undefined ? '–' : (p > 0 ? '+' : '') + fmtNum(Math.round(p * 1000) / 10) + '%',
+  isMoney() { const t = readTable(this.cfg.table); return /sales|value|amount|revenue|price|target|cost|profit/i.test(t.headers[this.cfg.mc]); },
+  fmtV(v) { return this.isMoney() ? wmoney(v) : fmtNum(Math.round(v * 100) / 100); },
+  draw() {
+    const R = this.compute(); this.last = R; const body = $('#grBody'); if (!R) { body.innerHTML = ''; return; }
+    const c = this.cfg, t = R.t, items = this.sortList(R.list), tot = R.tot, S = R.S, f = v => this.fmtV(v), sign = v => (v > 0 ? '+' : v < 0 ? '−' : '') + f(Math.abs(v));
+    const up = items.filter(x => x.status === 'up').length, down = items.filter(x => x.status === 'down').length;
+    const best = items.filter(x => x.pct !== null).sort((a, b) => b.pct - a.pct)[0], worst = items.filter(x => x.pct !== null).sort((a, b) => a.pct - b.pct)[0];
+    const warn = R.missing.cur || R.missing.prev ? `<div class="sm-note">ℹ️ ${R.missing.cur ? `${R.missing.cur} month(s) of <b>${esc(S.curL)}</b> have no data yet. ` : ''}${R.missing.prev ? `${R.missing.prev} month(s) of <b>${esc(S.prevL)}</b> have no data.` : ''} Growth compares only the months that have data.</div>` : '';
+    body.innerHTML = `${warn}
+      <div class="muted" style="margin-top:-6px">📊 <b>${esc(S.curL)}</b> compared with <b>${esc(S.prevL)}</b> · total <b>${esc(t.headers[c.mc])}</b> from <b>${esc(c.table)}</b>${R.gc >= 0 ? ` · by <b>${esc(t.headers[R.gc])}</b>` : ''} · Growth % = (Current − Previous) ÷ Previous</div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">⏮️ Previous · ${esc(S.prevL)}</div><div class="v">${f(tot.prev)}</div></div>
+        <div class="kpi"><div class="l">▶️ Current · ${esc(S.curL)}</div><div class="v">${f(tot.cur)}</div></div>
+        <div class="kpi"><div class="l">↕️ Change</div><div class="v" style="color:${this.color(tot.status)}">${sign(tot.change)}</div></div>
+        <div class="kpi"><div class="l">📊 Growth %</div><div class="v" style="color:${this.color(tot.status)}">${this.pctTxt(tot.pct)} ${tot.status === 'down' ? '📉' : tot.status === 'up' ? '📈' : ''}</div></div>
+        ${R.gc >= 0 ? `<div class="kpi"><div class="l">🏆 Highest growth</div><div class="v wrap">${best ? esc(best.name) + ' · ' + this.pctTxt(best.pct) : '–'}</div></div>
+        <div class="kpi"><div class="l">⚠️ Biggest degrowth</div><div class="v wrap">${worst && worst.pct < 0 ? esc(worst.name) + ' · ' + this.pctTxt(worst.pct) : 'None 🎉'}</div></div>
+        <div class="kpi"><div class="l">📈 / 📉 Count</div><div class="v wrap">📈 ${up} growing · 📉 ${down} falling</div></div>` : ''}
+      </div>
+      <div class="grid2">
+        <div class="card"><h3 style="margin-bottom:2px">${R.gc >= 0 ? '📊 Previous vs current by ' + esc(t.headers[R.gc]) : '📅 Month by month'}</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Blue = ${esc(S.prevL)} · Orange = ${esc(S.curL)}</div><div class="chart-box" style="height:${R.gc >= 0 ? Math.max(300, Math.min(700, items.length * 36 + 80)) : 340}px"><canvas id="grChart1"></canvas></div></div>
+        <div class="card"><h3 style="margin-bottom:2px">↕️ Growth / degrowth %</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">🟢 growth · 🔴 degrowth</div><div class="chart-box" style="height:${R.gc >= 0 ? Math.max(300, Math.min(700, items.length * 36 + 80)) : 340}px"><canvas id="grChart2"></canvas></div></div>
+      </div>
+      <div class="card"><h3>📋 Growth report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>${R.gc >= 0 ? esc(t.headers[R.gc]) : 'Total'}</th><th style="text-align:right">Previous · ${esc(S.prevL)}</th><th style="text-align:right">Current · ${esc(S.curL)}</th><th style="text-align:right">Change</th><th style="text-align:right">Growth %</th><th>Status</th></tr></thead><tbody>
+        ${items.map((x, i) => `<tr><td>${i + 1}</td><td><b>${esc(x.name)}</b></td><td style="text-align:right">${f(x.prev)}</td><td style="text-align:right">${f(x.cur)}</td><td style="text-align:right;color:${this.color(x.status)}">${sign(x.change)}</td><td style="text-align:right;font-weight:700;color:${this.color(x.status)}">${this.pctTxt(x.pct)}</td><td>${this.badge(x.status)}</td></tr>`).join('')}
+        ${R.gc >= 0 ? `<tr class="tg-total"><td></td><td>Total</td><td style="text-align:right">${f(tot.prev)}</td><td style="text-align:right">${f(tot.cur)}</td><td style="text-align:right">${sign(tot.change)}</td><td style="text-align:right">${this.pctTxt(tot.pct)}</td><td>${this.badge(tot.status)}</td></tr>` : ''}
+      </tbody></table></div></div>
+      <div class="card"><h3>📅 Month by month (${esc(S.prevL)} vs ${esc(S.curL)})</h3><div style="overflow:auto"><table class="ptable tg-month"><tbody>
+        <tr><th style="position:static">Month</th>${R.months.map(m => `<th style="position:static">${esc(m.label)}</th>`).join('')}</tr>
+        <tr><td><b>Previous</b></td>${R.months.map(m => `<td style="text-align:right">${f(m.prevV)}</td>`).join('')}</tr>
+        <tr><td><b>Current</b></td>${R.months.map(m => `<td style="text-align:right">${f(m.curV)}</td>`).join('')}</tr>
+        <tr><td><b>Growth %</b></td>${R.months.map(m => { const p = m.prevV ? (m.curV - m.prevV) / m.prevV : null; return `<td style="text-align:right;font-weight:700;color:${p === null ? 'inherit' : p >= 0 ? '#6B8E23' : '#B23A3A'}">${this.pctTxt(p)}</td>`; }).join('')}</tr></tbody></table></div></div>`;
+    this.drawCharts(R, items);
+  },
+  drawCharts(R, items) {
+    if (!window.Chart) return; const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim(), pal = chartColors(), S = R.S, short = v => Math.abs(v) >= 1e5 ? fmtNum(Math.round(v / 1e5 * 10) / 10) + 'L' : fmtNum(v);
+    Chart.defaults.color = css('--text'); Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+    [this.chart, this.chart2].forEach(ch => ch && ch.destroy());
+    const byGroup = R.gc >= 0, labels = byGroup ? items.map(x => x.name) : R.months.map(m => m.label);
+    const prevD = byGroup ? items.map(x => x.prev) : R.months.map(m => m.prevV), curD = byGroup ? items.map(x => x.cur) : R.months.map(m => m.curV);
+    const pcts = labels.map((l, i) => prevD[i] ? (curD[i] - prevD[i]) / prevD[i] : null);
+    this.chart = new Chart($('#grChart1'), {type: 'bar', data: {labels, datasets: [{label: S.prevL, data: prevD, backgroundColor: pal[1], borderRadius: 4}, {label: S.curL, data: curD, backgroundColor: pal[0], borderRadius: 4}]},
+      options: {indexAxis: byGroup ? 'y' : 'x', responsive: true, maintainAspectRatio: false, interaction: {mode: 'index', intersect: false}, plugins: {legend: {position: 'top', labels: {boxWidth: 14}}, tooltip: {callbacks: {label: c => ` ${c.dataset.label}: ${this.fmtV(c.raw)}`, footer: it => { const p = pcts[it[0].dataIndex]; return p === null ? '' : 'Growth: ' + this.pctTxt(p); }}}},
+        scales: {[byGroup ? 'x' : 'y']: {grid: {color: css('--line')}, ticks: {callback: v => short(v)}}, [byGroup ? 'y' : 'x']: {grid: {display: false}}}}});
+    const g = pcts.map(p => p === null ? 0 : Math.round(p * 1000) / 10);
+    this.chart2 = new Chart($('#grChart2'), {type: 'bar', data: {labels, datasets: [{label: 'Growth %', data: g, backgroundColor: g.map(v => v >= 0 ? '#6B8E23' : '#B23A3A'), borderRadius: 4}]},
+      options: {indexAxis: byGroup ? 'y' : 'x', responsive: true, maintainAspectRatio: false, layout: {padding: {right: 40, top: 16}}, plugins: {legend: {display: false}, tooltip: {callbacks: {label: c => ' ' + (c.raw > 0 ? '+' : '') + c.raw + '%'}}},
+        scales: {[byGroup ? 'x' : 'y']: {grid: {color: css('--line')}, ticks: {callback: v => v + '%'}}, [byGroup ? 'y' : 'x']: {grid: {display: false}}}},
+      plugins: [{id: 'gl', afterDatasetsDraw(ch) { const {ctx} = ch, m = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 11px ' + Chart.defaults.font.family; ctx.fillStyle = css('--text'); ctx.textBaseline = 'middle';
+        m.data.forEach((b, i) => { if (pcts[i] === null) return; const t = (g[i] > 0 ? '+' : '') + g[i] + '%'; if (byGroup) { ctx.textAlign = g[i] >= 0 ? 'left' : 'right'; ctx.fillText(t, b.x + (g[i] >= 0 ? 4 : -4), b.y); } else { ctx.textAlign = 'center'; ctx.fillText(t, b.x, g[i] >= 0 ? b.y - 8 : b.y + 8); } }); ctx.restore(); }}]});
+  },
+  /* sheet with live formulas */
+  createSheet() {
+    const R = this.last || this.compute(); if (!R) return;
+    const c = this.cfg, t = R.t, P = R.P, S = R.S, items = this.sortList(R.list), first = 5, last = first + items.length - 1;
+    const d2s = (y, m, end) => (end ? Date.UTC(y, m + 1, 0) : Date.UTC(y, m, 1)) / 864e5 + 25569;
+    const periodCrit = keys => { const a = keys[0], b = keys[keys.length - 1];
+      if (P.dc >= 0) return [[colRange(t, P.dc), fstr('>=' + d2s(Math.floor(a / 100), a % 100)), colRange(t, P.dc), fstr('<=' + d2s(Math.floor(b / 100), b % 100, true))]];
+      return keys.map(k => [colRange(t, P.mc), fstr(P.monthText[k] || monthName(k % 100)), ...(P.yc >= 0 ? [colRange(t, P.yc), Math.floor(k / 100)] : [])]); };
+    const sumF = (keys, extra) => periodCrit(keys).map(cr => `SUMIFS(${colRange(t, c.mc)},${[...extra, ...cr].join(',')})`).join('+');
+    const H = [R.gc >= 0 ? t.headers[R.gc] : 'Total', `Previous (${S.prevL})`, `Current (${S.curL})`, 'Change', 'Growth %', 'Status'];
+    const aoa = [[`Growth / Degrowth – ${t.headers[c.mc]}: ${S.curL} vs ${S.prevL}`], [`From ${c.table} · Growth % = (Current − Previous) ÷ Previous`], [], H];
+    items.forEach((x, i) => { const r = first + i, ex = R.gc >= 0 ? [colRange(t, R.gc), `$A${r}`] : [];
+      aoa.push([x.name, '=' + sumF(S.prev, ex), '=' + sumF(S.cur, ex), `=C${r}-B${r}`, `=IFERROR((C${r}-B${r})/B${r},"")`, `=IF(B${r}=0,IF(C${r}>0,"New",""),IF(C${r}>B${r},"Growth",IF(C${r}<B${r},"Degrowth","No change")))`]); });
+    if (R.gc >= 0) { const tr = last + 1; aoa.push(['Total', `=SUM(B${first}:B${last})`, `=SUM(C${first}:C${last})`, `=C${tr}-B${tr}`, `=IFERROR((C${tr}-B${tr})/B${tr},"")`, `=IF(C${tr}>B${tr},"Growth",IF(C${tr}<B${tr},"Degrowth","No change"))`]); }
+    const money = this.isMoney(), styles = {'0,0': {b: true, size: 13, color: '#8B5A2B'}};
+    H.forEach((h, i) => { styles['3,' + i] = {b: true, bg: '#C68642', color: '#ffffff'}; if (R.gc >= 0) styles[(last) + ',' + i] = {b: true, bg: '#F3E3CF'}; });
+    const n = writeResult('Growth_' + S.curL.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 20), aoa, {colFmt: money ? {1: 'cur', 2: 'cur', 3: 'cur', 4: 'pct'} : {4: 'pct'}, styles,
+      rules: [{col: 5, op: 'eq', val: 'Growth', color: '#D4E8C2'}, {col: 5, op: 'eq', val: 'Degrowth', color: '#F8DCDC'}, {col: 4, op: 'lt', val: 0, color: '#F8DCDC'}]});
+    switchSheet(n); go('sheet'); refreshAll(); scheduleSave();
+    toast(`📊 Sheet <b>${esc(n)}</b> created with live growth formulas: SUMIFS for each period, Growth % = (Current − Previous) ÷ Previous.`, 'ok', 6000);
+    return n;
+  },
+  reportAoa() {
+    if (!this.cfg || !readTable(this.cfg.table)) this.cfg = this.detect(); if (!this.cfg) return null;
+    const R = this.compute(); if (!R || !R.list.length) return null; const t = R.t, S = R.S, items = this.sortList(R.list), money = this.isMoney();
+    const st = s => ({up: 'Growth', down: 'Degrowth', flat: 'No change', new: 'New'}[s]), r2 = v => Math.round(v * 100) / 100, pc = v => v === null ? '' : Math.round(v * 10000) / 10000;
+    return {title: [`Growth / Degrowth – ${t.headers[this.cfg.mc]}: ${S.curL} vs ${S.prevL}`], header: [R.gc >= 0 ? t.headers[R.gc] : 'Total', `Previous (${S.prevL})`, `Current (${S.curL})`, 'Change', 'Growth %', 'Status'],
+      rows: items.map(x => [x.name, r2(x.prev), r2(x.cur), r2(x.change), pc(x.pct), st(x.status)]), total: R.gc >= 0 ? ['Total', r2(R.tot.prev), r2(R.tot.cur), r2(R.tot.change), pc(R.tot.pct), st(R.tot.status)] : [],
+      money: money ? [1, 2, 3] : [], pct: [4], growth: true, prevL: S.prevL, curL: S.curL, months: R.months.map(m => ({label: m.label, prev: m.prevV, cur: m.curV}))};
+  }
+};
+$('#grSheet').onclick = () => Growth.createSheet();
+$('#grShare').onclick = () => { if (!Growth.last) return; Share.open(['r:growth'], `Growth_${Growth.last.S.curL}_vs_${Growth.last.S.prevL}`.replace(/[^A-Za-z0-9]+/g, '_'), 'growth report'); };
+$('#grPng').onclick = () => { if (Growth.chart) Charts.png(Growth.chart, 'growth_chart'); };
+
+/* assistant: "sales growth vs last year by region", "degrowth products", "this month vs last month" */
+function buildGrowthCompare(ctx) {
+  const cfg = Growth.cfg && readTable(Growth.cfg.table) ? Object.assign({}, Growth.cfg) : Growth.detect(); if (!cfg) return needData();
+  const tn = ctx.tables.length ? ctx.tables[0].name : cfg.table, t = readTable(tn), P = Targets.periods(t); if (!P.keys.length) return {info: 'Growth needs a Date or Month column in the data.'};
+  cfg.table = tn; const low = ctx.low;
+  cfg.mode = /\b(fy|financial year|fiscal)\b/.test(low) ? (/\b(ytd|to date|till date)\b/.test(low) ? 'fytd' : 'fy') : /\b(ytd|year to date|till date)\b/.test(low) ? 'ytd' : /\b(quarter|qoq|q-o-q)\b/.test(low) ? 'qoq' : /same month/.test(low) ? 'yom' : /\b(month|mom|m-o-m)\b/.test(low) ? 'mom' : 'yoy';
+  const cols = ctx.cols(tn), dims = cols.filter(m => isDim(t, m.c) && t.types[m.c] === 'text' && !/month|year|date/i.test(m.header)), meas = cols.filter(m => !isDim(t, m.c));
+  cfg.group = dims.length ? 'g:' + dims[0].c : 'total'; if (meas.length) cfg.mc = meas[0].c; else cfg.mc = defaultMeasure(t) ?? cfg.mc;
+  cfg.cur = P.keys[P.keys.length - 1];
+  const yr = low.match(/\b((?:19|20)\d{2})\b/); if (yr) { const ks = P.keys.filter(k => Math.floor(k / 100) === +yr[1]); if (ks.length) cfg.cur = ks[ks.length - 1]; }
+  if (!/\b(full year|calendar year|whole year|full fy|complete)\b/.test(low)) { const have = new Set(P.keys), part = m => Growth.sets(m, cfg.cur).cur.some(k => !have.has(k));   // part year -> same months only
+    if (cfg.mode === 'yoy' && part('yoy')) cfg.mode = 'ytd'; if (cfg.mode === 'fy' && part('fy')) cfg.mode = 'fytd'; }
+  const S = Growth.sets(cfg.mode, cfg.cur), sheet = /\b(sheet|excel|formula|table)\b/.test(low);
+  return {title: '📈 Growth / degrowth', describe: `I will compare <b>${esc(S.curL)}</b> with <b>${esc(S.prevL)}</b> for total <b>${esc(t.headers[cfg.mc])}</b>${cfg.group !== 'total' ? ` by <b>${esc(t.headers[+cfg.group.slice(2)])}</b>` : ''}, showing growth and degrowth %${sheet ? ' and create a sheet with the formulas' : ''}.`,
+    apply: () => { Growth.cfg = cfg; if (/\bdegrowth|declin|fall|drop\b/.test(low)) Growth.sort = 'pct'; go('growth'); if (sheet) { const n = Growth.createSheet(); return {msg: `Growth sheet <b>${esc(n)}</b> created; the dashboard is on the 📈 Growth tab.`, how: 'SUMIFS adds each period; Growth % = (Current − Previous) ÷ Previous; Status shows Growth or Degrowth.'}; }
+      return {msg: 'Opened the 📈 Growth tab.', how: 'Growth % = (Current − Previous) ÷ Previous. Positive is growth, negative is degrowth.'}; }};
+}
+INTENTS.splice(1, 0, {name: 'growthcmp', test: c => /\b(yoy|y-o-y|year on year|year over year|degrowth|de-growth|qoq|ytd|fytd|previous year|last year|prior year|previous month|last month|previous quarter|last quarter|same month last year|this year vs|this month vs|vs last|versus last|compared? (to|with) last|financial year)\b/.test(c.low) && !/\btarget\b/.test(c.low), build: buildGrowthCompare});
+/* =====================================================================
+   20. POWERPOINT – a full presentation built from the results (PptxGenJS, offline)
+   Title → contents → for each report: section, key numbers, charts (real, editable
+   PowerPoint charts), tables, insights → closing summary. Caramel design.
+   ===================================================================== */
+const PPT = {
+  C: {esp: '3E2723', car: 'C68642', dark: '8B5A2B', cream: 'FFF8EE', latte: 'F3E3CF', line: 'E8D5BF', soft: '6D4C41', white: 'FFFFFF', ok: '6B8E23', mid: 'E0A030', low: 'B23A3A'},
+  get PAL() { return PALETTE_LIGHT.map(c => c.slice(1).toUpperCase()); },   // read when used (the palette is defined later in the file)
+  money(v) { return App.settings.currency + fmtNum(Math.round(v), 0); },
+  pct(v) { return v === null || v === '' || v === undefined ? '–' : fmtNum(Math.round(v * 1000) / 10) + '%'; },
+  sgn(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + this.money(Math.abs(v)); },
+  /* turn any item into {title, header, rows, total, money, pct, kind, ...} */
+  rep(id) {
+    if (id.startsWith('s:')) {
+      const n = id.slice(2), rows = Export.displayRows(id).filter(r => r.some(v => v !== '')); if (!rows.length) return null;
+      const L = App.lastResult && App.lastResult.sheet === n ? App.lastResult : null;
+      return {title: [n.replace(/_/g, ' ')], header: rows[0], rows: rows.slice(1), total: [], money: [], pct: [], display: true, chartData: L};
+    }
+    const r = Export.report(id); if (!r) return null;
+    return Object.assign({}, r, {chartData: id === 'r:chart' ? App.lastResult : null});
+  },
+  analyse(r) { // which columns are what
+    const H = r.header.map(String), num = H.map((h, i) => !r.display && r.rows.some(row => typeof row[i] === 'number'));
+    const ti = H.findIndex(h => /target|budget|goal/i.test(h) && !/%/.test(h)), ai = H.findIndex((h, i) => /achiev|actual/i.test(h) && !/%/.test(h) && !r.pct.includes(i));
+    const pi = r.pct.length ? r.pct[0] : -1, si = H.findIndex(h => /^status$/i.test(h));
+    let kind = r.growth ? 'growth' : (ti >= 0 && ai >= 0 ? 'target' : 'generic');
+    const mi = kind === 'growth' ? 2 : kind === 'target' ? ai : num.findIndex((x, i) => x && i > 0 && !r.pct.includes(i));
+    const isMonth = /^month/i.test(H[0]) || r.rows.slice(0, 3).every(row => monthIndex(String(row[0]).split(' ')[0]) >= 0);
+    return {H, num, ti, ai, pi, si, kind, mi, isMonth};
+  },
+  /* the rows behind the charts (grouped by the first column when it repeats) */
+  series(r, A) {
+    let rows = r.rows.filter(row => row[0] !== '' && row[0] !== 'Total');
+    const names = new Set(rows.map(x => x[0]));
+    if (names.size < rows.length && !A.isMonth) { const m = new Map(); rows.forEach(row => { const e = m.get(row[0]) || row.map((v, i) => i === 0 ? v : 0); row.forEach((v, i) => { if (i && typeof v === 'number' && !r.pct.includes(i)) e[i] = (+e[i] || 0) + v; }); m.set(row[0], e); }); rows = [...m.values()];
+      if (A.ti >= 0 && A.ai >= 0 && A.pi >= 0) rows.forEach(x => { x[A.pi] = x[A.ti] ? x[A.ai] / x[A.ti] : ''; }); }
+    return rows;
+  },
+  /* ---------- slide helpers ---------- */
+  masters(p) {
+    const C = this.C;
+    p.defineSlideMaster({title: 'ES_TITLE', background: {color: C.esp}, objects: [{rect: {x: 0, y: 0, w: 0.35, h: 7.5, fill: {color: C.car}}}, {rect: {x: 0.35, y: 6.55, w: 12.98, h: 0.06, fill: {color: C.car}}}]});
+    p.defineSlideMaster({title: 'ES_SECTION', background: {color: C.car}, objects: [{rect: {x: 0, y: 6.9, w: 13.33, h: 0.6, fill: {color: C.dark}}}]});
+    p.defineSlideMaster({title: 'ES_CONTENT', background: {color: C.cream}, objects: [
+      {rect: {x: 0, y: 0, w: 13.33, h: 0.92, fill: {color: C.car}}}, {rect: {x: 0, y: 0.92, w: 13.33, h: 0.05, fill: {color: C.dark}}},
+      {text: {text: 'Excel Specialist', options: {x: 0.45, y: 7.05, w: 5, h: 0.3, fontSize: 9, color: C.soft, fontFace: 'Calibri'}}}],
+      slideNumber: {x: 12.35, y: 7.05, w: 0.6, h: 0.3, fontSize: 9, color: C.soft, fontFace: 'Calibri'}});
+  },
+  content(p, title, sub) {
+    const s = p.addSlide({masterName: 'ES_CONTENT'});
+    s.addText(title, {x: 0.45, y: 0.12, w: 12.4, h: 0.5, fontSize: 24, bold: true, color: this.C.white, fontFace: 'Calibri'});
+    if (sub) s.addText(sub, {x: 0.45, y: 0.55, w: 12.4, h: 0.32, fontSize: 12, color: 'FBEFE2', fontFace: 'Calibri'});
+    return s;
+  },
+  kpis(s, cards) { // up to 6 cards in a 3×2 grid
+    const C = this.C, w = 3.95, h = 1.55;
+    cards.slice(0, 6).forEach((k, i) => { const x = 0.55 + (i % 3) * (w + 0.25), y = 1.35 + Math.floor(i / 3) * (h + 0.3);
+      s.addShape('roundRect', {x, y, w, h, fill: {color: C.white}, line: {color: C.line, width: 1}, rectRadius: 0.12, shadow: {type: 'outer', blur: 4, offset: 2, angle: 90, color: 'B08968', opacity: 0.25}});
+      s.addShape('rect', {x, y: y + 0.18, w: 0.09, h: h - 0.36, fill: {color: k.color || C.car}, line: {color: k.color || C.car}});
+      s.addText(k.label, {x: x + 0.3, y: y + 0.15, w: w - 0.45, h: 0.38, fontSize: 13, color: C.soft, fontFace: 'Calibri'});
+      s.addText(k.value, {x: x + 0.3, y: y + 0.55, w: w - 0.45, h: 0.75, fontSize: String(k.value).length > 16 ? 20 : 28, bold: true, color: k.color || C.esp, fontFace: 'Calibri', fit: 'shrink'}); });
+  },
+  table(p, r, title) { // 12 rows per slide, max 4 slides
+    const C = this.C, per = 12, rows = r.rows, pages = Math.min(4, Math.max(1, Math.ceil(rows.length / per))), ncol = r.header.length;
+    const fmt = (v, i) => typeof v !== 'number' ? String(v ?? '') : r.pct.includes(i) ? this.pct(v) : r.money.includes(i) ? this.money(v) : fmtNum(Math.round(v * 100) / 100);
+    const stFill = {Achieved: 'E3EFD3', Close: 'FCEBC8', 'Below target': 'F8DCDC', Growth: 'E3EFD3', Degrowth: 'F8DCDC'};
+    for (let pg = 0; pg < pages; pg++) {
+      const s = this.content(p, title, pages > 1 ? `Table ${pg + 1} of ${pages}${rows.length > per * pages ? ` · first ${per * pages} of ${rows.length} rows (all rows are in the Excel file)` : ''}` : `${rows.length} row(s)`);
+      const head = r.header.map(h => ({text: String(h), options: {bold: true, color: C.white, fill: {color: C.car}, align: 'center', valign: 'middle'}}));
+      const body = rows.slice(pg * per, pg * per + per).map((row, j) => row.map((v, i) => ({text: fmt(v, i), options: {fill: {color: stFill[v] || (j % 2 ? 'FAF0E3' : C.white)}, align: typeof v === 'number' ? 'right' : 'left', color: C.esp}})));
+      if (pg === pages - 1 && r.total && r.total.length) body.push(r.total.map((v, i) => ({text: fmt(v, i), options: {bold: true, fill: {color: C.latte}, align: typeof v === 'number' ? 'right' : 'left', color: C.esp}})));
+      s.addTable([head, ...body], {x: 0.45, y: 1.2, w: 12.43, fontSize: ncol > 9 ? 8.5 : ncol > 6 ? 10 : 11.5, fontFace: 'Calibri', border: {type: 'solid', pt: 0.6, color: C.line}, rowH: 0.36, valign: 'middle', autoPage: false});
+    }
+  },
+  bullets(s, items, x = 0.6, y = 1.3, w = 12.1, h = 5.4) {
+    s.addText(items.map(t => ({text: t, options: {bullet: {code: '25CF', color: this.C.car}, breakLine: true, paraSpaceAfter: 10}})), {x, y, w, h, fontSize: 18, color: this.C.esp, fontFace: 'Calibri', valign: 'top'});
+  },
+  chartOpts(extra) {
+    return Object.assign({fontFace: 'Calibri', catAxisLabelFontSize: 11, valAxisLabelFontSize: 10, catAxisLabelColor: this.C.esp, valAxisLabelColor: this.C.soft,
+      valGridLine: {color: this.C.line, size: 0.5}, catGridLine: {style: 'none'}, showLegend: true, legendPos: 't', legendFontSize: 11, legendColor: this.C.esp, valAxisLabelFormatCode: '#,##0', plotArea: {fill: {color: this.C.white}}}, extra);
+  },
+  /* ---------- one report → slides ---------- */
+  addReport(p, r, insightsOut) {
+    const A = this.analyse(r), title = String(r.title[0] || 'Report').replace(/\s+/g, ' '), C = this.C, rows = this.series(r, A), name = row => String(row[0]);
+    const sec = p.addSlide({masterName: 'ES_SECTION'});
+    sec.addText(title, {x: 0.8, y: 2.6, w: 11.7, h: 1.2, fontSize: 36, bold: true, color: C.white, fontFace: 'Calibri'});
+    sec.addText(`${rows.length} item(s) · ${new Date().toLocaleDateString()}`, {x: 0.8, y: 3.8, w: 11.7, h: 0.5, fontSize: 16, color: 'FBEFE2', fontFace: 'Calibri'});
+    const ins = [], horiz = rows.length > 6 && !A.isMonth, top = rows.slice(0, horiz ? 15 : 24);
+    const chartH = horiz ? Math.min(5.6, 0.38 * top.length + 1.2) : 5.4;
+    if (A.kind === 'target') {
+      const T = rows.reduce((a, x) => a + (+x[A.ti] || 0), 0), Ach = rows.reduce((a, x) => a + (+x[A.ai] || 0), 0), pc = T ? Ach / T : null;
+      const withP = rows.filter(x => typeof x[A.pi] === 'number').sort((a, b) => b[A.pi] - a[A.pi]), ok = withP.filter(x => x[A.pi] >= 1).length, low = withP.filter(x => x[A.pi] < .8).length;
+      const col = pc === null ? C.esp : pc >= 1 ? C.ok : pc >= .8 ? C.mid : C.low;
+      this.kpis(this.content(p, 'Key numbers', title), [{label: '🎯 Target', value: this.money(T)}, {label: '💰 Achieved', value: this.money(Ach)}, {label: '📊 Achievement', value: this.pct(pc), color: col},
+        {label: '📉 Balance to target', value: this.money(Math.max(0, T - Ach))}, {label: '🏆 Best', value: withP[0] ? `${name(withP[0])} · ${this.pct(withP[0][A.pi])}` : '–', color: C.ok}, {label: '✅ / 🔴', value: `${ok} achieved · ${low} below 80%`}]);
+      const s1 = this.content(p, A.isMonth ? 'Target vs achieved – month by month' : 'Target vs achieved', title);
+      s1.addChart('bar', [{name: r.header[A.ti], labels: top.map(name), values: top.map(x => +x[A.ti] || 0)}, {name: r.header[A.ai], labels: top.map(name), values: top.map(x => +x[A.ai] || 0)}],
+        this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: chartH, barDir: horiz ? 'bar' : 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: [this.PAL[1], this.PAL[0]], catAxisOrientation: horiz ? 'maxMin' : 'minMax'}));
+      if (!A.isMonth) { const sh = foldOthers(rows.map(name), rows.map(x => +x[A.ai] || 0)), s2 = this.content(p, `Share of ${r.header[A.ai].toLowerCase()}`, title);
+        s2.addChart('doughnut', [{name: r.header[A.ai], labels: sh.labels, values: sh.values}], {x: 0.6, y: 1.25, w: 7.2, h: 5.5, holeSize: 55, chartColors: sh.labels.map((l, i) => l === 'Others' ? 'A8A29A' : this.PAL[i]), showPercent: true, showValue: false, showLegend: true, legendPos: 'r', legendFontSize: 12, dataLabelColor: C.white, dataLabelFontSize: 11, fontFace: 'Calibri'});
+        this.bullets(s2, withP.slice(0, 3).map(x => `${name(x)}: ${this.pct(x[A.pi])} of target`).concat(withP.length > 3 ? [`Lowest: ${name(withP[withP.length - 1])} (${this.pct(withP[withP.length - 1][A.pi])})`] : []), 8.1, 1.6, 4.8, 5); }
+      ins.push(`Overall achievement is ${this.pct(pc)}: ${this.money(Ach)} of ${this.money(T)}.`);
+      if (withP.length > 1) { ins.push(`Best: ${name(withP[0])} at ${this.pct(withP[0][A.pi])}.`); ins.push(`Needs attention: ${name(withP[withP.length - 1])} at ${this.pct(withP[withP.length - 1][A.pi])}.`); }
+      if (withP.length) ins.push(`${ok} of ${withP.length} reached the target; ${low} are below 80%.`);
+      if (T > Ach) ins.push(`${this.money(T - Ach)} more is needed to reach the full target.`);
+    } else if (A.kind === 'growth') {
+      const P0 = rows.reduce((a, x) => a + (+x[1] || 0), 0), C1 = rows.reduce((a, x) => a + (+x[2] || 0), 0), g = P0 ? (C1 - P0) / P0 : null, col = g === null ? C.esp : g >= 0 ? C.ok : C.low;
+      const withG = rows.filter(x => typeof x[4] === 'number').sort((a, b) => b[4] - a[4]), up = withG.filter(x => x[4] > 0), down = withG.filter(x => x[4] < 0);
+      const mon = r.money.length > 0, fv = v => mon ? this.money(v) : fmtNum(Math.round(v));
+      this.kpis(this.content(p, 'Key numbers', title), [{label: `⏮️ ${r.prevL}`, value: fv(P0)}, {label: `▶️ ${r.curL}`, value: fv(C1)}, {label: '↕️ Change', value: (C1 - P0 >= 0 ? '+' : '−') + fv(Math.abs(C1 - P0)), color: col},
+        {label: '📊 Growth %', value: (g > 0 ? '+' : '') + this.pct(g), color: col}, {label: '📈 Growing', value: `${up.length} of ${withG.length}`, color: C.ok}, {label: '📉 Degrowth', value: `${down.length} of ${withG.length}`, color: down.length ? C.low : C.esp}]);
+      if (rows.length <= 1 && r.months && r.months.length > 1) { // total only: month by month
+        const M = r.months, s1 = this.content(p, `${r.prevL} vs ${r.curL} – month by month`, title);
+        s1.addChart('bar', [{name: r.prevL, labels: M.map(m => m.label), values: M.map(m => m.prev)}, {name: r.curL, labels: M.map(m => m.label), values: M.map(m => m.cur)}],
+          this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: 5.4, barDir: 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: [this.PAL[1], this.PAL[0]]}));
+        const gp = M.map(m => m.prev ? Math.round((m.cur - m.prev) / m.prev * 1000) / 10 : 0), s2 = this.content(p, 'Growth / degrowth % by month', title);
+        s2.addChart('bar', [{name: 'Growth', labels: M.map(m => m.label), values: gp.map(v => v > 0 ? v : 0)}, {name: 'Degrowth', labels: M.map(m => m.label), values: gp.map(v => v < 0 ? v : 0)}],
+          this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: 5.4, barDir: 'col', barGrouping: 'stacked', chartColors: [C.ok, C.low], catAxisLabelPos: 'low', valAxisLabelFormatCode: '0"%"', showValue: true, dataLabelFormatCode: '+0.0"%";-0.0"%";;', dataLabelFontSize: 11, dataLabelPosition: 'outEnd'}));
+        const bestM = M.map((m, i) => [m.label, gp[i]]).sort((a, b) => b[1] - a[1]); if (bestM.length) ins.push(`Best month: ${bestM[0][0]} (${bestM[0][1] > 0 ? '+' : ''}${bestM[0][1]}%); weakest: ${bestM[bestM.length - 1][0]} (${bestM[bestM.length - 1][1] > 0 ? '+' : ''}${bestM[bestM.length - 1][1]}%).`);
+      }
+      if (rows.length > 1) {
+        const s1 = this.content(p, `${r.prevL} vs ${r.curL}`, title);
+        s1.addChart('bar', [{name: r.prevL, labels: top.map(name), values: top.map(x => +x[1] || 0)}, {name: r.curL, labels: top.map(name), values: top.map(x => +x[2] || 0)}],
+          this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: chartH, barDir: horiz ? 'bar' : 'col', barGrouping: 'clustered', barGapWidthPct: 60, chartColors: [this.PAL[1], this.PAL[0]], catAxisOrientation: horiz ? 'maxMin' : 'minMax'}));
+        const gs = withG.slice(0, 15), s2 = this.content(p, 'Growth / degrowth %', title);
+        s2.addChart('bar', [{name: 'Growth', labels: gs.map(name), values: gs.map(x => x[4] > 0 ? Math.round(x[4] * 1000) / 10 : 0)}, {name: 'Degrowth', labels: gs.map(name), values: gs.map(x => x[4] < 0 ? Math.round(x[4] * 1000) / 10 : 0)}],
+          this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: Math.min(5.6, 0.38 * gs.length + 1.2), barDir: 'bar', barGrouping: 'stacked', chartColors: [C.ok, C.low], catAxisOrientation: 'maxMin', catAxisLabelPos: 'low', valAxisLabelFormatCode: '0"%"', showValue: true, dataLabelFormatCode: '+0.0"%";-0.0"%";;', dataLabelFontSize: 10, dataLabelPosition: 'outEnd'}));
+      }
+      ins.push(`${r.curL} is ${g === null ? 'new compared with' : g >= 0 ? `up ${this.pct(g)} on` : `down ${this.pct(-g)} on`} ${r.prevL} (${(C1 - P0 >= 0 ? '+' : '−') + fv(Math.abs(C1 - P0))}).`);
+      if (up.length) ins.push(`Highest growth: ${name(up[0])} (+${this.pct(up[0][4])}).`);
+      if (down.length) ins.push(`Biggest degrowth: ${name(down[down.length - 1])} (${this.pct(down[down.length - 1][4])}).`);
+      if (withG.length > 1) ins.push(`${up.length} growing and ${down.length} falling out of ${withG.length}.`);
+    } else if (A.mi > 0 || (r.chartData && r.chartData.labels)) {
+      const L = r.chartData && r.display ? r.chartData : null, labels = L ? L.labels : rows.map(name), vals = L ? L.values : rows.map(x => +x[A.mi] || 0), vname = L ? L.valueName : r.header[A.mi];
+      const tot = vals.reduce((a, b) => a + b, 0), mon = L ? /sales|value|amount|revenue|target/i.test(vname || '') : r.money.includes(A.mi), fv = v => mon ? this.money(v) : fmtNum(Math.round(v * 100) / 100);
+      const order = labels.map((l, i) => i).sort((a, b) => vals[b] - vals[a]);
+      this.kpis(this.content(p, 'Key numbers', title), [{label: `Σ ${/^total/i.test(vname) ? vname : 'Total ' + vname}`, value: fv(tot)}, {label: '🔢 Items', value: fmtNum(labels.length)}, {label: '📊 Average', value: fv(labels.length ? tot / labels.length : 0)},
+        {label: '🏆 Highest', value: labels.length ? `${labels[order[0]]}` : '–', color: C.ok}, {label: '⬆️ Highest value', value: labels.length ? fv(vals[order[0]]) : '–'}, {label: '⬇️ Lowest', value: labels.length ? `${labels[order[order.length - 1]]}` : '–'}]);
+      const tl = (L || A.isMonth) ? labels.map((l, i) => i) : order, tt = tl.slice(0, 24), hz = tt.length > 8 && !A.isMonth;
+      const s1 = this.content(p, `${vname} by ${r.header[0] || 'item'}`, title);
+      s1.addChart(A.isMonth ? 'line' : 'bar', [{name: vname, labels: tt.map(i => String(labels[i])), values: tt.map(i => vals[i])}], this.chartOpts({x: 0.5, y: 1.2, w: 12.3, h: hz ? Math.min(5.6, 0.32 * tt.length + 1.2) : 5.4, barDir: hz ? 'bar' : 'col', chartColors: [this.PAL[0]], catAxisOrientation: hz ? 'maxMin' : 'minMax', showLegend: false, lineSize: 3, lineDataSymbol: 'circle', lineDataSymbolSize: 8, showValue: tt.length <= 12, dataLabelFontSize: 10, dataLabelFormatCode: '#,##0'}));
+      if (!A.isMonth && labels.length > 1) { const sh = foldOthers(labels.map(String), vals), s2 = this.content(p, `Share of ${vname}`, title);
+        s2.addChart('doughnut', [{name: vname, labels: sh.labels, values: sh.values}], {x: 2.2, y: 1.2, w: 8.9, h: 5.6, holeSize: 55, chartColors: sh.labels.map((l, i) => l === 'Others' ? 'A8A29A' : this.PAL[i]), showPercent: true, showLegend: true, legendPos: 'r', legendFontSize: 12, dataLabelColor: C.white, dataLabelFontSize: 11, fontFace: 'Calibri'}); }
+      if (labels.length) { ins.push(`${/^total/i.test(vname) ? vname : 'Total ' + vname}: ${fv(tot)} across ${labels.length} item(s).`); ins.push(`Highest: ${labels[order[0]]} (${fv(vals[order[0]])}${tot ? ', ' + this.pct(vals[order[0]] / tot) + ' of the total' : ''}).`); if (labels.length > 1) ins.push(`Lowest: ${labels[order[order.length - 1]]} (${fv(vals[order[order.length - 1]])}).`);
+        const top3 = order.slice(0, 3).reduce((a, i) => a + vals[i], 0); if (labels.length > 4 && tot) ins.push(`The top 3 make up ${this.pct(top3 / tot)} of the total.`); }
+    }
+    this.table(p, r, title);
+    if (ins.length) { const s = this.content(p, 'What the numbers say', title); this.bullets(s, ins);
+      const short = A.kind === 'growth' ? 'Growth' : title.replace(/\s*[–-]\s*(All data|Year \d{4}|\w{3} \d{4}|Whole team).*$/, '');
+      insightsOut.push(`${short} – ${ins[0]}`); }
+  },
+  async build(ids, base) {
+    if (!window.PptxGenJS) throw new Error('PowerPoint maker could not load (libs/pptxgen.min.js missing)');
+    const p = new PptxGenJS(), C = this.C, nice = String(base).replace(/_/g, ' ');
+    p.layout = 'LAYOUT_WIDE'; p.author = 'Excel Specialist'; p.company = 'Excel Specialist'; p.title = nice;
+    p.theme = {headFontFace: 'Calibri', bodyFontFace: 'Calibri'};
+    this.masters(p);
+    const reps = ids.map(id => this.rep(id)).filter(Boolean); if (!reps.length) throw new Error('nothing to put in the presentation');
+    const t = p.addSlide({masterName: 'ES_TITLE'});
+    t.addText(nice, {x: 0.9, y: 2.0, w: 11.6, h: 1.4, fontSize: 40, bold: true, color: C.white, fontFace: 'Calibri', fit: 'shrink'});
+    t.addText(reps.map(r => String(r.title[0])).slice(0, 4).join('  ·  '), {x: 0.9, y: 3.45, w: 11.6, h: 0.9, fontSize: 16, color: 'E8C9A6', fontFace: 'Calibri', fit: 'shrink'});
+    t.addText(`Prepared on ${new Date().toLocaleDateString(undefined, {day: 'numeric', month: 'long', year: 'numeric'})} · Excel Specialist`, {x: 0.9, y: 5.8, w: 11.6, h: 0.5, fontSize: 14, color: 'C9A88A', fontFace: 'Calibri'});
+    if (reps.length > 1) { const s = this.content(p, 'Contents'); this.bullets(s, reps.map((r, i) => `${i + 1}.  ${r.title[0]}`)); }
+    const ins = []; reps.forEach(r => this.addReport(p, r, ins));
+    const e = p.addSlide({masterName: 'ES_TITLE'});
+    e.addText('Summary', {x: 0.9, y: 0.9, w: 11.6, h: 0.9, fontSize: 34, bold: true, color: C.white, fontFace: 'Calibri'});
+    if (ins.length) e.addText(ins.slice(0, 7).map(x => ({text: x, options: {bullet: {code: '25CF', color: C.car}, breakLine: true, paraSpaceAfter: 10}})), {x: 0.9, y: 1.9, w: 11.6, h: 3.9, fontSize: 18, color: 'F7E9D7', fontFace: 'Calibri', valign: 'top'});
+    e.addText('Thank you', {x: 0.9, y: 5.8, w: 11.6, h: 0.55, fontSize: 20, bold: true, color: 'E8C9A6', fontFace: 'Calibri'});
+    const blob = await p.write({outputType: 'blob'});
+    const slides = p.slides ? p.slides.length : p._slides ? p._slides.length : null;
+    return {blob, name: `${base}.pptx`, type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', note: slides ? `${slides} slides` : 'presentation'};
+  },
+  async quick(ids, base) {
+    try { toast('📽️ Making the PowerPoint…', 'ok', 2000); const f = await this.build(ids, base); Export.saveBlob(f.blob, f.name); toast(`📽️ <b>${esc(f.name)}</b> downloaded (${f.note}): title, key numbers, charts, tables and insights.`, 'ok', 7000); return f; }
+    catch (e) { console.error(e); toast('Could not make the PowerPoint: ' + esc(e.message || e), 'err', 7000); }
+  }
+};
+
+/* quick PowerPoint buttons */
+$('#tgPpt').onclick = () => { const v = Targets.view, ids = v === 'product' ? ['r:product'] : v === 'region' ? ['r:region', 'r:trend'] : ['r:person', 'r:trend'];
+  PPT.quick(ids, `${v === 'product' ? 'Product' : v === 'region' ? 'Region' : 'Salesperson'}_Target_vs_Achievement_${Targets.periodLabel((Targets.cfg || {}).period || 'all').replace(/\W+/g, '_')}`); };
+$('#grPpt').onclick = () => { if (Growth.last) PPT.quick(['r:growth'], `Growth_${Growth.last.S.curL}_vs_${Growth.last.S.prevL}`.replace(/[^A-Za-z0-9]+/g, '_')); };
+$('#smPpt').onclick = () => { if (SampleReport.result) PPT.quick(['x:sample'], (SampleReport.result.title || 'Report').replace(/[^A-Za-z0-9]+/g, '_')); };
+$('#chPpt').onclick = () => { if (!App.lastResult) return toast('Run a request first – the PowerPoint uses the latest result.', 'warn'); PPT.quick(['r:chart'], App.lastResult.title.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 40)); };
+/* assistant: "make a ppt of target vs achievement", "presentation of growth vs last year" */
+INTENTS.splice(1, 0, {name: 'ppt', test: c => /\b(ppt|pptx|power ?point|presentation|slides?|deck)\b/.test(c.low), build: c => {
+  const low = c.low, ids = [];
+  if (/\btarget|achiev/.test(low)) ids.push(/\b(product|item|categor)/.test(low) ? 'r:product' : /\b(region|zone|area)/.test(low) ? 'r:region' : 'r:person', ...(/\b(month|trend)/.test(low) ? ['r:trend'] : []));
+  if (/\b(growth|degrowth|last year|previous|yoy|vs)\b/.test(low)) ids.push('r:growth');
+  if (/\bsample\b/.test(low) && SampleReport.result) ids.push('x:sample');
+  if (!ids.length) ids.push(App.lastResult ? 'r:chart' : 's:' + App.active);
+  const names = ids.map(id => Export.sheetNameFor(id).replace(/_/g, ' '));
+  return {title: '📽️ PowerPoint', describe: `I will make a presentation of <b>${names.map(esc).join(', ')}</b>: title slide, key numbers, charts, tables, insights and a summary, in the caramel design.`,
+    apply: async () => { const f = await PPT.build(ids, names.join(' and ').replace(/[^A-Za-z0-9]+/g, '_').slice(0, 60)); Export.saveBlob(f.blob, f.name); return {msg: `<b>${esc(f.name)}</b> downloaded (${f.note}).`, how: 'Charts are real PowerPoint charts, so you can still change colours or numbers in PowerPoint.'}; }};
+}});
+/* =====================================================================
    9. NAVIGATION, TOOLBAR & PANELS
    ===================================================================== */
 function go(page) {
@@ -4083,6 +4509,7 @@ function go(page) {
   if (page === 'targets') Targets.init();
   if (page === 'export') Export.init();
   if (page === 'sample') SampleReport.init();
+  if (page === 'growth') Growth.init();
   if (page === 'settings') libStatus();
 }
 $$('.tab').forEach(t => t.onclick = () => go(t.dataset.page));
@@ -4092,6 +4519,7 @@ function refreshAll() {
   if ($('#page-charts').classList.contains('active')) Charts.init();
   if ($('#page-targets').classList.contains('active')) Targets.init();
   if ($('#page-sample').classList.contains('active')) SampleReport.init();
+  if ($('#page-growth').classList.contains('active')) Growth.init();
 }
 function renderHome() {
   const files = dataTables(), rows = files.reduce((a, n) => a + Math.max(App.hf.getSheetDimensions(sheetId(n)).height - 1, 0), 0);
@@ -4439,6 +4867,11 @@ const HELP = [
  ['Dynamic', 'SORT', 'Sorted list (spills down).', '=SORT(M2:M200,1,-1)', 'Sales from high to low'],
  ['Dynamic', 'SORTBY', 'Sort one list by another.', '=SORTBY(G2:G200,M2:M200,-1)', 'Customers sorted by sales'],
  ['Dynamic', 'SEQUENCE', 'A list of numbers.', '=SEQUENCE(10)', 'Numbers 1 to 10'],
+ ['Growth', 'Growth %', 'How much bigger (or smaller) the current number is than the previous one.', '=IFERROR((C2-B2)/B2,"")', 'B2 = last year, C2 = this year → +12.5% means 12.5% growth'],
+ ['Growth', 'Growth / Degrowth label', 'Writes Growth, Degrowth or No change.', '=IF(C2>B2,"Growth",IF(C2<B2,"Degrowth","No change"))', 'Status column next to Growth %'],
+ ['Growth', 'This year vs last year', 'Total of one year minus the year before.', '=SUMIFS(M:M,O:O,2025)-SUMIFS(M:M,O:O,2024)', 'Change in sales value, 2025 vs 2024'],
+ ['Growth', 'Same month last year', 'Total for one month, using date limits.', '=SUMIFS(M:M,A:A,">="&DATE(2024,6,1),A:A,"<="&DATE(2024,6,30))', 'June 2024 sales, to compare with June 2025'],
+ ['Growth', 'Month vs previous month', 'Change from last month, in %.', '=IFERROR((SUMIFS(M:M,N:N,"Jun",O:O,2025)-SUMIFS(M:M,N:N,"May",O:O,2025))/SUMIFS(M:M,N:N,"May",O:O,2025),"")', 'June vs May growth %'],
  ['Pivot', 'Pivot table', 'Summary table with rows, columns and totals. Use 🧮 Pivot Builder or just type it.', 'Type: pivot with Region in rows, Month in columns, sum of Qty', 'Qty by region and month']
 ];
 function renderHelp() {
@@ -4474,7 +4907,7 @@ function applySettings() {
 });
 function libStatus() {
   const local = n => { const ss = $$('script').filter(x => x.src && x.src.includes(n)); if (!ss.length) return '📦 built into this file (offline)'; return ss.some(x => /^https?:/.test(x.src)) ? '🌐 from internet' : '📦 from libs folder (offline)'; };
-  const rows = [['Excel & CSV reader / writer', !!window.XLSX, local('xlsx-js-style')], ['Chart pictures in Excel', !!window.JSZip, local('jszip')], ['PDF file maker', !!window.jspdf, local('jspdf.umd')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
+  const rows = [['Excel & CSV reader / writer', !!window.XLSX, local('xlsx-js-style')], ['Chart pictures in Excel', !!window.JSZip, local('jszip')], ['PDF file maker', !!window.jspdf, local('jspdf.umd')], ['PowerPoint maker', !!window.PptxGenJS, local('pptxgen')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
     ['PDF reader', true, App.libs.pdf === 'internet' ? '🌐 from internet' : App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : window.pdfjsLib ? '📦 built into this file (offline)' : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, App.libs.ocr === 'built-in' || (window.OCR_ENG_JS && !App.libs.ocr) ? '📦 built into this file (offline)' : App.libs.ocr === 'local' ? '📦 from libs folder (offline)' : App.libs.ocr === 'internet' ? '🌐 from internet' : 'loads when you upload a picture (offline from libs/tesseract)']];
   $('#libStatus').innerHTML = rows.map(([n, ok, how]) => `<div class="row" style="padding:3px 0">${ok ? '✅' : '❌'} <b>${n}</b> <span class="muted">${how}</span></div>`).join('');
 }
