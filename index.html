@@ -14,8 +14,11 @@
     libs/chart.umd.min.js         Chart.js 4.4.1       – doughnut & bar charts
     libs/pdf.min.js               PDF.js 3.11.174      – read PDF files (loaded only when a PDF is uploaded)
     libs/pdf.worker.min.js        PDF.js worker 3.11.174
-  Reading text from JPG/PNG images uses Tesseract.js 5.1.1, which needs an internet connection
-  (its language data is ~10 MB, so it is downloaded only when you upload an image).
+    libs/tesseract/tesseract.min.js  Tesseract.js 5.1.1 – read text from JPG/PNG pictures (loaded only when a picture is uploaded)
+    libs/tesseract/ocr-worker.js     Tesseract.js 5.1.1 worker  } wrapped as JavaScript text so they work when the
+    libs/tesseract/ocr-core.js       tesseract.js-core 5.1.1    } page is opened by double-click (file://), where
+    libs/tesseract/ocr-eng.js        English language data      } browsers block normal worker/data downloads
+  Everything works with no internet once the libs folder is in place.
 -->
 <script src="libs/xlsx.full.min.js"></script>
 <script>window.XLSX||document.write('<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"><\/script>')</script>
@@ -1103,7 +1106,7 @@ async function handleFiles(files) {
 function friendlyError(e) {
   const m = String(e && e.message || e);
   if (/password|encrypt/i.test(m)) return 'The file is password-protected.';
-  if (/internet|load|missing|fetch|network/i.test(m)) return 'A helper file could not be loaded. Reading pictures needs an internet connection.';
+  if (/internet|load|missing|fetch|network/i.test(m)) return 'A helper file could not be loaded. Check that the libs folder is next to index.html.';
   return 'The file may be damaged or in an unusual format.';
 }
 function progressRow(name) {
@@ -1247,20 +1250,43 @@ function linesToTable(lines) {
 }
 
 /* ---------- Images (OCR) ---------- */
-async function readImage(f, prog) {
-  prog.set(.05, 'Loading picture reader (needs internet)');
-  if (!window.Tesseract) {
-    try { App.libs.ocr = await loadScript('libs/tesseract/tesseract.min.js', 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'); }
-    catch (e) { throw new Error('Picture reader could not load (internet needed)'); }
+/* Offline pack (libs/tesseract): worker, engine and English data are wrapped as scripts,
+   because browsers block workers and fetch() on pages opened by double-click (file://). */
+async function ensureOcr(prog) {
+  if (App.ocr) return App.ocr;
+  prog.set(.03, 'Loading picture reader');
+  try {
+    await loadScript('libs/tesseract/tesseract.min.js');
+    await loadScript('libs/tesseract/ocr-worker.js'); prog.set(.05);
+    await loadScript('libs/tesseract/ocr-core.js'); prog.set(.07);
+    await loadScript('libs/tesseract/ocr-eng.js'); prog.set(.09);
+    // One blob holds the English data, a fetch() stand-in that serves it, the engine and the worker:
+    // a worker on a file:// page may not load other files or blob URLs, and may not fetch().
+    const shim = `self.__ENG=${JSON.stringify(window.OCR_ENG_JS)};
+self.fetch=(function(orig){return function(url,o){if(/eng\\.traineddata/.test(String(url))){var b=atob(self.__ENG),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return Promise.resolve(new Response(u));}return orig(url,o);};})(self.fetch);\n`;
+    const src = URL.createObjectURL(new Blob([shim, window.OCR_CORE_JS, ';\n', window.OCR_WORKER_JS], {type: 'application/javascript'}));
+    App.ocr = {offline: true, opts: {workerPath: src, workerBlobURL: false, langPath: 'offline', cacheMethod: 'none', gzip: true}};
+    App.libs.ocr = 'local';
+  } catch (e) {
+    if (!window.Tesseract) {
+      try { await loadScript('https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js'); }
+      catch (e2) { throw new Error('Picture reader could not load (libs/tesseract missing and no internet)'); }
+    }
+    App.ocr = {offline: false, opts: {}}; App.libs.ocr = 'internet';
   }
-  const worker = await Tesseract.createWorker('eng', 1, {logger: m => { if (m.status === 'recognizing text') prog.set(.1 + m.progress * .85, 'Reading text ' + Math.round(m.progress * 100) + '%'); }});
+  return App.ocr;
+}
+async function readImage(f, prog) {
+  const ocr = await ensureOcr(prog);
+  const worker = await Tesseract.createWorker('eng', 1, Object.assign({logger: m => { if (m.status === 'recognizing text') prog.set(.1 + m.progress * .85, 'Reading text ' + Math.round(m.progress * 100) + '%'); }}, ocr.opts));
   const {data} = await worker.recognize(f);
   await worker.terminate();
   const words = (data.words || []).filter(w => w.text && w.text.trim()).map(w => ({x0: w.bbox.x0, x1: w.bbox.x1, y: (w.bbox.y0 + w.bbox.y1) / 2, h: w.bbox.y1 - w.bbox.y0, text: w.text.trim(), conf: w.confidence}));
   if (!words.length) { toast(`No text found in <b>${esc(f.name)}</b>. Try a clearer, straight photo.`, 'warn', 7000); return null; }
   const low = words.filter(w => w.conf < 60).length;
   if (low > words.length * .2) toast('Some text could not be read clearly. Please check the table before saving.', 'warn', 7000);
-  return await previewAndSave(linesToTable(groupLines(words)), f.name, f.name.split('.').pop().toLowerCase());
+  const junk = v => String(v).replace(/^[~|_`'"‘’“”:;,]+\s*/, '').replace(/\s*[~|_`'"‘’“”:;,]+$/, '');   // stray marks around words
+  return await previewAndSave(linesToTable(groupLines(words)).map(r => r.map(junk)), f.name, f.name.split('.').pop().toLowerCase());
 }
 
 /* Editable preview for PDF / picture tables */
@@ -2259,6 +2285,7 @@ function go(page) {
   if (page === 'files') renderFiles();
   if (page === 'home') renderHome();
   if (page === 'charts') Charts.init();
+  if (page === 'settings') libStatus();
 }
 $$('.tab').forEach(t => t.onclick = () => go(t.dataset.page));
 function refreshAll() {
@@ -2644,7 +2671,7 @@ function applySettings() {
 function libStatus() {
   const local = n => { const s = $$('script').find(x => x.src && x.src.includes(n)); return s && !/^https?:\/\/cdn/.test(s.src) ? '📦 from libs folder (offline)' : '🌐 from internet'; };
   const rows = [['Excel & CSV reader', !!window.XLSX, local('xlsx.full')], ['Formula engine', !!window.HyperFormula, local('hyperformula')], ['Charts', !!window.Chart, local('chart.umd')],
-    ['PDF reader', true, window.pdfjsLib ? (App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : '🌐 from internet') : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, window.Tesseract ? 'loaded' : 'loads when you upload a picture – needs internet']];
+    ['PDF reader', true, window.pdfjsLib ? (App.libs.pdf === 'local' ? '📦 from libs folder (offline)' : '🌐 from internet') : 'loads when you upload a PDF'], ['Picture reader (OCR)', true, App.libs.ocr === 'local' ? '📦 from libs folder (offline)' : App.libs.ocr === 'internet' ? '🌐 from internet' : 'loads when you upload a picture (offline from libs/tesseract)']];
   $('#libStatus').innerHTML = rows.map(([n, ok, how]) => `<div class="row" style="padding:3px 0">${ok ? '✅' : '❌'} <b>${n}</b> <span class="muted">${how}</span></div>`).join('');
 }
 

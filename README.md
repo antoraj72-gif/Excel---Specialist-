@@ -8,7 +8,7 @@ It runs in your browser and nothing is sent anywhere.
 2. Double-click **`index.html`**. It opens in Chrome or Edge.
 3. Click **🎁 Load Demo Data** to try it straight away, or go to **📂 My Files** and upload your own files.
 
-No installation, no login, no internet needed. The one exception is reading text from **pictures (JPG/PNG)**, which needs an internet connection.
+No installation, no login and **no internet needed**: every library, including the photo reader and its English language data, is already in the `libs` folder.
 
 ## The tabs
 | Tab | What it does |
@@ -48,6 +48,7 @@ SUM, SUMIF(S), AVERAGE, AVERAGEIF(S), COUNT, COUNTA, COUNTBLANK, COUNTIF(S), MIN
 ## Good to know
 - Your work is saved automatically **in this browser on this computer**. Use **⚙️ Settings → Clear everything** to start fresh.
 - The "smart" part is a built-in plain-English reader, not an online AI. It understands the common sales tasks above. If a request isn't understood, try the example wording.
+- Photo reading takes a few seconds the first time (it loads about 8 MB from `libs`). Check the preview, because photos can have small reading mistakes.
 - PDF reading works best with PDFs that contain real text. For scanned pages, upload a photo or screenshot (JPG/PNG) instead. You can fix any cell in the preview before saving.
 - Runs smoothly with tens of thousands of rows.
 
@@ -58,6 +59,11 @@ SUM, SUMIF(S), AVERAGE, AVERAGEIF(S), COUNT, COUNTA, COUNTBLANK, COUNTIF(S), MIN
 | `hyperformula.full.min.js` | HyperFormula 2.7.1 | GPL-3.0 (used with the `gpl-v3` key) |
 | `chart.umd.min.js` | Chart.js 4.4.1 | MIT |
 | `pdf.min.js`, `pdf.worker.min.js` | PDF.js 3.11.174 | Apache-2.0 |
-| *(online only)* | Tesseract.js 5.1.1 for picture reading | Apache-2.0 |
+| `tesseract/tesseract.min.js` | Tesseract.js 5.1.1 (reads text from JPG/PNG) | Apache-2.0 |
+| `tesseract/ocr-worker.js` | Tesseract.js 5.1.1 worker | Apache-2.0 |
+| `tesseract/ocr-core.js` | tesseract.js-core 5.1.1 (LSTM engine) | Apache-2.0 |
+| `tesseract/ocr-eng.js` | English language data (tessdata 4.0.0_best_int) | Apache-2.0 |
+
+The three `ocr-*.js` files hold the original files wrapped as JavaScript text. Browsers block background workers and data downloads on pages opened by double-click (`file://`), so this is what lets photo reading work offline.
 
 If the `libs` folder is missing, the app loads these libraries from the internet instead.
