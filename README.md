@@ -19,12 +19,18 @@ No installation, no login and **no internet needed**: every library, including t
 | 🏠 Home | Quick start, stats and recent files |
 | 📂 My Files | Upload Excel (.xlsx/.xls), CSV, PDF, JPG, PNG. Preview, rename, set a ⭐ Master file, delete |
 | 📊 Work Sheet | Excel-style sheet with the ✨ request box, toolbar, formula bar and sheet tabs |
+| 🎯 Targets | **Target vs achievement for each salesperson**: team gauge, target-vs-achieved chart, report table with progress bars and status (✅ ≥100%, 🟡 80–99%, 🔴 below 80%), and a card per person. Pick the period (all, a year or a month); monthly targets are multiplied by the number of months. **📊 Create Excel sheet** writes the same report with live formulas |
 | 📈 Charts | Doughnut and bar charts of your latest result, plus summary cards. Download as PNG or print |
 | 📘 Formula Help | Every formula explained simply, with a **Try it** button |
 | ⚙️ Settings | Light/dark caramel theme, money symbol, decimals, date format |
 
 ## Things you can type (sales team examples)
 All of these work on the demo data. Click **More ideas…** in the app to run any of them with one click. With your own files, use your own column and file names.
+
+**🎯 Target vs achievement**
+- `Target vs achievement dashboard` · `Target vs achievement for 2025` · `Target vs achievement for March`
+- `Target vs achievement sheet for each salesperson` (creates a sheet with formulas)
+- Targets can come from a **Target** column in the sales file, or from a separate file (for example *Employee ID, Monthly Target*), matched by name or ID.
 
 **🔎 Lookups (VLOOKUP)**
 - `From Master, bring Designation and Monthly Target by Employee ID`
