@@ -1658,10 +1658,14 @@ function loadDemo() {
   const sn = addSheet('Sales', [sales[0]].concat(s), {kind: 'file', source: 'Demo – sales transactions', type: 'demo', uploaded: Date.now(), colFmt: {11: 'pct', 12: 'cur', 10: 'cur'}});
   getMeta(m).colFmt = {5: 'cur'};
   const pt = [['Product Name', 'Product Category', 'Monthly Target'], ['Air Cooler', 'Appliances', 400000], ['Microwave Oven', 'Appliances', 150000], ['Mixer Grinder', 'Appliances', 180000], ['Bluetooth Speaker', 'Electronics', 200000], ['LED TV 43"', 'Electronics', 300000], ['Smartphone', 'Electronics', 160000], ['Office Chair', 'Furniture', 420000], ['Study Table', 'Furniture', 600000], ['Notebook Pack', 'Stationery', 30000], ['Printer Paper Box', 'Stationery', 65000]];
+  const ct = [['Customer Name', 'City', 'Monthly Target'], ['Apex Solutions', 'Pune', 95000], ['City Electronics', 'Chennai', 130000], ['Ganesh Stores', 'Coimbatore', 170000], ['Global Office Needs', 'Bengaluru', 190000],
+    ['Green Valley Supplies', 'Kochi', 200000], ['Kaveri Agencies', 'Chennai', 230000], ['Lakshmi Enterprises', 'Hyderabad', 190000], ['Metro Retail', 'Delhi', 240000], ['New India Traders', 'Mumbai', 160000],
+    ['Om Sai Distributors', 'Ahmedabad', 200000], ['Prime Home Store', 'Lucknow', 200000], ['Royal Mart', 'Jaipur', 165000], ['Sri Balaji Traders', 'Chennai', 185000], ['Star Bazaar', 'Kolkata', 130000], ['Sunrise Stores', 'Bhubaneswar', 100000]];
+  addSheet('Customer_Targets', ct, {kind: 'file', source: 'Demo – customer targets', type: 'demo', uploaded: Date.now(), colFmt: {2: 'cur'}});
   addSheet('Product_Targets', pt, {kind: 'file', source: 'Demo – product targets', type: 'demo', uploaded: Date.now(), colFmt: {2: 'cur'}});
   dataTables().forEach(t => { if (t !== m) getMeta(t).master = false; });
   App.hf.clearUndoStack(); switchSheet(sn); refreshAll(); scheduleSave();
-  toast('🎁 Demo data added: <b>Master</b> (12 employees), <b>Sales</b> (480 invoices, Jul 2023 – Jun 2025) and <b>Product_Targets</b> (10 products). Try the example buttons on the Work Sheet tab!', 'ok', 6500);
+  toast('🎁 Demo data added: <b>Master</b> (12 employees), <b>Sales</b> (480 invoices, Jul 2023 – Jun 2025) <b>Product_Targets</b> (10 products) and <b>Customer_Targets</b> (15 customers). Try the example buttons on the Work Sheet tab!', 'ok', 6500);
   go('sheet');
 }
 
@@ -2581,6 +2585,8 @@ const EXAMPLE_GROUPS = [
     'Target vs achievement sheet for each salesperson',
     'Month wise target vs achievement trend',
     'Product wise target vs achievement',
+    'Customer wise target vs achievement',
+    'Customer wise target vs achievement sheet for 2025',
     'Region wise target vs achievement',
     'Region wise target vs achievement sheet for 2025']],
   ['🔎 Lookups (VLOOKUP)', [
@@ -2806,34 +2812,36 @@ const Targets = {
     const periodOpts = opt('all', 'All data', c.period === 'all') + years.map(y => opt('y:' + y, 'Year ' + y, c.period === 'y:' + y)).join('') + P.keys.map(k => opt('m:' + k, monthName(k % 100) + (Math.floor(k / 100) ? ' ' + Math.floor(k / 100) : ''), c.period === 'm:' + k)).join('');
     const tt = c.tt ? readTable(c.tt) : null;
     const hasRegion = s.headers.some(h => /region|zone|territory/i.test(h)) || (tt && tt.headers.some(h => /region|zone|territory/i.test(h)));
-    const prodCols = s.headers.map((h, i) => i).filter(i => /product|item|sku|category|brand|model/i.test(s.headers[i]) && s.types[i] === 'text');
+    const dimC = {product: this.dimCols(s, 'product'), customer: this.dimCols(s, 'customer')}, dv = this.isDimView(), D = dv ? TG_DIMS[this.view] : null, dkey = dv ? this.dk(this.view) : null;
     if (!hasRegion && this.view === 'region') this.view = 'person';
-    if (!prodCols.length && this.view === 'product') this.view = 'person';
-    if (this.view === 'product' && !c.prod) this.detectProduct(c);
-    const pr = c.prod, ptt = pr && pr.tt ? readTable(pr.tt) : null;
-    const prodFields = this.view !== 'product' ? '' : `
-      <label class="field">Product level<select id="tgPpc">${prodCols.map(i => opt(i, s.headers[i], pr && i === pr.pc)).join('')}</select></label>
-      <label class="field">Product targets from<select id="tgPtt">${opt('', '— none —', !(pr && pr.tt))}${tables.filter(n => n !== c.sales).map(n => opt(n, n, pr && n === pr.tt)).join('')}</select></label>
+    if (dv && !dimC[this.view].length) this.view = 'person';
+    if (this.isDimView() && c[dkey] && c[dkey].tt && !readTable(c[dkey].tt)) c[dkey] = null;
+    if (this.isDimView() && !c[dkey]) this.detectDim(c, this.view);
+    const pr = this.isDimView() ? c[dkey] : null, ptt = pr && pr.tt ? readTable(pr.tt) : null, prodCols = this.isDimView() ? dimC[this.view] : [];
+    const prodFields = !this.isDimView() ? '' : `
+      <label class="field">${D.L} column<select id="tgPpc">${prodCols.map(i => opt(i, s.headers[i], pr && i === pr.pc)).join('')}</select></label>
+      <label class="field">${D.L} targets from<select id="tgPtt">${opt('', '— none —', !(pr && pr.tt))}${tables.filter(n => n !== c.sales).map(n => opt(n, n, pr && n === pr.tt)).join('')}</select></label>
       ${ptt ? `<label class="field">Target column<select id="tgPtc">${ptt.headers.map((h, i) => ptt.types[i] === 'number' ? opt(i, h, i === pr.tc) : '').join('')}</select></label>
       <label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="tgPmonthly" ${pr.monthly ? 'checked' : ''}> Target is per month</label>` : ''}`;
     $('#tgSetup').innerHTML = `<div class="row" style="align-items:flex-end">
-      <label class="field">👁️ View by<select id="tgView">${opt('person', '👤 Salesperson', this.view !== 'region' && this.view !== 'product')}${hasRegion ? opt('region', '🗺️ Region', this.view === 'region') : ''}${prodCols.length ? opt('product', '📦 Product', this.view === 'product') : ''}</select></label>
+      <label class="field">👁️ View by<select id="tgView">${opt('person', '👤 Salesperson', this.view !== 'region' && !this.isDimView())}${hasRegion ? opt('region', '🗺️ Region', this.view === 'region') : ''}${dimC.product.length ? opt('product', '📦 Product', this.view === 'product') : ''}${dimC.customer.length ? opt('customer', '🏬 Customer', this.view === 'customer') : ''}</select></label>
       <label class="field">📅 Period<select id="tgPeriod">${periodOpts}</select></label>
       <label class="field">Sales data<select id="tgSales">${tables.map(n => opt(n, n, n === c.sales)).join('')}</select></label>
-      ${this.view === 'product' ? '' : `<label class="field">Salesperson<select id="tgPc">${s.headers.map((h, i) => opt(i, h, i === c.pc)).join('')}</select></label>`}
+      ${this.isDimView() ? '' : `<label class="field">Salesperson<select id="tgPc">${s.headers.map((h, i) => opt(i, h, i === c.pc)).join('')}</select></label>`}
       <label class="field">Achieved = total of<select id="tgVc">${s.headers.map((h, i) => s.types[i] === 'number' ? opt(i, h, i === c.vc) : '').join('')}</select></label>${prodFields}
-      ${this.view === 'product' ? '<!--' : ''}<label class="field">Targets from<select id="tgTt">${opt('', '— none —', !c.tt)}${tables.map(n => opt(n, n, n === c.tt)).join('')}</select></label>
+      ${this.isDimView() ? '<!--' : ''}<label class="field">Targets from<select id="tgTt">${opt('', '— none —', !c.tt)}${tables.map(n => opt(n, n, n === c.tt)).join('')}</select></label>
       ${tt ? `<label class="field">Target column<select id="tgTc">${tt.headers.map((h, i) => tt.types[i] === 'number' ? opt(i, h, i === c.tc) : '').join('')}</select></label>
-      ${c.tt !== c.sales ? `<label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="tgMonthly" ${c.monthly ? 'checked' : ''}> Target is per month</label>` : ''}` : ''}${this.view === 'product' ? '-->' : ''}
+      ${c.tt !== c.sales ? `<label class="field" style="flex-direction:row;align-items:center;gap:6px;padding-bottom:8px"><input type="checkbox" id="tgMonthly" ${c.monthly ? 'checked' : ''}> Target is per month</label>` : ''}` : ''}${this.isDimView() ? '-->' : ''}
       <label class="field">Sort by<select id="tgSort">${[['pct', 'Achievement %'], ['achieved', 'Achieved'], ['target', 'Target'], ['balance', 'Balance to target'], ['name', 'Name']].map(([v, l]) => opt(v, l, (this.sort || 'pct') === v)).join('')}</select></label>
     </div>`;
     const re = () => { this.renderSetup(); this.draw(); };
     $('#tgPeriod').onchange = e => { c.period = e.target.value; this.draw(); };
     $('#tgView').onchange = e => { this.view = e.target.value; this.renderSetup(); this.draw(); };
-    if ($('#tgPpc')) $('#tgPpc').onchange = e => { c.prod = null; this.detectProduct(c, +e.target.value); re(); };
-    if ($('#tgPtt')) $('#tgPtt').onchange = e => { const n = e.target.value; if (!n) { c.prod = Object.assign({}, c.prod, {tt: null}); return re(); } this.detectProduct(c, c.prod && c.prod.pc, n); if (!c.prod.tt) toast(`I couldn't match the products in <b>${esc(n)}</b> with <b>${esc(c.sales)}</b>.`, 'warn', 6000); re(); };
-    if ($('#tgPtc')) $('#tgPtc').onchange = e => { c.prod.tc = +e.target.value; this.draw(); };
-    if ($('#tgPmonthly')) $('#tgPmonthly').onchange = e => { c.prod.monthly = e.target.checked; this.draw(); };
+    const vk = this.isDimView() ? this.dk(this.view) : null, vw = this.view;
+    if ($('#tgPpc')) $('#tgPpc').onchange = e => { c[vk] = null; this.detectDim(c, vw, +e.target.value); re(); };
+    if ($('#tgPtt')) $('#tgPtt').onchange = e => { const n = e.target.value; if (!n) { c[vk] = Object.assign({}, c[vk], {tt: null}); return re(); } this.detectDim(c, vw, c[vk] && c[vk].pc, n); if (!c[vk].tt) toast(`I couldn't match the ${TG_DIMS[vw].Lp.toLowerCase()} in <b>${esc(n)}</b> with <b>${esc(c.sales)}</b>.`, 'warn', 6000); re(); };
+    if ($('#tgPtc')) $('#tgPtc').onchange = e => { c[vk].tc = +e.target.value; this.draw(); };
+    if ($('#tgPmonthly')) $('#tgPmonthly').onchange = e => { c[vk].monthly = e.target.checked; this.draw(); };
     $('#tgSales').onchange = e => { this.cfg = Object.assign({}, c, {sales: e.target.value, period: 'all'}); const s2 = readTable(this.cfg.sales); this.cfg.pc = Math.max(0, this.personCol(s2)); this.cfg.vc = Math.max(0, this.valueCol(s2)); this.detectTarget(this.cfg); re(); };
     if ($('#tgPc')) $('#tgPc').onchange = e => { c.pc = +e.target.value; this.detectTarget(c); re(); };
     $('#tgVc').onchange = e => { c.vc = +e.target.value; this.draw(); };
@@ -2849,7 +2857,7 @@ const Targets = {
     $('#tgSort').onchange = e => { this.sort = e.target.value; this.draw(); };
   },
   draw() {
-    if (this.view === 'product') return this.drawProduct();
+    if (this.isDimView()) return this.drawDim(this.view);
     const R = this.compute(); this.last = R; const body = $('#tgBody');
     if (!R) { body.innerHTML = ''; return; }
     if (this.view === 'region' && R.regions) return this.drawRegion(R);
@@ -2898,7 +2906,7 @@ const Targets = {
     Chart.defaults.color = css('--text'); Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
     if (this.chart) this.chart.destroy(); if (this.gauge) this.gauge.destroy();
     const pct = tot.pct || 0, st = tot.pct === null ? 'none' : pct >= 1 ? 'ok' : pct >= .8 ? 'mid' : 'low';
-    const label = {id: 'gl', afterDraw(ch) { const {ctx, chartArea: a} = ch; ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = css('--text'); ctx.font = '700 30px ' + Chart.defaults.font.family; ctx.fillText(tot.pct === null ? '–' : Math.round(pct * 1000) / 10 + '%', (a.left + a.right) / 2, a.bottom - 18); ctx.font = '12px ' + Chart.defaults.font.family; ctx.fillText(Targets.view === 'product' ? 'of product target' : 'of team target', (a.left + a.right) / 2, a.bottom + 2); ctx.restore(); }};
+    const label = {id: 'gl', afterDraw(ch) { const {ctx, chartArea: a} = ch; ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = css('--text'); ctx.font = '700 30px ' + Chart.defaults.font.family; ctx.fillText(tot.pct === null ? '–' : Math.round(pct * 1000) / 10 + '%', (a.left + a.right) / 2, a.bottom - 18); ctx.font = '12px ' + Chart.defaults.font.family; ctx.fillText(Targets.isDimView() ? `of ${Targets.view} target` : 'of team target', (a.left + a.right) / 2, a.bottom + 2); ctx.restore(); }};
     this.gauge = new Chart($('#tgGauge'), {type: 'doughnut', data: {labels: ['Achieved', 'Balance'], datasets: [{data: [Math.min(pct, 1), Math.max(0, 1 - pct)], backgroundColor: [color(st), css('--latte')], borderWidth: 0}]},
       options: {responsive: true, maintainAspectRatio: false, rotation: -90, circumference: 180, cutout: '72%', layout: {padding: {bottom: 24}}, plugins: {legend: {display: false}, tooltip: {enabled: false}}}, plugins: [label]});
     const names = sorted.map(p => String(p.name)), fmtV = v => wmoney(v);
@@ -2914,10 +2922,10 @@ const Targets = {
   },
   /* Excel sheet with live formulas */
   createSheet() {
-    if (this.view === 'product') return this.createProductSheet();
+    if (this.isDimView()) return this.createDimSheet(this.view);
     const R = this.last || this.compute(); if (!R) return toast('No sales data yet.', 'warn');
     if (this.view === 'region' && R.regions) return this.createRegionSheet(R);
-    if (this.view === 'product') return this.createProductSheet();
+    if (this.isDimView()) return this.createDimSheet(this.view);
     const c = this.cfg, s = R.s, t = c.tt ? readTable(c.tt) : null, sorted = this.sortList(R.list);
     const useKey = (c.keyS ?? c.pc) !== c.pc, hasReg = sorted.some(p => p.region);
     const H = ['Salesperson']; if (useKey) H.push(s.headers[c.keyS]); if (hasReg) H.push('Region');
@@ -3027,8 +3035,8 @@ const Targets = {
   },
   rowYm(P, r) { if (P.dc >= 0 && typeof r[P.dc] === 'number') { const d = serialToDate(r[P.dc]); return d.getUTCFullYear() * 100 + d.getUTCMonth(); }
     if (P.mc >= 0) { const m = monthIndex(String(r[P.mc])); return m < 0 ? null : (P.yc >= 0 ? (+r[P.yc] || 0) : 0) * 100 + m; } return null; },
-  trendProduct(R, who = 'all') { // who = 'all' | 'p:<product>' | 'r:<category>'
-    const c = this.cfg, pr = c.prod, s = R.s, P = R.P, keyOf = v => String(v).trim().toLowerCase();
+  trendProduct(R, who = 'all') { // product or customer view; who = 'all' | 'p:<name>' | 'r:<category / city>'
+    const c = this.cfg, pr = R.pr, s = R.s, P = R.P, keyOf = v => String(v).trim().toLowerCase();
     let keys = P.keys;
     if (c.period.startsWith('y:')) keys = keys.filter(k => Math.floor(k / 100) === +c.period.slice(2)); else if (c.period.startsWith('m:')) { const y = Math.floor(+c.period.slice(2) / 100); keys = keys.filter(k => Math.floor(k / 100) === y); }
     const items = R.list.filter(p => who === 'all' || (who.startsWith('p:') ? keyOf(p.name) === who.slice(2) : String(p.cat) === who.slice(2))), ik = new Set(items.map(p => keyOf(p.name)));
@@ -3042,14 +3050,14 @@ const Targets = {
     const card = $('#tgTrendCard'); if (!card) return;
     if (!R.P.keys.length) { card.innerHTML = '<h3>📅 Month-wise target vs achievement</h3><p class="muted">Add a Date or Month column to the sales data to see the monthly trend.</p>'; return; }
     const keyOf = v => String(v).trim().toLowerCase(), who = this.trendWho || 'all';
-    const isP = !!R.isProduct, pk = p => keyOf(isP ? p.name : p.key);
+    const isP = !!R.isDim, pk = p => keyOf(isP ? p.name : p.key), DD = R.D || {};
     const regs = isP ? [...new Set(R.list.map(p => p.cat).filter(Boolean))].sort() : R.regions ? R.regions.map(g => g.name).sort() : [], ppl = R.list.slice().sort((a, b) => String(a.name).localeCompare(String(b.name)));
     if (who !== 'all' && !(who.startsWith('r:') ? regs.includes(who.slice(2)) : ppl.some(p => 'p:' + pk(p) === who))) this.trendWho = 'all';
     const M = isP ? this.trendProduct(R, this.trendWho || 'all') : this.trend(R, this.trendWho || 'all'), hit = M.filter(m => m.status === 'ok').length, best = M.filter(m => m.pct !== null).sort((a, b) => b.pct - a.pct)[0];
     const tot = M.reduce((a, m) => ({t: a.t + m.target, a: a.a + m.achieved}), {t: 0, a: 0});
     card.innerHTML = `<div class="row" style="justify-content:space-between;align-items:flex-end"><div><h3 style="margin-bottom:2px">📅 Month-wise target vs achievement</h3>
         <div class="muted" style="font-size:12.5px">${M.length} month${M.length === 1 ? '' : 's'} · target met in <b>${hit}</b> · ${best ? `best month <b>${esc(best.label)}</b> (${tgPct(best.pct)})` : ''} · overall ${tgPct(tot.t ? tot.a / tot.t : null)}</div></div>
-      <label class="field noprint">Show trend for<select id="tgWho"><option value="all">${isP ? '📦 All products' : '👥 Whole team'}</option>${regs.length ? `<optgroup label="${isP ? 'Category' : 'Region'}">${regs.map(r => `<option value="r:${esc(r)}">${isP ? '🏷️' : '🗺️'} ${esc(r)}</option>`).join('')}</optgroup>` : ''}<optgroup label="${isP ? 'Product' : 'Salesperson'}">${ppl.map(p => `<option value="p:${esc(pk(p))}">${isP ? '📦' : '👤'} ${esc(p.name)}</option>`).join('')}</optgroup></select></label></div>
+      <label class="field noprint">Show trend for<select id="tgWho"><option value="all">${isP ? `${DD.icon} All ${DD.Lp.toLowerCase()}` : '👥 Whole team'}</option>${regs.length ? `<optgroup label="${isP ? DD.secL : 'Region'}">${regs.map(r => `<option value="r:${esc(r)}">${isP ? DD.secIcon : '🗺️'} ${esc(r)}</option>`).join('')}</optgroup>` : ''}<optgroup label="${isP ? DD.L : 'Salesperson'}">${ppl.map(p => `<option value="p:${esc(pk(p))}">${isP ? DD.icon : '👤'} ${esc(p.name)}</option>`).join('')}</optgroup></select></label></div>
       <div class="chart-box" style="height:330px;margin-top:8px"><canvas id="tgTrend"></canvas></div>
       <div style="overflow:auto;margin-top:10px"><table class="ptable tg-month"><tbody>
         <tr><th style="position:static">Month</th>${M.map(m => `<th style="position:static">${esc(m.short)}</th>`).join('')}</tr>
@@ -3071,11 +3079,14 @@ const Targets = {
       plugins: [{id: 'mpct', afterDatasetsDraw(ch) { const {ctx} = ch, m1 = ch.getDatasetMeta(1), m0 = ch.getDatasetMeta(0); ctx.save(); ctx.font = '700 11px ' + Chart.defaults.font.family; ctx.textAlign = 'center'; ctx.fillStyle = css('--text');
         m1.data.forEach((b, i) => { if (M[i].pct === null) return; const top = Math.min(b.y, m0.data[i].y); ctx.fillText(Math.round(M[i].pct * 100) + '%', (b.x + m0.data[i].x) / 2, top - 6); }); ctx.restore(); }}]});
   },
-  /* ---------- product view ---------- */
-  detectProduct(cfg, pcWant, ttWant) {
-    const s = readTable(cfg.sales), cols = s.headers.map((h, i) => i).filter(i => /product|item|sku|category|brand|model/i.test(s.headers[i]) && s.types[i] === 'text');
-    if (!cols.length) { cfg.prod = null; return; }
-    const order = pcWant !== undefined && pcWant !== null ? [pcWant] : cols.slice().sort((a, b) => (/name|item|sku|model/i.test(s.headers[b]) ? 1 : 0) - (/name|item|sku|model/i.test(s.headers[a]) ? 1 : 0));
+  /* ---------- product / customer views (same dashboard, different column) ---------- */
+  dk: kind => kind === 'customer' ? 'cust' : 'prod',
+  isDimView(v = this.view) { return v === 'product' || v === 'customer'; },
+  dimCols(s, kind) { return s.headers.map((h, i) => i).filter(i => TG_DIMS[kind].re.test(s.headers[i]) && s.types[i] === 'text'); },
+  detectDim(cfg, kind, pcWant, ttWant) {
+    const D = TG_DIMS[kind], key = this.dk(kind), s = readTable(cfg.sales), cols = this.dimCols(s, kind);
+    if (!cols.length) { cfg[key] = null; return; }
+    const order = pcWant !== undefined && pcWant !== null ? [pcWant] : cols.slice().sort((a, b) => (D.prefer.test(s.headers[b]) ? 1 : 0) - (D.prefer.test(s.headers[a]) ? 1 : 0));
     const qc = s.headers.findIndex(h => /^qty$|quantity|\bqty\b|units/i.test(h));
     for (const pc of order) {
       const sv = new Set(s.rows.map(r => String(r[pc]).trim().toLowerCase()));
@@ -3084,87 +3095,95 @@ const Targets = {
         const t = readTable(n); if (!t || !t.rows.length) continue;
         const tc = t.headers.findIndex((h, i) => /target|budget|goal|quota/i.test(h) && t.types[i] === 'number'); if (tc < 0) continue;
         let best = -1, bs = 0; t.headers.forEach((h, i) => { if (t.types[i] !== 'text') return; const hit = t.rows.filter(r => sv.has(String(r[i]).trim().toLowerCase())).length / t.rows.length; if (hit > bs) { bs = hit; best = i; } });
-        if (best >= 0 && bs >= .5) { cfg.prod = {pc, tt: n, tk: best, tc, monthly: !/year|annual|total/i.test(t.headers[tc]), qc}; return; }
+        if (best >= 0 && bs >= .5) { cfg[key] = {pc, tt: n, tk: best, tc, monthly: !/year|annual|total/i.test(t.headers[tc]), qc}; return; }
       }
     }
-    cfg.prod = {pc: order[0], tt: null, tk: -1, tc: -1, monthly: true, qc};
+    cfg[key] = {pc: order[0], tt: null, tk: -1, tc: -1, monthly: true, qc};
   },
-  computeProduct() {
-    const c = this.cfg; if (!c) return null; if (!c.prod) this.detectProduct(c); const pr = c.prod; if (!pr) return null;
+  computeDim(kind) {
+    const c = this.cfg, D = TG_DIMS[kind], key = this.dk(kind); if (!c) return null;
+    if (c[key] && c[key].tt && !readTable(c[key].tt)) c[key] = null;   // target file was deleted or renamed
+    if (!c[key]) this.detectDim(c, kind); const pr = c[key]; if (!pr) return null;
     const s = readTable(c.sales), P = this.periods(s), filters = this.periodFilters(s, P, c.period), months = this.monthsIn(P, c.period);
-    const keyOf = v => String(v).trim().toLowerCase(), catC = s.headers.findIndex((h, i) => i !== pr.pc && /category|segment|group|division/i.test(h) && s.types[i] === 'text');
-    const items = new Map(), get = (v, cat) => { const k = keyOf(v); if (!k) return null; if (!items.has(k)) items.set(k, {name: v, cat: cat || '', achieved: 0, qty: 0, target: 0}); const it = items.get(k); if (!it.cat && cat) it.cat = cat; return it; };
-    s.rows.forEach(r => get(r[pr.pc], catC >= 0 ? r[catC] : ''));
+    const keyOf = v => String(v).trim().toLowerCase(), catC = s.headers.findIndex((h, i) => i !== pr.pc && D.sec.test(h) && s.types[i] === 'text');
+    const items = new Map(), seen = new Map(), get = v => { const k = keyOf(v); if (!k) return null; if (!items.has(k)) items.set(k, {name: v, cat: '', achieved: 0, qty: 0, target: 0}); return items.get(k); };
+    s.rows.forEach(r => { const it = get(r[pr.pc]); if (!it || catC < 0) return; const k = keyOf(r[pr.pc]), m = seen.get(k) || new Map(); m.set(r[catC], (m.get(r[catC]) || 0) + 1); seen.set(k, m); });
+    // the extra column (Category / City) is shown only when each name belongs to one value
+    const consistent = catC >= 0 && [...seen.values()].filter(m => m.size === 1).length >= seen.size * .8;
+    if (consistent) seen.forEach((m, k) => { items.get(k).cat = [...m.entries()].sort((a, b) => b[1] - a[1])[0][0]; });
     s.rows.filter(r => passes(r, filters)).forEach(r => { const it = get(r[pr.pc]); if (!it) return; if (typeof r[c.vc] === 'number') it.achieved += r[c.vc]; if (pr.qc >= 0 && typeof r[pr.qc] === 'number') it.qty += r[pr.qc]; });
     let tName = '';
-    if (pr.tt) { const t = readTable(pr.tt); tName = t.headers[pr.tc]; const tcat = t.headers.findIndex((h, i) => i !== pr.tk && /category|segment|group/i.test(h));
-      t.rows.forEach(r => { if (typeof r[pr.tc] !== 'number') return; const it = get(r[pr.tk], tcat >= 0 ? r[tcat] : ''); if (it) it.target += r[pr.tc] * (pr.monthly ? months : 1); }); }
+    if (pr.tt) { const t = readTable(pr.tt); tName = t.headers[pr.tc]; const tcat = t.headers.findIndex((h, i) => i !== pr.tk && D.sec.test(h));
+      t.rows.forEach(r => { if (typeof r[pr.tc] !== 'number') return; const it = get(r[pr.tk]); if (!it) return; it.target += r[pr.tc] * (pr.monthly ? months : 1); if (!it.cat && tcat >= 0) it.cat = r[tcat]; }); }   // the target file's Category / City fills the gap
     const list = [...items.values()].map(p => { const pct = p.target ? p.achieved / p.target : null; return Object.assign(p, {key: p.name, pct, balance: Math.max(0, p.target - p.achieved), status: tgStatus(pct)}); });
     const tot = {target: list.reduce((a, p) => a + p.target, 0), achieved: list.reduce((a, p) => a + p.achieved, 0)}; tot.pct = tot.target ? tot.achieved / tot.target : null;
-    return {isProduct: true, list, tot, months, filters, P, s, tName, qc: pr.qc, pr};
+    return {isDim: true, isProduct: kind === 'product', kind, D, list, tot, months, filters, P, s, tName, qc: pr.qc, pr};
   },
-  drawProduct() {
-    const R = this.computeProduct(), body = $('#tgBody'); this.lastP = R;
-    if (!R) { body.innerHTML = '<div class="card">No product column found in the sales data.</div>'; return; }
-    const c = this.cfg, s = R.s, tot = R.tot, items = this.sortList(R.list), pr = R.pr, hasCat = items.some(p => p.cat), hasQty = R.qc >= 0;
+  drawDim(kind) {
+    const R = this.computeDim(kind), body = $('#tgBody'), D = TG_DIMS[kind]; this.lastD = R; if (kind === 'product') this.lastP = R;
+    if (!R) { body.innerHTML = `<div class="card">No ${D.L.toLowerCase()} column found in the sales data.</div>`; return; }
+    const c = this.cfg, s = R.s, tot = R.tot, items = this.sortList(R.list), pr = R.pr, hasCat = items.some(p => p.cat), hasQty = R.qc >= 0, l = D.L.toLowerCase();
     const per = this.periodLabel(c.period) + (pr.tt && pr.monthly ? ` · monthly target × ${R.months} month${R.months > 1 ? 's' : ''}` : '');
     const top = items.filter(p => p.pct !== null)[0], cnt = st => items.filter(p => p.status === st).length;
     const bar = (pct, st) => `<div class="pbar"><i style="width:${Math.min(100, (pct || 0) * 100)}%;background:${tgColor(st)}"></i></div>`;
     body.innerHTML = `
-      ${!pr.tt ? `<div class="card" style="border-left:5px solid var(--warn)"><b>⚠️ No product targets found.</b> <span class="muted">Upload a file with <i>${esc(s.headers[pr.pc])}</i> and <i>Monthly Target</i> columns and pick it in <b>Product targets from</b>, or make one here and type the targets.</span>
-        <div style="margin-top:8px"><button class="btn sm" id="tgMakeP">📝 Make a product target sheet</button></div></div>` : ''}
-      <div class="muted" style="margin-top:-6px">📅 ${esc(per)} · 📦 Product view · Achieved = total <b>${esc(s.headers[c.vc])}</b> by <b>${esc(s.headers[pr.pc])}</b>${pr.tt ? ` · Target = <b>${esc(R.tName)}</b> from <b>${esc(pr.tt)}</b>` : ''}</div>
+      ${!pr.tt ? `<div class="card" style="border-left:5px solid var(--warn)"><b>⚠️ No ${l} targets found.</b> <span class="muted">Upload a file with <i>${esc(s.headers[pr.pc])}</i> and <i>Monthly Target</i> columns and pick it in <b>${D.L} targets from</b>, or make one here and type the targets.</span>
+        <div style="margin-top:8px"><button class="btn sm" id="tgMakeP">📝 Make a ${l} target sheet</button></div></div>` : ''}
+      <div class="muted" style="margin-top:-6px">📅 ${esc(per)} · ${D.icon} ${D.L} view · Achieved = total <b>${esc(s.headers[c.vc])}</b> by <b>${esc(s.headers[pr.pc])}</b>${pr.tt ? ` · Target = <b>${esc(R.tName)}</b> from <b>${esc(pr.tt)}</b>` : ''}</div>
       <div class="kpis">
-        <div class="kpi"><div class="l">🎯 Product target</div><div class="v">${wmoney(tot.target)}</div></div>
+        <div class="kpi"><div class="l">🎯 ${D.L} target</div><div class="v">${wmoney(tot.target)}</div></div>
         <div class="kpi"><div class="l">💰 Achieved</div><div class="v">${wmoney(tot.achieved)}</div></div>
         <div class="kpi"><div class="l">📊 Achievement</div><div class="v" style="color:${tgColor(tgStatus(tot.pct))}">${tgPct(tot.pct)}</div></div>
         <div class="kpi"><div class="l">📉 Balance to target</div><div class="v">${wmoney(Math.max(0, tot.target - tot.achieved))}</div></div>
-        <div class="kpi"><div class="l">🏆 Top product</div><div class="v wrap">${top ? esc(top.name) + ' · ' + tgPct(top.pct) : '–'}</div></div>
-        <div class="kpi"><div class="l">📦 Products</div><div class="v wrap">✅ ${cnt('ok')} · 🟡 ${cnt('mid')} · 🔴 ${cnt('low')}</div></div>
+        <div class="kpi"><div class="l">🏆 Top ${l}</div><div class="v wrap">${top ? esc(top.name) + ' · ' + tgPct(top.pct) : '–'}</div></div>
+        <div class="kpi"><div class="l">${D.icon} ${D.Lp}</div><div class="v wrap">✅ ${cnt('ok')} · 🟡 ${cnt('mid')} · 🔴 ${cnt('low')}</div></div>
       </div>
       <div class="tg-charts">
         <div class="card"><h3>🎯 Overall achievement</h3><div class="chart-box" style="height:250px"><canvas id="tgGauge"></canvas></div><div class="muted" style="text-align:center;font-size:12.5px">${wmoney(tot.achieved)} of ${wmoney(tot.target)}</div></div>
-        <div class="card"><h3 style="margin-bottom:2px">📦 Target vs achieved by product</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Achieved bar: 🟢 100% or more · 🟡 80–99% · 🔴 below 80%</div><div class="chart-box" style="height:${Math.max(300, Math.min(700, items.length * 34 + 80))}px"><canvas id="tgBar"></canvas></div></div>
+        <div class="card"><h3 style="margin-bottom:2px">${D.icon} Target vs achieved by ${l}</h3><div class="muted" style="font-size:12.5px;margin-bottom:6px">Achieved bar: 🟢 100% or more · 🟡 80–99% · 🔴 below 80%</div><div class="chart-box" style="height:${Math.max(300, Math.min(760, items.length * 34 + 80))}px"><canvas id="tgBar"></canvas></div></div>
       </div>
       <div class="card" id="tgTrendCard"></div>
-      <div class="card"><h3>📋 Product report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>Product</th>${hasCat ? '<th>Category</th>' : ''}${hasQty ? '<th style="text-align:right">Qty sold</th>' : ''}<th style="text-align:right">Target</th><th style="text-align:right">Achieved</th><th style="text-align:right">Balance</th><th>Achievement</th><th>Status</th></tr></thead><tbody>
+      <div class="card"><h3>📋 ${D.L} report</h3><div style="overflow:auto"><table class="ptable tg-table"><thead><tr><th>#</th><th>${D.L}</th>${hasCat ? `<th>${esc(R.D.secL)}</th>` : ''}${hasQty ? '<th style="text-align:right">Qty sold</th>' : ''}<th style="text-align:right">Target</th><th style="text-align:right">Achieved</th><th style="text-align:right">Balance</th><th>Achievement</th><th>Status</th></tr></thead><tbody>
         ${items.map((p, i) => `<tr><td>${i + 1}</td><td><b>${esc(p.name)}</b></td>${hasCat ? `<td>${esc(p.cat)}</td>` : ''}${hasQty ? `<td style="text-align:right">${fmtNum(p.qty)}</td>` : ''}<td style="text-align:right">${wmoney(p.target)}</td><td style="text-align:right">${wmoney(p.achieved)}</td><td style="text-align:right">${wmoney(p.balance)}</td>
           <td><div class="row" style="gap:8px;flex-wrap:nowrap">${bar(p.pct, p.status)}<b style="min-width:52px">${tgPct(p.pct)}</b></div></td><td>${tgBadge(p.status)}</td></tr>`).join('')}
         <tr class="tg-total"><td></td><td>Total</td>${hasCat ? '<td></td>' : ''}${hasQty ? `<td style="text-align:right">${fmtNum(items.reduce((a, p) => a + p.qty, 0))}</td>` : ''}<td style="text-align:right">${wmoney(tot.target)}</td><td style="text-align:right">${wmoney(tot.achieved)}</td><td style="text-align:right">${wmoney(Math.max(0, tot.target - tot.achieved))}</td><td><b>${tgPct(tot.pct)}</b></td><td></td></tr>
       </tbody></table></div></div>
-      <div><h3>📦 Each product</h3><div class="pcards">${items.map(p => { const v = Math.min(100, (p.pct || 0) * 100);
+      <div><h3>${D.icon} Each ${l}</h3><div class="pcards">${items.map(p => { const v = Math.min(100, (p.pct || 0) * 100);
         return `<div class="card pcard"><div class="ring" style="background:conic-gradient(${tgColor(p.status)} ${v}%, var(--latte) 0)"><span>${tgPct(p.pct)}</span></div>
-          <div style="min-width:0"><div class="pname">${esc(p.name)}</div>${p.cat ? `<div class="muted" style="font-size:12px">${esc(p.cat)}${hasQty ? ' · ' + fmtNum(p.qty) + ' sold' : ''}</div>` : ''}
+          <div style="min-width:0"><div class="pname">${esc(p.name)}</div>${p.cat || hasQty ? `<div class="muted" style="font-size:12px">${esc(p.cat || '')}${p.cat && hasQty ? ' · ' : ''}${hasQty ? fmtNum(p.qty) + (kind === 'customer' ? ' units bought' : ' sold') : ''}</div>` : ''}
           <div style="font-size:12.5px;margin-top:4px">🎯 ${wmoney(p.target)}<br>💰 ${wmoney(p.achieved)}${p.balance > 0 ? `<br><span class="muted">Needs ${wmoney(p.balance)} more</span>` : p.target ? `<br><span style="color:var(--ok)">+${wmoney(p.achieved - p.target)} above</span>` : ''}</div>
           <div style="margin-top:6px">${tgBadge(p.status)}</div></div></div>`; }).join('')}</div></div>`;
-    if ($('#tgMakeP')) $('#tgMakeP').onclick = () => this.makeProductTargetSheet();
+    if ($('#tgMakeP')) $('#tgMakeP').onclick = () => this.makeDimTargetSheet(kind);
     this.drawCharts(items, tot, tgColor);
     this.drawTrend(R);
   },
-  makeProductTargetSheet() {
-    const R = this.lastP || this.computeProduct(); if (!R) return;
-    const s = R.s, hasCat = R.list.some(p => p.cat), H = [s.headers[R.pr.pc], ...(hasCat ? ['Category'] : []), 'Monthly Target'];
-    const n = addSheet('Product_Targets', [H, ...R.list.slice().sort((a, b) => String(a.cat + a.name).localeCompare(String(b.cat + b.name))).map(p => [p.name, ...(hasCat ? [p.cat] : []), null])], {kind: 'file', source: 'Product targets (typed in the app)', type: 'xlsx', uploaded: Date.now(), colFmt: {[H.length - 1]: 'cur'}});
-    this.cfg.prod = null; switchSheet(n); go('sheet'); Grid.select(1, H.length - 1); refreshAll(); scheduleSave();
-    toast(`📝 Sheet <b>${esc(n)}</b> made with every product. Type each product's <b>Monthly Target</b> in the last column, then open 🎯 Targets → View by Product.`, 'ok', 8000);
+  makeDimTargetSheet(kind) {
+    const D = TG_DIMS[kind], R = (this.lastD && this.lastD.kind === kind && this.lastD) || this.computeDim(kind); if (!R) return;
+    const s = R.s, hasCat = R.list.some(p => p.cat), H = [s.headers[R.pr.pc], ...(hasCat ? [D.secL] : []), 'Monthly Target'];
+    const n = addSheet(D.sheet, [H, ...R.list.slice().sort((a, b) => String(a.cat + a.name).localeCompare(String(b.cat + b.name))).map(p => [p.name, ...(hasCat ? [p.cat] : []), null])], {kind: 'file', source: `${D.L} targets (typed in the app)`, type: 'xlsx', uploaded: Date.now(), colFmt: {[H.length - 1]: 'cur'}});
+    this.cfg[this.dk(kind)] = null; switchSheet(n); go('sheet'); Grid.select(1, H.length - 1); refreshAll(); scheduleSave();
+    toast(`📝 Sheet <b>${esc(n)}</b> made with every ${D.L.toLowerCase()}. Type each one's <b>Monthly Target</b> in the last column, then open 🎯 Targets → View by ${D.L}.`, 'ok', 8000);
   },
-  createProductSheet() {
-    const R = this.computeProduct(); if (!R) return toast('No product column found.', 'warn');
+  createDimSheet(kind) {
+    const D = TG_DIMS[kind], R = this.computeDim(kind); if (!R) return toast(`No ${D.L.toLowerCase()} column found.`, 'warn');
     const c = this.cfg, s = R.s, pr = R.pr, t = pr.tt ? readTable(pr.tt) : null, items = this.sortList(R.list), per = critPairs(s, R.filters), hasCat = items.some(p => p.cat), L = colName;
-    const H = ['Product', ...(hasCat ? ['Category'] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], cT = hasCat ? 2 : 1, cA = cT + 1, cB = cT + 2, cP = cT + 3, cS = cT + 4, first = 5, last = first + items.length - 1;
-    const aoa = [[`Product-wise Target vs Achievement – ${this.periodLabel(c.period)}`], [`Achieved = total ${s.headers[c.vc]} by ${s.headers[pr.pc]} from ${c.sales}` + (t ? ` · Target = ${t.headers[pr.tc]} from ${pr.tt}` + (pr.monthly ? ` × ${R.months} month(s)` : '') : '')], [], H];
+    const H = [D.L, ...(hasCat ? [D.secL] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], cT = hasCat ? 2 : 1, cA = cT + 1, cB = cT + 2, cP = cT + 3, cS = cT + 4, first = 5, last = first + items.length - 1;
+    const aoa = [[`${D.L}-wise Target vs Achievement – ${this.periodLabel(c.period)}`], [`Achieved = total ${s.headers[c.vc]} by ${s.headers[pr.pc]} from ${c.sales}` + (t ? ` · Target = ${t.headers[pr.tc]} from ${pr.tt}` + (pr.monthly ? ` × ${R.months} month(s)` : '') : '')], [], H];
     items.forEach((p, i) => { const r = first + i;
       aoa.push([p.name, ...(hasCat ? [p.cat] : []), t ? `=SUMIFS(${colRange(t, pr.tc)},${colRange(t, pr.tk)},$A${r})` + (pr.monthly && R.months !== 1 ? `*${R.months}` : '') : 0,
         '=' + aggFormula('sum', colRange(s, c.vc), [colRange(s, pr.pc), `$A${r}`, ...per]), `=MAX(0,${L(cT)}${r}-${L(cA)}${r})`, `=IFERROR(${L(cA)}${r}/${L(cT)}${r},"")`,
         `=IF(${L(cP)}${r}="","No target",IF(${L(cP)}${r}>=1,"Achieved",IF(${L(cP)}${r}>=0.8,"Close","Below target")))`]); });
     const tr = last + 1; aoa.push(['Total', ...(hasCat ? [''] : []), `=SUM(${L(cT)}${first}:${L(cT)}${last})`, `=SUM(${L(cA)}${first}:${L(cA)}${last})`, `=MAX(0,${L(cT)}${tr}-${L(cA)}${tr})`, `=IFERROR(${L(cA)}${tr}/${L(cT)}${tr},"")`, '']);
     const styles = {'0,0': {b: true}}; H.forEach((h, i) => { styles['3,' + i] = {b: true, bg: '#C68642', color: '#fff'}; styles[(tr - 1) + ',' + i] = {b: true, bg: '#F3E3CF', color: '#3E2723'}; });
-    const n = writeResult('Product_Target_vs_Achievement', aoa, {colFmt: {[cT]: 'cur', [cA]: 'cur', [cB]: 'cur', [cP]: 'pct'}, styles,
+    const n = writeResult(`${D.L}_Target_vs_Achievement`, aoa, {colFmt: {[cT]: 'cur', [cA]: 'cur', [cB]: 'cur', [cP]: 'pct'}, styles,
       rules: [{col: cS, op: 'eq', val: 'Achieved', color: '#D4E8C2'}, {col: cS, op: 'eq', val: 'Close', color: '#FCEBC8'}, {col: cS, op: 'eq', val: 'Below target', color: '#F8DCDC'}]});
     switchSheet(n); go('sheet'); refreshAll(); scheduleSave();
-    toast(`📊 Sheet <b>${esc(n)}</b> created with live formulas (SUMIFS by product).`, 'ok', 5000);
+    toast(`📊 Sheet <b>${esc(n)}</b> created with live formulas (SUMIFS by ${D.L.toLowerCase()}).`, 'ok', 5000);
     return n;
   },
+  // product names kept for the Export / PowerPoint code
+  detectProduct(cfg, pc, tt) { return this.detectDim(cfg, 'product', pc, tt); },
+  computeProduct() { return this.computeDim('product'); },
   /* plain values for the Export tab: view = 'person' | 'region' */
   reportAoa(view) {
     if (!this.cfg || !readTable(this.cfg.sales)) this.cfg = this.detect();
@@ -3173,11 +3192,11 @@ const Targets = {
     const title = [`${view === 'region' ? 'Region-wise ' : ''}Target vs Achievement – ${this.periodLabel(this.cfg.period)}`];
     const st = x => ({ok: 'Achieved', mid: 'Close', low: 'Below target', none: 'No target'}[x]);
     const r2 = v => Math.round(v * 100) / 100, pct = v => v === null ? '' : Math.round(v * 10000) / 10000;
-    if (view === 'product') {
-      const Rp = this.computeProduct(); if (!Rp) return null;
+    if (view === 'product' || view === 'customer') {
+      const Rp = this.computeDim(view), D = TG_DIMS[view]; if (!Rp) return null;
       const hasCat = Rp.list.some(p => p.cat), hasQty = Rp.qc >= 0;
       const rows = this.sortList(Rp.list).map(p => [p.name, ...(hasCat ? [p.cat || ''] : []), ...(hasQty ? [p.qty] : []), r2(p.target), r2(p.achieved), r2(p.balance), pct(p.pct), st(p.status)]), o = (hasCat ? 1 : 0) + (hasQty ? 1 : 0);
-      return {title: [`Product-wise Target vs Achievement – ${this.periodLabel(this.cfg.period)}`], header: ['Product', ...(hasCat ? ['Category'] : []), ...(hasQty ? ['Qty sold'] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], rows,
+      return {title: [`${D.L}-wise Target vs Achievement – ${this.periodLabel(this.cfg.period)}`], header: [D.L, ...(hasCat ? [D.secL] : []), ...(hasQty ? ['Qty sold'] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], rows,
         total: ['Total', ...(hasCat ? [''] : []), ...(hasQty ? [Rp.list.reduce((a, p) => a + p.qty, 0)] : []), r2(Rp.tot.target), r2(Rp.tot.achieved), r2(Math.max(0, Rp.tot.target - Rp.tot.achieved)), pct(Rp.tot.pct), ''], money: [1 + o, 2 + o, 3 + o], pct: [4 + o]};
     }
     if (view === 'trend') {
@@ -3197,6 +3216,10 @@ const Targets = {
     return {title, header: ['Salesperson', ...(hasReg ? ['Region'] : []), 'Target', 'Achieved', 'Balance to Target', 'Achievement %', 'Status'], rows, total: ['Team total', ...(hasReg ? [''] : []), r2(R.tot.target), r2(R.tot.achieved), r2(Math.max(0, R.tot.target - R.tot.achieved)), pct(R.tot.pct), ''], money: [1 + o, 2 + o, 3 + o], pct: [4 + o]};
   }
 };
+const TG_DIMS = {
+  product: {re: /product|item|sku|category|brand|model/i, prefer: /name|item|sku|model/i, sec: /category|segment|group|division/i, L: 'Product', Lp: 'Products', icon: '📦', secL: 'Category', secIcon: '🏷️', sheet: 'Product_Targets'},
+  customer: {re: /customer|client|party|dealer|distributor|retailer|buyer/i, prefer: /name/i, sec: /city|region|zone|territory|segment|channel|type|class/i, L: 'Customer', Lp: 'Customers', icon: '🏬', secL: 'City', secIcon: '📍', sheet: 'Customer_Targets'}
+};
 const tgStatus = p => p === null || p === undefined ? 'none' : p >= 1 ? 'ok' : p >= .8 ? 'mid' : 'low';
 const tgPct = p => p === null || p === undefined ? '–' : fmtNum(Math.round(p * 1000) / 10) + '%';
 const tgColor = st => ({ok: '#6B8E23', mid: '#E0A030', low: '#B23A3A', none: '#A1887F'}[st]);
@@ -3204,8 +3227,8 @@ const tgBadge = st => ({ok: '<span class="tg-badge st-ok">✅ Achieved</span>', 
 const wmoney = v => App.settings.currency + fmtNum(Math.round(v), 0);   // whole rupees on the dashboard
 const monthName = m => MONTHS[m][0].toUpperCase() + MONTHS[m].slice(1);
 $('#tgSheet').onclick = () => Targets.createSheet();
-$('#tgShare').onclick = () => { const v = Targets.view, ids = v === 'product' ? ['r:product'] : v === 'region' ? ['r:region', 'r:trend'] : ['r:person', 'r:trend'];
-  Share.open(ids, `${v === 'product' ? 'Product' : v === 'region' ? 'Region' : 'Salesperson'}_Target_vs_Achievement_${Targets.periodLabel((Targets.cfg || {}).period || 'all').replace(/\W+/g, '_')}`, 'target vs achievement'); };
+$('#tgShare').onclick = () => { const v = Targets.view, ids = Targets.isDimView() ? ['r:' + v] : v === 'region' ? ['r:region', 'r:trend'] : ['r:person', 'r:trend'];
+  Share.open(ids, `${Targets.isDimView() ? TG_DIMS[v].L : v === 'region' ? 'Region' : 'Salesperson'}_Target_vs_Achievement_${Targets.periodLabel((Targets.cfg || {}).period || 'all').replace(/\W+/g, '_')}`, 'target vs achievement'); };
 $('#tgPng').onclick = () => { if (!Targets.chart) return toast('No chart yet.', 'warn'); const a = document.createElement('a'); a.href = Targets.chart.toBase64Image('image/png', 1); a.download = 'target_vs_achievement.png'; a.click(); };
 
 /* Assistant command: "target vs achievement (dashboard/sheet) [for 2025 / for March]" */
@@ -3217,11 +3240,11 @@ function buildTargets(ctx) {
   const ym = ctx.low.match(/\b((?:19|20)\d{2})\b/), mm = ctx.low.match(/\b(jan(uary)?|feb(ruary)?|mar(ch)?|apr(il)?|may|june?|july?|aug(ust)?|sep(t|tember)?|oct(ober)?|nov(ember)?|dec(ember)?)\b/);
   if (mm) { const mi = monthIndex(mm[1]), keys = P.keys.filter(k => k % 100 === mi && (!ym || Math.floor(k / 100) === +ym[1])); if (keys.length) period = 'm:' + keys[keys.length - 1]; }
   else if (ym && P.keys.some(k => Math.floor(k / 100) === +ym[1])) period = 'y:' + ym[1];
-  const wantSheet = /\b(sheet|excel|table|formula)/.test(ctx.low), byRegion = /\b(region|zone|area|territor)/.test(ctx.low), byProduct = /\b(product|item|sku|categor|brand)/.test(ctx.low);
+  const wantSheet = /\b(sheet|excel|table|formula)/.test(ctx.low), byRegion = /\b(region|zone|area|territor)/.test(ctx.low), byProduct = /\b(product|item|sku|categor|brand)/.test(ctx.low), byCustomer = /\b(customer|client|party|dealer|distributor|retailer|buyer)/.test(ctx.low);
   const t = cfg.tt ? readTable(cfg.tt) : null;
-  return {title: '🎯 Target vs Achievement', describe: `I will ${wantSheet ? 'create a sheet with formulas and open' : 'open'} the <b>${byProduct ? 'product-wise ' : byRegion ? 'region-wise ' : ''}Target vs Achievement</b> dashboard for each <b>${byProduct ? 'product' : byRegion ? 'region' : esc(s.headers[cfg.pc])}</b> (${esc(Targets.periodLabel(period))}). Achieved = total <b>${esc(s.headers[cfg.vc])}</b> from <b>${esc(cfg.sales)}</b>; ${t ? `Target = <b>${esc(t.headers[cfg.tc])}</b> from <b>${esc(cfg.tt)}</b>${cfg.tt !== cfg.sales && cfg.monthly ? ' × number of months' : ''}` : '<b>no target column found yet</b>'}.`,
+  return {title: '🎯 Target vs Achievement', describe: `I will ${wantSheet ? 'create a sheet with formulas and open' : 'open'} the <b>${byCustomer ? 'customer-wise ' : byProduct ? 'product-wise ' : byRegion ? 'region-wise ' : ''}Target vs Achievement</b> dashboard for each <b>${byCustomer ? 'customer' : byProduct ? 'product' : byRegion ? 'region' : esc(s.headers[cfg.pc])}</b> (${esc(Targets.periodLabel(period))}). Achieved = total <b>${esc(s.headers[cfg.vc])}</b> from <b>${esc(cfg.sales)}</b>; ${t ? `Target = <b>${esc(t.headers[cfg.tc])}</b> from <b>${esc(cfg.tt)}</b>${cfg.tt !== cfg.sales && cfg.monthly ? ' × number of months' : ''}` : '<b>no target column found yet</b>'}.`,
     apply: () => {
-      Targets.cfg = Object.assign({}, cfg, {period}); Targets.view = byProduct ? 'product' : byRegion ? 'region' : 'person';
+      Targets.cfg = Object.assign({}, cfg, {period}); Targets.view = byCustomer ? 'customer' : byProduct ? 'product' : byRegion ? 'region' : 'person';
       if (wantSheet) { Targets.last = null; Targets.compute(); const n = Targets.createSheet(); return {msg: `Sheet <b>${esc(n)}</b> is ready, and the dashboard is on the 🎯 Targets tab.`, how: 'Achieved uses SUMIFS on the sales data for each salesperson. Target looks up each salesperson\'s target (× months for monthly targets). Achievement % = Achieved ÷ Target.'}; }
       go('targets');
       if (/\b(month|monthly|trend)\b/.test(ctx.low)) setTimeout(() => { const el = $('#tgTrendCard'); if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'}); }, 150);
@@ -3254,6 +3277,7 @@ const Export = {
       const per = 'Period: ' + Targets.periodLabel((Targets.cfg || {}).period || 'all') + ' (change it on the 🎯 Targets tab)';
       out.push({id: 'r:person', label: 'Target vs Achievement – by salesperson', icon: '🎯', info: per, group: 'reports'});
       const ra = Targets.reportAoa('region'); if (ra) out.push({id: 'r:region', label: 'Target vs Achievement – by region', icon: '🗺️', info: per, group: 'reports'});
+      if (Targets.reportAoa('customer')) out.push({id: 'r:customer', label: 'Target vs Achievement – by customer', icon: '🏬', info: per, group: 'reports'});
       if (Targets.reportAoa('product')) out.push({id: 'r:product', label: 'Target vs Achievement – by product', icon: '📦', info: per, group: 'reports'});
       if (Targets.reportAoa('trend')) out.push({id: 'r:trend', label: 'Target vs Achievement – month-wise trend', icon: '📅', info: per, group: 'reports'});
     }
@@ -3357,9 +3381,9 @@ const Export = {
     if (id === 'r:growth') return Growth.reportAoa();
     if (id.startsWith('x:') && this.extraReports && this.extraReports[id]) return this.extraReports[id]();
     if (id === 'r:chart') { const L = App.lastResult; return {title: [L.title], header: ['Name', L.valueName || 'Value'], rows: L.labels.map((l, i) => [l, L.values[i]]), total: ['Total', L.values.reduce((a, b) => a + b, 0)], money: /sales|value|amount|revenue|target/i.test(L.valueName || '') ? [1] : [], pct: []}; }
-    return Targets.reportAoa(id === 'r:region' ? 'region' : id === 'r:trend' ? 'trend' : id === 'r:product' ? 'product' : 'person');
+    return Targets.reportAoa(id === 'r:region' ? 'region' : id === 'r:trend' ? 'trend' : id === 'r:product' ? 'product' : id === 'r:customer' ? 'customer' : 'person');
   },
-  sheetNameFor(id) { if (id.startsWith('x:') && this.extraNames && this.extraNames[id]) return this.extraNames[id]; return {'r:growth': 'Growth_Degrowth', 'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:product': 'Target_by_Product', 'r:trend': 'Target_by_Month', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
+  sheetNameFor(id) { if (id.startsWith('x:') && this.extraNames && this.extraNames[id]) return this.extraNames[id]; return {'r:growth': 'Growth_Degrowth', 'r:person': 'Target_by_Salesperson', 'r:region': 'Target_by_Region', 'r:product': 'Target_by_Product', 'r:customer': 'Target_by_Customer', 'r:trend': 'Target_by_Month', 'r:chart': 'Chart_Data'}[id] || id.slice(2); },
   /* ---- dashboard charts as pictures (drawn off-screen, light colours on white) ---- */
   renderChart(cfg, w = 960, h = 460) {
     const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.style.cssText = `position:fixed;left:-20000px;top:0;width:${w}px;height:${h}px`; document.body.appendChild(cv);
@@ -3418,11 +3442,12 @@ const Export = {
   chartsFor(ids) {
     const out = [];
     try {
-      if (ids.some(id => ['r:person', 'r:region', 'r:trend', 'r:product'].includes(id))) {
+      if (ids.some(id => ['r:person', 'r:region', 'r:trend', 'r:product', 'r:customer'].includes(id))) {
         if (!Targets.cfg || !readTable(Targets.cfg.sales)) Targets.cfg = Targets.detect();
         const R = Targets.cfg && Targets.compute(), per = R ? Targets.periodLabel(Targets.cfg.period) : '';
         if (R && ids.includes('r:person')) out.push({title: `Target vs achieved by salesperson – ${per}`, ...this.targetChart(Targets.sortList(R.list), `Target vs achieved by salesperson – ${per}`)});
         if (R && R.regions && ids.includes('r:region')) out.push({title: `Target vs achieved by region – ${per}`, ...this.targetChart(Targets.sortList(R.regions), `Target vs achieved by region – ${per}`)});
+        if (R && ids.includes('r:customer')) { const Rc = Targets.computeDim('customer'); if (Rc && Rc.list.some(p => p.target)) out.push({title: `Target vs achieved by customer – ${per}`, ...this.targetChart(Targets.sortList(Rc.list), `Target vs achieved by customer – ${per}`)}); }
         if (R && ids.includes('r:product')) { const Rp = Targets.computeProduct(); if (Rp && Rp.list.some(p => p.target)) out.push({title: `Target vs achieved by product – ${per}`, ...this.targetChart(Targets.sortList(Rp.list), `Target vs achieved by product – ${per}`)}); }
         if (R && ids.includes('r:trend')) { const M = Targets.trend(R, Targets.trendWho || 'all'); if (M.length) { const t = `Month-wise target vs achievement – ${(Targets.lastTrend && Targets.lastTrend.who) || 'Whole team'}`; out.push({title: t, ...this.trendChart(M, t)}); } }
       }
@@ -4480,15 +4505,15 @@ const PPT = {
 };
 
 /* quick PowerPoint buttons */
-$('#tgPpt').onclick = () => { const v = Targets.view, ids = v === 'product' ? ['r:product'] : v === 'region' ? ['r:region', 'r:trend'] : ['r:person', 'r:trend'];
-  PPT.quick(ids, `${v === 'product' ? 'Product' : v === 'region' ? 'Region' : 'Salesperson'}_Target_vs_Achievement_${Targets.periodLabel((Targets.cfg || {}).period || 'all').replace(/\W+/g, '_')}`); };
+$('#tgPpt').onclick = () => { const v = Targets.view, ids = Targets.isDimView() ? ['r:' + v] : v === 'region' ? ['r:region', 'r:trend'] : ['r:person', 'r:trend'];
+  PPT.quick(ids, `${Targets.isDimView() ? TG_DIMS[v].L : v === 'region' ? 'Region' : 'Salesperson'}_Target_vs_Achievement_${Targets.periodLabel((Targets.cfg || {}).period || 'all').replace(/\W+/g, '_')}`); };
 $('#grPpt').onclick = () => { if (Growth.last) PPT.quick(['r:growth'], `Growth_${Growth.last.S.curL}_vs_${Growth.last.S.prevL}`.replace(/[^A-Za-z0-9]+/g, '_')); };
 $('#smPpt').onclick = () => { if (SampleReport.result) PPT.quick(['x:sample'], (SampleReport.result.title || 'Report').replace(/[^A-Za-z0-9]+/g, '_')); };
 $('#chPpt').onclick = () => { if (!App.lastResult) return toast('Run a request first – the PowerPoint uses the latest result.', 'warn'); PPT.quick(['r:chart'], App.lastResult.title.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 40)); };
 /* assistant: "make a ppt of target vs achievement", "presentation of growth vs last year" */
 INTENTS.splice(1, 0, {name: 'ppt', test: c => /\b(ppt|pptx|power ?point|presentation|slides?|deck)\b/.test(c.low), build: c => {
   const low = c.low, ids = [];
-  if (/\btarget|achiev/.test(low)) ids.push(/\b(product|item|categor)/.test(low) ? 'r:product' : /\b(region|zone|area)/.test(low) ? 'r:region' : 'r:person', ...(/\b(month|trend)/.test(low) ? ['r:trend'] : []));
+  if (/\btarget|achiev/.test(low)) ids.push(/\b(customer|client|dealer|party)/.test(low) ? 'r:customer' : /\b(product|item|categor)/.test(low) ? 'r:product' : /\b(region|zone|area)/.test(low) ? 'r:region' : 'r:person', ...(/\b(month|trend)/.test(low) ? ['r:trend'] : []));
   if (/\b(growth|degrowth|last year|previous|yoy|vs)\b/.test(low)) ids.push('r:growth');
   if (/\bsample\b/.test(low) && SampleReport.result) ids.push('x:sample');
   if (!ids.length) ids.push(App.lastResult ? 'r:chart' : 's:' + App.active);
