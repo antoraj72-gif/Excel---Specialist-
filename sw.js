@@ -1,7 +1,7 @@
-/* Excel Jarvis offline cache – version 8acafc2400c6
+/* Excel Jarvis offline cache – version 1bec0eb149ff
    First visit stores the app on the device; later it opens instantly, even with no internet.
    When a newer Excel Jarvis is uploaded, it is fetched quietly and used from the next launch. */
-const CACHE = 'excel-jarvis-8acafc2400c6';
+const CACHE = 'excel-jarvis-1bec0eb149ff';
 // Only the small files are stored at install, so the phone can offer "Install app" straight away.
 // The big app page is stored right after, in the background.
 const SMALL = ['manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-64.png'];
