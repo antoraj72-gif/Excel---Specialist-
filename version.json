@@ -1,1 +1,1 @@
-{"v": 6, "name": "Jarvis 6.0", "date": "2026-11-04", "notes": "One device, one unlock key: users send their Device ID, the owner sends a key"}
+{"v": 7, "name": "Jarvis 7.0", "date": "2026-11-04", "notes": "Hardware-locked devices: each unlock key works only with the fingerprint / screen lock of that one phone"}
